@@ -445,6 +445,10 @@ function generateDemoData() {
 // ===== AUTH =====
 let currentRole = 'viewer';
 
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 function getAdminPassword() {
   return localStorage.getItem('admin_password') || 'cctv2026musafety';
 }
@@ -844,9 +848,9 @@ function openModal(idx){
         <select id="of-file"><option value="">—</option><option ${r.fileGiven==='ใช่'?'selected':''}>ใช่</option><option ${r.fileGiven==='ไม่'?'selected':''}>ไม่</option></select></div>
       <div class="officer-row"><label>เจ้าหน้าที่ผู้รับเรื่อง</label>
         <input type="text" id="of-officer" value="${r.officerName||''}" placeholder="ชื่อเจ้าหน้าที่"></div>
-      `:'<input type="hidden" id="of-status" value="${r.status||'รอดำเนินการ'}"><input type="hidden" id="of-found" value="${r.footageFound||''}"><input type="hidden" id="of-file" value="${r.fileGiven||''}"><input type="hidden" id="of-officer" value="${r.officerName||''}">'}
+      `:('<input type="hidden" id="of-status" value="'+escHtml(r.status||'รอดำเนินการ')+'"><input type="hidden" id="of-found" value="'+escHtml(r.footageFound||'')+'"><input type="hidden" id="of-file" value="'+escHtml(r.fileGiven||'')+'"><input type="hidden" id="of-officer" value="'+escHtml(r.officerName||'')+'">') }
       <div class="officer-row">
-        <label>วันที่ปิดเคส ${currentRole==='closer'?'<span style="color:var(--red);">*</span>':''}</label>
+        <label>วันที่ปิดเคส ${currentRole==='closer'?'<span style=\"color:var(--red);\">&nbsp;*</span>':''}</label>
         <input type="date" id="of-closed" value="${r.closedDate||new Date().toISOString().slice(0,10)}">
       </div>
       <div class="officer-row"><label>บันทึก${currentRole==='closer'?'เหตุผลการปิดเคส':'ของเจ้าหน้าที่'}</label>
