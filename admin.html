@@ -829,42 +829,71 @@ function openModal(idx){
       <div class="detail-item detail-full"><label>หมายเหตุ</label><div class="val">${r.additionalNote||'—'}</div></div>
     </div>
     <hr class="modal-divider">
-    ${(currentRole==='admin'||currentRole==='closer')?`
-    <div class="officer-form">
-      <h4>🔧 ${currentRole==='closer'?'ปิดเคส':'บันทึกผลการดำเนินการ'}</h4>
-      <div class="officer-row"><label>เจ้าหน้าที่ผู้ให้บริการ</label>
-        <div style="padding:8px 12px;background:var(--surface);border-radius:6px;font-size:13px;color:var(--gold);">${r.serviceOfficerName||'ไม่ระบุ'}</div>
-      </div>
-      ${currentRole==='admin'?`
-      <div class="officer-row"><label>สถานะ</label>
-        <select id="of-status">
-          ${['รอดำเนินการ','กำลังดำเนินการ','เสร็จสิ้น','ปฏิเสธ','ปิดเคส'].map(s=>`<option ${r.status===s?'selected':''}>${s}</option>`).join('')}
-        </select></div>
-      <div class="officer-row"><label>ผลการตรวจสอบ</label>
-        <select id="of-found">
-          ${['พบภาพ','ไม่พบภาพ','ภาพไม่ชัด','ไม่อยู่ในช่วงบันทึก'].map(s=>`<option ${r.footageFound===s?'selected':''}>${s}</option>`).join('')}
-        </select></div>
-      <div class="officer-row"><label>มอบไฟล์ให้</label>
-        <select id="of-file"><option value="">—</option><option ${r.fileGiven==='ใช่'?'selected':''}>ใช่</option><option ${r.fileGiven==='ไม่'?'selected':''}>ไม่</option></select></div>
-      <div class="officer-row"><label>เจ้าหน้าที่ผู้รับเรื่อง</label>
-        <input type="text" id="of-officer" value="${r.officerName||''}" placeholder="ชื่อเจ้าหน้าที่"></div>
-      `:('<input type="hidden" id="of-status" value="'+escHtml(r.status||'รอดำเนินการ')+'"><input type="hidden" id="of-found" value="'+escHtml(r.footageFound||'')+'"><input type="hidden" id="of-file" value="'+escHtml(r.fileGiven||'')+'"><input type="hidden" id="of-officer" value="'+escHtml(r.officerName||'')+'">') }
-      <div class="officer-row">
-        <label>วันที่ปิดเคส ${currentRole==='closer'?'<span style=\"color:var(--red);\">&nbsp;*</span>':''}</label>
-        <input type="date" id="of-closed" value="${r.closedDate||new Date().toISOString().slice(0,10)}">
-      </div>
-      <div class="officer-row"><label>บันทึก${currentRole==='closer'?'เหตุผลการปิดเคส':'ของเจ้าหน้าที่'}</label>
-        <textarea id="of-note" rows="3" placeholder="${currentRole==='closer'?'ระบุเหตุผลการปิดเคส...':''}">${r.officerNote||''}</textarea>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
-        ${currentRole==='admin'?`<button class="btn-update" onclick="updateRecord(${idx})">💾 บันทึกผล</button>`:''}
-        ${r.status!=='ปิดเคส'?`<button class="btn-close-case" onclick="closeCase(${idx})">🔒 ปิดเคสนี้</button>`:`<div style="padding:10px 16px;background:rgba(46,204,113,0.1);border:1px solid var(--green);border-radius:8px;color:var(--green);font-size:13px;font-weight:700;">✅ ปิดเคสแล้ว เมื่อ ${r.closedDate||''}</div>`}
-        <button onclick="exportSinglePDF(${idx})" style="background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.4);color:var(--red);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">📄 Export PDF</button>
-      </div>
-    </div>`:''}
-  `;
+        ${buildOfficerForm(r, idx)}  `;
   document.getElementById('modalOverlay').style.display='flex';
 }
+function buildOfficerForm(r, idx) {
+  if (currentRole !== 'admin' && currentRole !== 'closer') return '';
+  const isAdmin = currentRole === 'admin';
+  const isClosed = r.status === 'ปิดเคส';
+  const today = new Date().toISOString().slice(0,10);
+
+  let adminFields = '';
+  if (isAdmin) {
+    const statusOpts = ['รอดำเนินการ','กำลังดำเนินการ','เสร็จสิ้น','ปฏิเสธ','ปิดเคส']
+      .map(s => '<option'+(r.status===s?' selected':'')+'>'+s+'</option>').join('');
+    const foundOpts = ['พบภาพ','ไม่พบภาพ','ภาพไม่ชัด','ไม่อยู่ในช่วงบันทึก']
+      .map(s => '<option'+(r.footageFound===s?' selected':'')+'>'+s+'</option>').join('');
+    adminFields = `
+      <div class="officer-row"><label>สถานะ</label>
+        <select id="of-status">${statusOpts}</select></div>
+      <div class="officer-row"><label>ผลการตรวจสอบ</label>
+        <select id="of-found">${foundOpts}</select></div>
+      <div class="officer-row"><label>มอบไฟล์ให้</label>
+        <select id="of-file">
+          <option value="">—</option>
+          <option${r.fileGiven==='ใช่'?' selected':''}>ใช่</option>
+          <option${r.fileGiven==='ไม่'?' selected':''}>ไม่</option>
+        </select></div>
+      <div class="officer-row"><label>เจ้าหน้าที่ผู้รับเรื่อง</label>
+        <input type="text" id="of-officer" value="${escHtml(r.officerName||'')}" placeholder="ชื่อเจ้าหน้าที่"></div>`;
+  } else {
+    // closer — hidden fields เพื่อให้ updateRecord ทำงานได้
+    adminFields =
+      '<input type="hidden" id="of-status" value="'+escHtml(r.status||'รอดำเนินการ')+'">' +
+      '<input type="hidden" id="of-found" value="'+escHtml(r.footageFound||'')+'">'+
+      '<input type="hidden" id="of-file" value="'+escHtml(r.fileGiven||'')+'">'+
+      '<input type="hidden" id="of-officer" value="'+escHtml(r.officerName||'')+'">'+
+      '<input type="hidden" id="of-officer-closer" value="">';
+  }
+
+  const closedStatus = isClosed
+    ? '<div style="padding:10px 16px;background:rgba(46,204,113,0.1);border:1px solid var(--green);border-radius:8px;color:var(--green);font-size:13px;font-weight:700;">&#10003; ปิดเคสแล้ว เมื่อ '+(r.closedDate||'')+'</div>'
+    : '<button class="btn-close-case" onclick="closeCase('+idx+')">&#128274; ปิดเคสนี้</button>';
+
+  return `
+    <div class="officer-form">
+      <h4>${isAdmin ? '🔧 บันทึกผลการดำเนินการ' : '🔒 ปิดเคส'}</h4>
+      <div class="officer-row"><label>เจ้าหน้าที่ผู้ให้บริการ</label>
+        <div style="padding:8px 12px;background:var(--surface);border-radius:6px;font-size:13px;color:var(--gold);">${escHtml(r.serviceOfficerName||'ไม่ระบุ')}</div>
+      </div>
+      ${adminFields}
+      <div class="officer-row">
+        <label>วันที่ปิดเคส${isAdmin ? '' : ' <span style="color:var(--red);">*</span>'}</label>
+        <input type="date" id="of-closed" value="${r.closedDate||today}">
+      </div>
+      <div class="officer-row">
+        <label>${isAdmin ? 'บันทึกของเจ้าหน้าที่' : 'เหตุผลการปิดเคส'}</label>
+        <textarea id="of-note" rows="3" placeholder="${isAdmin ? '' : 'ระบุเหตุผลการปิดเคส...'}">${escHtml(r.officerNote||'')}</textarea>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+        ${isAdmin ? '<button class="btn-update" onclick="updateRecord('+idx+')">&#128190; บันทึกผล</button>' : ''}
+        ${closedStatus}
+        <button onclick="exportSinglePDF(${idx})" style="background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.4);color:var(--red);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">&#128196; Export PDF</button>
+      </div>
+    </div>`;
+}
+
 function closeModal(){ document.getElementById('modalOverlay').style.display='none'; }
 function updateRecord(idx){
   allData[idx].status=document.getElementById('of-status').value;
