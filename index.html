@@ -47,8 +47,8 @@
   .pdpa-consent label { font-size: 13px; font-weight: 600; color: var(--mu-navy); cursor: pointer; line-height: 1.5; }
 
   /* CARD */
-  .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; }
-  .card-header { background: linear-gradient(90deg,var(--mu-navy),#1e3a6e); color: white; padding: 14px 22px; display: flex; align-items: center; gap: 10px; }
+  .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 20px; overflow: visible; }
+  .card-header { background: linear-gradient(90deg,var(--mu-navy),#1e3a6e); color: white; padding: 14px 22px; display: flex; align-items: center; gap: 10px; border-radius: var(--radius) var(--radius) 0 0; }
   .card-header .step-num { background: var(--mu-gold); color: var(--mu-navy); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
   .card-header h2 { font-size: 14px; font-weight: 700; }
   .card-body { padding: 22px; }
@@ -136,15 +136,15 @@
 
   /* MISC */
   .section-divider { border: none; border-top: 1px dashed var(--border); margin: 16px 0; }
-  .conditional-section { overflow: hidden; max-height: 0; opacity: 0; transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease; margin-top: 0; }
-  .conditional-section.show { max-height: 800px; opacity: 1; margin-top: 16px; }
+  .conditional-section { display: none; margin-top: 0; }
+  .conditional-section.show { display: block; margin-top: 16px; }
   .error-msg { font-size: 11px; color: #c0392b; margin-top: 3px; display: none; }
   .error-msg.show { display: block; }
 
   /* AUTOCOMPLETE */
-  .autocomplete-wrap { position: relative; }
+  .autocomplete-wrap { position: relative; overflow: visible; }
   .autocomplete-dropdown {
-    position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 9999;
     background: white; border: 1.5px solid var(--mu-blue);
     border-top: none; border-radius: 0 0 10px 10px;
     max-height: 220px; overflow-y: auto;
@@ -510,7 +510,7 @@
           <div class="autocomplete-wrap">
             <input type="text" id="officerNameInput" name="officerNameInput"
               placeholder="พิมพ์ชื่อ-นามสกุล เจ้าหน้าที่..." autocomplete="off"
-              oninput="officerSearch(this)" onkeydown="acKeydown(event,'officerDrop')"
+              oninput="officerSearch(this)" onkeydown="officerKeydown(event)"
               onfocus="officerSearch(this)" onblur="setTimeout(()=>acHide('officerDrop'),180)">
             <div class="autocomplete-dropdown" id="officerDrop"></div>
           </div>
@@ -835,6 +835,29 @@ function selectOfficerMode(mode) {
   }
 }
 
+function officerKeydown(e) {
+  const drop = document.getElementById('officerDrop');
+  const items = drop.querySelectorAll('.autocomplete-item');
+  if (!drop.classList.contains('show') || !items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    acActiveIdx = Math.min(acActiveIdx + 1, items.length - 1);
+    items.forEach((el, i) => el.classList.toggle('active', i === acActiveIdx));
+    items[acActiveIdx]?.scrollIntoView({block:'nearest'});
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acActiveIdx = Math.max(acActiveIdx - 1, 0);
+    items.forEach((el, i) => el.classList.toggle('active', i === acActiveIdx));
+    items[acActiveIdx]?.scrollIntoView({block:'nearest'});
+  } else if (e.key === 'Enter' && acActiveIdx >= 0) {
+    e.preventDefault();
+    const item = items[acActiveIdx];
+    selectOfficer(item.dataset.name, item.dataset.email);
+  } else if (e.key === 'Escape') {
+    acHide('officerDrop');
+  }
+}
+
 function officerSearch(input) {
   const q = input.value.trim().toLowerCase();
   const drop = document.getElementById('officerDrop');
@@ -844,7 +867,7 @@ function officerSearch(input) {
     : OFFICER_DB.filter(o => o.name.toLowerCase().includes(q)).slice(0,10);
   if (!results.length) { drop.classList.remove('show'); return; }
   drop.innerHTML = results.map(o =>
-    `<div class="autocomplete-item" data-val="${o.name}" data-email="${o.email}"
+    `<div class="autocomplete-item" data-name="${o.name}" data-email="${o.email}"
       onmousedown="selectOfficer('${o.name.replace(/'/g,"\'")}','${o.email}')">
       <span class="item-icon">👮</span>
       <div style="display:flex;flex-direction:column;gap:2px;">
