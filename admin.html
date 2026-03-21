@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
   :root {
     --navy:#1a2744; --blue:#003087; --gold:#c9a84c; --gold-lt:#f5e9c0;
@@ -89,6 +91,31 @@
   .badge-processing{background:rgba(52,152,219,0.15);color:#3498db;}
   .badge-rejected{background:rgba(231,76,60,0.15);color:var(--red);}
   .badge-urgent{background:rgba(230,126,34,0.15);color:var(--orange);border:1px solid rgba(230,126,34,0.3);}
+  .badge-closed{background:rgba(80,90,110,0.3);color:#8a9bc0;}
+  tr.row-closed td{background:rgba(60,70,90,0.4)!important;color:#7a8599!important;}
+  tr.row-closed td span{opacity:0.65;}
+  tr.row-overdue{border-left:3px solid var(--red);}
+  tr.row-overdue td:first-child{position:relative;}
+  .overdue-badge{background:rgba(231,76,60,0.2);color:var(--red);border:1px solid var(--red);padding:1px 5px;border-radius:4px;font-size:10px;font-weight:800;margin-left:4px;white-space:nowrap;}
+  .overdue-banner{background:rgba(231,76,60,0.12);border:1px solid rgba(231,76,60,0.4);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:none;align-items:center;gap:12px;}
+  .overdue-banner.show{display:flex;}
+  .pdf-panel{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:16px;display:none;}
+  .pdf-panel.show{display:block;}
+  .pdf-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+  .pdf-panel-header h4{font-size:14px;font-weight:700;color:var(--gold);}
+  .pdf-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .btn-pdf{background:var(--red);color:white;border:none;padding:7px 14px;border-radius:7px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;}
+  .btn-pdf:hover{background:#c0392b;}
+  .btn-pdf.outline{background:var(--surface3);color:var(--text);border:1px solid var(--border);}
+  .select-all-wrap{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted);}
+  .select-all-wrap input{accent-color:var(--gold);}
+  .row-check{accent-color:var(--gold);width:14px;height:14px;cursor:pointer;}
+  .date-filter-wrap{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 12px;}
+  .date-filter-wrap label{font-size:12px;color:var(--text-muted);white-space:nowrap;}
+  .date-filter-wrap input[type=date]{background:transparent;border:none;color:var(--text);font-family:inherit;font-size:13px;outline:none;}
+  .date-filter-wrap input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.7);}
+  .filter-divider{width:1px;height:20px;background:var(--border);}
+  .btn-close-case{background:#c0392b;color:white;border:none;padding:10px 20px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;margin-left:6px;}
   .badge-emergency{background:rgba(231,76,60,0.2);color:var(--red);border:1px solid rgba(231,76,60,0.4);}
 
   /* MODAL */
@@ -194,6 +221,7 @@
         <div class="stat-card" style="--accent:#f1c40f"><div class="stat-icon">⏳</div><div class="stat-value" id="stat-pending">—</div><div class="stat-label">รอดำเนินการ</div></div>
         <div class="stat-card" style="--accent:#2ecc71"><div class="stat-icon">✅</div><div class="stat-value" id="stat-done">—</div><div class="stat-label">เสร็จสิ้น</div></div>
         <div class="stat-card" style="--accent:#e74c3c"><div class="stat-icon">🔴</div><div class="stat-value" id="stat-emergency">—</div><div class="stat-label">เร่งด่วน/ฉุกเฉิน</div></div>
+        <div class="stat-card" style="--accent:#c0392b"><div class="stat-icon">⚠️</div><div class="stat-value" id="stat-overdue">—</div><div class="stat-label">เกิน 2 วัน ไม่ปิดงาน</div></div>
         <div class="stat-card" style="--accent:#3498db"><div class="stat-icon">📁</div><div class="stat-value" id="stat-file">—</div><div class="stat-label">ขอรับไฟล์ภาพ</div></div>
         <div class="stat-card" style="--accent:#9b59b6"><div class="stat-icon">📅</div><div class="stat-value" id="stat-today">—</div><div class="stat-label">คำขอวันนี้</div></div>
       </div>
@@ -213,12 +241,41 @@
 
     <!-- REQUESTS -->
     <div class="tab-panel" id="panel-requests">
+      <!-- Overdue Banner -->
+      <div class="overdue-banner" id="overdueBannerReq">
+        <span style="font-size:22px;">⚠️</span>
+        <div><strong id="overdueTextReq" style="color:var(--red);font-size:14px;">มีเคสเกิน 2 วันยังไม่ปิดงาน!</strong>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:2px;">กรุณาตรวจสอบแถวที่มีสัญลักษณ์สีแดง</p></div>
+      </div>
       <div class="filter-bar">
-        <select class="filter-select" id="filterStatus" onchange="renderRequestTable()"><option value="">ทุกสถานะ</option><option>รอดำเนินการ</option><option>กำลังดำเนินการ</option><option>เสร็จสิ้น</option><option>ปฏิเสธ</option></select>
-        <select class="filter-select" id="filterUrgency" onchange="renderRequestTable()"><option value="">ทุกระดับ</option><option>ปกติ</option><option>เร่งด่วน</option><option>ฉุกเฉิน</option></select>
-        <select class="filter-select" id="filterType" onchange="renderRequestTable()"><option value="">ทุกประเภท</option><option>นักศึกษา</option><option>บุคลากร</option><option>เจ้าหน้าที่ภายนอก</option><option>บุคคลทั่วไป</option></select>
-        <input type="text" class="search-input" id="searchInput" placeholder="🔍 ค้นหาชื่อ, เลขอ้างอิง..." oninput="renderRequestTable()">
+        <select class="filter-select" id="filterStatus" onchange="applyFilters()"><option value="">ทุกสถานะ</option><option>รอดำเนินการ</option><option>กำลังดำเนินการ</option><option>เสร็จสิ้น</option><option>ปิดเคส</option><option>ปฏิเสธ</option></select>
+        <select class="filter-select" id="filterUrgency" onchange="applyFilters()"><option value="">ทุกระดับ</option><option>ปกติ</option><option>เร่งด่วน</option><option>ฉุกเฉิน</option></select>
+        <select class="filter-select" id="filterType" onchange="applyFilters()"><option value="">ทุกประเภท</option><option>นักศึกษา</option><option>บุคลากร</option><option>เจ้าหน้าที่ภายนอก</option><option>บุคคลทั่วไป</option></select>
+        <div class="date-filter-wrap">
+          <label>ตั้งแต่</label>
+          <input type="date" id="filterDateFrom" onchange="applyFilters()">
+          <div class="filter-divider"></div>
+          <label>ถึง</label>
+          <input type="date" id="filterDateTo" onchange="applyFilters()">
+        </div>
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 ค้นหาชื่อ, เลขอ้างอิง..." oninput="applyFilters()">
+        <button class="btn-refresh" onclick="clearFilters()" style="color:var(--text-muted);">✕ ล้างตัวกรอง</button>
         <button class="btn-refresh" onclick="loadData()">🔄 รีเฟรช</button>
+        <button class="btn-refresh" style="color:var(--red);border-color:rgba(231,76,60,0.4);background:rgba(231,76,60,0.1);" onclick="togglePdfPanel()">📄 Export PDF</button>
+      </div>
+      <!-- PDF Panel -->
+      <div class="pdf-panel" id="pdfPanel">
+        <div class="pdf-panel-header">
+          <h4>📄 Export รายการที่กรองไว้เป็น PDF</h4>
+          <div class="pdf-actions">
+            <div class="select-all-wrap">
+              <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this.checked)">
+              <label for="selectAll" style="cursor:pointer;font-size:13px;">เลือกทั้งหมด (<span id="filteredCount">0</span> รายการ)</label>
+            </div>
+            <button class="btn-pdf" onclick="exportSelectedPDF()">📥 Export ที่เลือก (<span id="selectedCount">0</span>)</button>
+            <button class="btn-pdf outline" onclick="togglePdfPanel()">✕ ปิด</button>
+          </div>
+        </div>
       </div>
       <div class="table-wrap">
         <div id="fullTableWrap"><div class="loading-msg"><div class="spinner-sm"></div>กำลังโหลด...</div></div>
@@ -410,16 +467,18 @@ async function loadData(){
 
 function renderAll(){
   document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH');
-  renderStats(); renderOverviewCharts(); renderRecentTable(); renderRequestTable();
+  renderStats(); renderOverviewCharts(); applyFilters();
 }
 
 // ===== STATS =====
 function renderStats(){
   const today=new Date().toISOString().slice(0,10);
+  const overdueCt=allData.filter(isOverdue).length;
   document.getElementById('stat-total').textContent=allData.length;
-  document.getElementById('stat-pending').textContent=allData.filter(r=>r.status==='รอดำเนินการ').length;
-  document.getElementById('stat-done').textContent=allData.filter(r=>r.status==='เสร็จสิ้น').length;
+  document.getElementById('stat-pending').textContent=allData.filter(r=>r.status==='รอดำเนินการ'||r.status==='กำลังดำเนินการ').length;
+  document.getElementById('stat-done').textContent=allData.filter(r=>r.status==='เสร็จสิ้น'||r.status==='ปิดเคส').length;
   document.getElementById('stat-emergency').textContent=allData.filter(r=>r.urgency==='ฉุกเฉิน'||r.urgency==='เร่งด่วน').length;
+  document.getElementById('stat-overdue').textContent=overdueCt;
   document.getElementById('stat-file').textContent=allData.filter(r=>r.requestFile==='ต้องการไฟล์').length;
   document.getElementById('stat-today').textContent=allData.filter(r=>r.timestamp&&r.timestamp.startsWith(today)).length;
 }
@@ -467,41 +526,155 @@ function renderRecentTable(){
   document.getElementById('recentTableWrap').innerHTML=renderTable(sorted,true);
 }
 
-function renderRequestTable(){
-  let data=[...allData];
-  const status=document.getElementById('filterStatus')?.value;
-  const urgency=document.getElementById('filterUrgency')?.value;
-  const type=document.getElementById('filterType')?.value;
+// ===== FILTER + PDF STATE =====
+let filteredData=[], selectedIds=new Set(), pdfPanelOpen=false;
+
+function isOverdue(r){
+  if(['ปิดเคส','เสร็จสิ้น','ปฏิเสธ'].includes(r.status)) return false;
+  if(!r.timestamp) return false;
+  return (Date.now()-new Date(r.timestamp))/86400000>2;
+}
+
+function applyFilters(){
+  const status=document.getElementById('filterStatus')?.value||'';
+  const urgency=document.getElementById('filterUrgency')?.value||'';
+  const type=document.getElementById('filterType')?.value||'';
   const search=(document.getElementById('searchInput')?.value||'').toLowerCase();
-  if(status)data=data.filter(r=>r.status===status);
-  if(urgency)data=data.filter(r=>r.urgency===urgency);
-  if(type)data=data.filter(r=>r.requesterType===type);
-  if(search)data=data.filter(r=>(r.refCode||'').toLowerCase().includes(search)||(r.fname+' '+r.lname).toLowerCase().includes(search)||(r.purpose||'').toLowerCase().includes(search));
-  data.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
-  document.getElementById('fullTableWrap').innerHTML=renderTable(data,false);
+  const df=document.getElementById('filterDateFrom')?.value||'';
+  const dt=document.getElementById('filterDateTo')?.value||'';
+  filteredData=allData.filter(r=>{
+    if(status&&r.status!==status) return false;
+    if(urgency&&r.urgency!==urgency) return false;
+    if(type&&r.requesterType!==type) return false;
+    if(search&&!((r.refCode||'').toLowerCase().includes(search)||((r.fname||'')+' '+(r.lname||'')).toLowerCase().includes(search)||(r.purpose||'').toLowerCase().includes(search)||(r.serviceOfficerName||'').toLowerCase().includes(search))) return false;
+    const rd=(r.timestamp||'').slice(0,10);
+    if(df&&rd<df) return false;
+    if(dt&&rd>dt) return false;
+    return true;
+  });
+  filteredData.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+  renderRequestTable();
+  updatePdfCounts();
+  const oc=filteredData.filter(isOverdue).length;
+  const bn=document.getElementById('overdueBannerReq');
+  if(bn){if(oc>0){bn.classList.add('show');document.getElementById('overdueTextReq').textContent=`มี ${oc} เคสเกิน 2 วันยังไม่ปิดงาน!`;}else bn.classList.remove('show');}
+}
+
+function clearFilters(){
+  ['filterStatus','filterUrgency','filterType','filterDateFrom','filterDateTo','searchInput'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  applyFilters();
+}
+
+function renderRequestTable(){
+  document.getElementById('fullTableWrap').innerHTML=renderTable(filteredData,false);
+}
+
+// ===== PDF PANEL =====
+function togglePdfPanel(){
+  pdfPanelOpen=!pdfPanelOpen;
+  document.getElementById('pdfPanel').classList.toggle('show',pdfPanelOpen);
+  selectedIds.clear(); renderRequestTable(); updatePdfCounts();
+}
+function toggleSelectAll(checked){
+  filteredData.forEach(r=>{if(checked)selectedIds.add(r.refCode);else selectedIds.delete(r.refCode);});
+  renderRequestTable(); updatePdfCounts();
+  const cb=document.getElementById('selectAll'); if(cb)cb.checked=checked;
+}
+function toggleSelect(rc,checked){if(checked)selectedIds.add(rc);else selectedIds.delete(rc);updatePdfCounts();}
+function updatePdfCounts(){
+  const fc=document.getElementById('filteredCount');const sc=document.getElementById('selectedCount');
+  if(fc)fc.textContent=filteredData.length;if(sc)sc.textContent=selectedIds.size;
+}
+function exportSinglePDF(idx){generatePDF([allData[idx]]);}
+function exportSelectedPDF(){
+  if(!selectedIds.size){alert('กรุณาเลือกรายการก่อนค่ะ');return;}
+  generatePDF(filteredData.filter(r=>selectedIds.has(r.refCode)));
+}
+function generatePDF(records){
+  if(!records.length) return;
+  try{
+    const {jsPDF}=window.jspdf;if(!jsPDF){alert('ไม่สามารถโหลด jsPDF ได้');return;}
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    records.forEach((r,pi)=>{
+      if(pi>0)doc.addPage();
+      const mg=15,pw=doc.internal.pageSize.getWidth(),cw=pw-mg*2;let y=mg;
+      doc.setFillColor(0,48,135);doc.rect(0,0,pw,28,'F');
+      doc.setFillColor(201,168,76);doc.rect(0,28,pw,2,'F');
+      doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(255,255,255);
+      doc.text('CCTV Request | Mahidol University',mg,11);
+      doc.setFontSize(9);doc.setFont('helvetica','normal');
+      doc.text('Traffic & Safety | Salaya Campus',mg,18);
+      doc.text('Ref: '+(r.refCode||'-'),pw-mg,11,{align:'right'});
+      doc.text(r.timestamp?new Date(r.timestamp).toLocaleDateString('th-TH'):'',pw-mg,18,{align:'right'});
+      y=40;
+      const sc=r.status==='ปิดเคส'||r.status==='เสร็จสิ้น'?[46,204,113]:r.status==='ปฏิเสธ'?[231,76,60]:[241,196,15];
+      doc.setFillColor(...sc);doc.roundedRect(mg,y-5,38,8,2,2,'F');
+      doc.setTextColor(20,20,20);doc.setFont('helvetica','bold');doc.setFontSize(8);
+      doc.text(r.status||'รอดำเนินการ',mg+19,y,{align:'center'});
+      const uc=r.urgency==='ฉุกเฉิน'?[231,76,60]:r.urgency==='เร่งด่วน'?[230,126,34]:[26,92,56];
+      doc.setFillColor(...uc);doc.roundedRect(mg+42,y-5,28,8,2,2,'F');
+      doc.setTextColor(255,255,255);doc.setFontSize(8);doc.text(r.urgency||'ปกติ',mg+56,y,{align:'center'});
+      y+=12;
+      function sec(t){doc.setFillColor(240,242,251);doc.rect(mg,y,cw,7,'F');doc.setFillColor(0,48,135);doc.rect(mg,y,3,7,'F');doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(0,48,135);doc.text(t,mg+6,y+4.5);y+=10;}
+      function row(lb,val){if(!val||val==='-'||val==='—') return;doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(100,120,160);doc.text(lb,mg+4,y);doc.setTextColor(30,40,68);doc.setFont('helvetica','bold');const lines=doc.splitTextToSize(String(val),cw-52);doc.text(lines,mg+50,y);y+=lines.length*4.5+1;if(y>270){doc.addPage();y=20;}}
+      function lrow(lb,val){if(!val) return;doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(100,120,160);doc.text(lb+':',mg+4,y);y+=5;doc.setFont('helvetica','normal');doc.setTextColor(30,40,68);const lines=doc.splitTextToSize(String(val),cw-8);doc.text(lines,mg+4,y);y+=lines.length*4.5+2;if(y>270){doc.addPage();y=20;}}
+      sec('[ 1 ] ข้อมูลผู้ขอ');
+      row('ชื่อ-สกุล',`${r.prefix||''} ${r.fname||''} ${r.lname||''} (${r.gender||''})`);
+      row('ประเภท',r.requesterType);row('รหัส/บัตร',r.idCard);
+      row('คณะ/หน่วยงาน',r.faculty||r.officialOrg||'-');row('โทรศัพท์',r.phone);row('อีเมล',r.email||'-');y+=2;
+      sec('[ 2 ] วัตถุประสงค์และเหตุการณ์');
+      row('วัตถุประสงค์',r.purpose);
+      row('ช่วงเวลา',`${r.dateStart||''} ${r.timeStart||''} - ${r.dateEnd||r.dateStart||''} ${r.timeEnd||''}`);
+      row('จุดที่ขอดูกล้อง',r.locations);row('ยานพาหนะ',r.vehiclePlate?`${r.vehiclePlate} ${r.vehicleDesc||''}`:'-');
+      row('หลักฐาน',r.evidenceTypes||'-');lrow('รายละเอียด',r.purposeDetail);y+=2;
+      sec('[ 3 ] การขอรับข้อมูล');
+      row('ขอรับไฟล์',r.requestFile);row('เหตุผล',r.fileReason||'-');row('รูปแบบรับ',r.deliveryMethod||'-');
+      row('เอกสาร',r.docs||'-');row('ไฟล์แนบ',r.attachedFiles||'-');lrow('หมายเหตุ',r.additionalNote);y+=2;
+      sec('[ 4 ] เจ้าหน้าที่และผลดำเนินการ');
+      row('เจ้าหน้าที่ให้บริการ',r.serviceOfficerName||'-');row('เจ้าหน้าที่รับเรื่อง',r.officerName||'-');
+      row('ผลการตรวจสอบ',r.footageFound||'-');row('มอบไฟล์',r.fileGiven||'-');
+      row('วันที่ปิดเคส',r.closedDate||'-');lrow('บันทึกเจ้าหน้าที่',r.officerNote);
+      doc.setDrawColor(200,200,200);doc.line(mg,285,pw-mg,285);
+      doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(150);
+      doc.text('CCTV Request | Traffic & Safety | Mahidol University',mg,289);
+      doc.text(`Page ${pi+1}/${records.length} | ${new Date().toLocaleString('th-TH')}`,pw-mg,289,{align:'right'});
+    });
+    const fn=records.length===1?`CCTV_${records[0].refCode}_${new Date().toISOString().slice(0,10)}.pdf`:`CCTV_Export_${records.length}cases.pdf`;
+    doc.save(fn);
+  }catch(err){alert('เกิดข้อผิดพลาด: '+err.message);}
 }
 
 function renderTable(data, compact) {
   if(!data.length)return`<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">📭</div><p>ไม่พบข้อมูล</p></div>`;
-  // Assign alternating color by date group
-  let dateGroups={}, groupEven={}, groupCount=0, lastDate='', even=false;
-  data.forEach(r=>{
-    const d=(r.timestamp||'').slice(0,10)||r.dateStart||'';
-    if(d!==lastDate){lastDate=d;even=!even;groupEven[d]=even;}
-  });
-  return`<table><thead><tr><th>เลขอ้างอิง</th><th>วันที่</th><th>ชื่อ-สกุล</th><th>ประเภท</th><th>วัตถุประสงค์</th><th>ความเร่งด่วน</th><th>สถานะ</th><th></th></tr></thead><tbody>`+
-  data.map((r)=>{
-    const d=(r.timestamp||'').slice(0,10)||r.dateStart||'';
-    const cls=groupEven[d]?'date-group-even':'';
-    return`<tr class="${cls}">
-      <td style="font-family:monospace;font-size:12px;color:var(--gold)">${r.refCode||'—'}</td>
+  const showCheck=pdfPanelOpen&&!compact;
+  let lastDate='',even=false,groupEven={};
+  data.forEach(r=>{const d=(r.timestamp||'').slice(0,10);if(d!==lastDate){lastDate=d;even=!even;groupEven[d]=even;}});
+  return`<table><thead><tr>
+    ${showCheck?'<th style="width:32px;"><input type="checkbox" onchange="toggleSelectAll(this.checked)" style="accent-color:var(--gold);"></th>':''}
+    <th>เลขอ้างอิง</th><th>วันที่</th><th>ชื่อ-สกุล</th><th>ประเภท</th><th>วัตถุประสงค์</th><th>เจ้าหน้าที่</th><th>เร่งด่วน</th><th>สถานะ</th><th></th>
+  </tr></thead><tbody>`+
+  data.map(r=>{
+    const d=(r.timestamp||'').slice(0,10);
+    const closed=r.status==='ปิดเคส';
+    const overdue=isOverdue(r);
+    let cls=closed?'row-closed':'';
+    if(!closed&&groupEven[d])cls+=' date-group-even';
+    if(overdue)cls+=' row-overdue';
+    const idx=allData.indexOf(r);
+    return`<tr class="${cls.trim()}">
+      ${showCheck?`<td><input type="checkbox" class="row-check" value="${r.refCode}" ${selectedIds.has(r.refCode)?'checked':''} onchange="toggleSelect('${r.refCode}',this.checked)"></td>`:''}
+      <td style="font-family:monospace;font-size:11px;color:var(--gold);">${r.refCode||'—'}${overdue?'<br><span class="overdue-badge">⚠️ เกิน 2 วัน</span>':''}</td>
       <td style="white-space:nowrap;font-size:12px;">${r.timestamp?new Date(r.timestamp).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'}):'—'}</td>
       <td>${r.prefix||''} ${r.fname||''} ${r.lname||''}</td>
-      <td><span class="badge" style="background:rgba(52,152,219,0.15);color:#3498db">${r.requesterType||'—'}</span></td>
+      <td><span class="badge" style="background:rgba(52,152,219,0.15);color:#3498db;font-size:10px;">${r.requesterType||'—'}</span></td>
       <td style="font-size:12px;">${r.purpose||'—'}</td>
+      <td style="font-size:11px;color:var(--text-muted);">${r.serviceOfficerName||r.officerName||'—'}</td>
       <td><span class="badge ${urgencyBadge[r.urgency]||'badge-pending'}">${r.urgency||'ปกติ'}</span></td>
       <td><span class="badge ${statusBadge[r.status||'รอดำเนินการ']}">${r.status||'รอดำเนินการ'}</span></td>
-      <td><button onclick="openModal(${allData.indexOf(r)})" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;">ดูรายละเอียด</button></td>
+      <td style="white-space:nowrap;">
+        <button onclick="openModal(${idx})" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);padding:4px 8px;border-radius:5px;cursor:pointer;font-size:11px;margin-right:3px;">รายละเอียด</button>
+        ${!compact&&currentRole==='admin'?`<button onclick="exportSinglePDF(${idx})" style="background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.4);color:var(--red);padding:4px 8px;border-radius:5px;cursor:pointer;font-size:11px;">PDF</button>`:''}
+      </td>
     </tr>`;
   }).join('')+`</tbody></table>`;
 }
@@ -530,11 +703,13 @@ function openModal(idx){
       <div class="detail-item detail-full"><label>หมายเหตุ</label><div class="val">${r.additionalNote||'—'}</div></div>
     </div>
     <hr class="modal-divider">
+    ${currentRole==='admin'?`
     <div class="officer-form">
-      <h4>🔧 บันทึกผลการดำเนินการ (เจ้าหน้าที่)</h4>
+      <h4>🔧 บันทึกผลการดำเนินการ</h4>
+      <div class="officer-row"><label>เจ้าหน้าที่ผู้ให้บริการ</label><div style="padding:8px 12px;background:var(--surface);border-radius:6px;font-size:13px;color:var(--gold);">${r.serviceOfficerName||'ไม่ระบุ'}</div></div>
       <div class="officer-row"><label>สถานะ</label>
         <select id="of-status">
-          ${['รอดำเนินการ','กำลังดำเนินการ','เสร็จสิ้น','ปฏิเสธ'].map(s=>`<option ${r.status===s?'selected':''}>${s}</option>`).join('')}
+          ${['รอดำเนินการ','กำลังดำเนินการ','เสร็จสิ้น','ปฏิเสธ','ปิดเคส'].map(s=>`<option ${r.status===s?'selected':''}>${s}</option>`).join('')}
         </select></div>
       <div class="officer-row"><label>ผลการตรวจสอบ</label>
         <select id="of-found">
@@ -543,9 +718,15 @@ function openModal(idx){
       <div class="officer-row"><label>มอบไฟล์ให้</label>
         <select id="of-file"><option value="">—</option><option ${r.fileGiven==='ใช่'?'selected':''}>ใช่</option><option ${r.fileGiven==='ไม่'?'selected':''}>ไม่</option></select></div>
       <div class="officer-row"><label>เจ้าหน้าที่ผู้รับเรื่อง</label><input type="text" id="of-officer" value="${r.officerName||''}" placeholder="ชื่อเจ้าหน้าที่"></div>
+      <div class="officer-row"><label>วันที่ปิดเคส</label><input type="date" id="of-closed" value="${r.closedDate||''}"></div>
       <div class="officer-row"><label>บันทึกของเจ้าหน้าที่</label><textarea id="of-note" rows="3">${r.officerNote||''}</textarea></div>
-      <button class="btn-update" onclick="updateRecord(${idx})">💾 บันทึกผล</button>
-    </div>`;
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+        <button class="btn-update" onclick="updateRecord(${idx})">💾 บันทึกผล</button>
+        ${r.status!=='ปิดเคส'?`<button class="btn-close-case" onclick="closeCase(${idx})">🔒 ปิดเคสนี้</button>`:''}
+        <button onclick="exportSinglePDF(${idx})" style="background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.4);color:var(--red);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">📄 Export PDF</button>
+      </div>
+    </div>`:''}
+  `;
   document.getElementById('modalOverlay').style.display='flex';
 }
 function closeModal(){ document.getElementById('modalOverlay').style.display='none'; }
@@ -554,9 +735,20 @@ function updateRecord(idx){
   allData[idx].footageFound=document.getElementById('of-found').value;
   allData[idx].fileGiven=document.getElementById('of-file').value;
   allData[idx].officerName=document.getElementById('of-officer').value;
+  allData[idx].closedDate=document.getElementById('of-closed').value;
   allData[idx].officerNote=document.getElementById('of-note').value;
   closeModal(); renderAll();
   alert('✅ บันทึกผลการดำเนินการแล้ว');
+}
+
+function closeCase(idx){
+  if(!confirm('ยืนยันปิดเคสนี้?')) return;
+  allData[idx].status='ปิดเคส';
+  allData[idx].closedDate=new Date().toISOString().slice(0,10);
+  if(document.getElementById('of-officer')?.value) allData[idx].officerName=document.getElementById('of-officer').value;
+  if(document.getElementById('of-note')?.value) allData[idx].officerNote=document.getElementById('of-note').value;
+  closeModal(); renderAll();
+  alert('🔒 ปิดเคสสำเร็จแล้ว');
 }
 
 // ===== EMAIL MANAGEMENT =====
