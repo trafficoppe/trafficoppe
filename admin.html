@@ -7,8 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
   :root {
     --navy:#1a2744; --blue:#003087; --gold:#c9a84c; --gold-lt:#f5e9c0;
@@ -176,6 +174,40 @@
   .spinner-sm{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;}
   @keyframes spin{to{transform:rotate(360deg)}}
   .empty-state{text-align:center;padding:48px;color:var(--text-muted);}
+
+  /* ===== PRINT / PDF STYLES ===== */
+  #printArea{display:none;}
+  @media print{
+    body *{visibility:hidden !important;}
+    #printArea,#printArea *{visibility:visible !important;}
+    #printArea{display:block !important;position:absolute;left:0;top:0;width:100%;}
+    .no-print{display:none !important;}
+  }
+  /* Print document styling */
+  .pdf-doc{font-family:'Sarabun','IBM Plex Sans Thai',Arial,sans-serif;color:#1a2744;background:white;font-size:11pt;line-height:1.5;}
+  .pdf-page{width:210mm;min-height:297mm;padding:12mm 15mm;margin:0 auto;background:white;position:relative;page-break-after:always;}
+  .pdf-page:last-child{page-break-after:avoid;}
+  .pdf-header{background:#003087;color:white;padding:12px 16px;border-radius:6px 6px 0 0;margin-bottom:0;}
+  .pdf-header-gold{height:3px;background:#c9a84c;margin-bottom:14px;}
+  .pdf-header h1{font-size:14pt;font-weight:700;margin:0 0 3px;}
+  .pdf-header p{font-size:9pt;opacity:0.8;margin:0;}
+  .pdf-header-right{float:right;text-align:right;}
+  .pdf-badges{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .pdf-badge{padding:3px 14px;border-radius:20px;font-size:9pt;font-weight:700;display:inline-block;}
+  .pdf-badge-green{background:#e8f5ee;color:#1a7a4a;border:1px solid #1a7a4a;}
+  .pdf-badge-yellow{background:#fff8e7;color:#7a5800;border:1px solid #c9a84c;}
+  .pdf-badge-red{background:#fdf0f0;color:#8b1a1a;border:1px solid #c0392b;}
+  .pdf-badge-blue{background:#eef2fb;color:#003087;border:1px solid #003087;}
+  .pdf-badge-orange{background:#fff3e0;color:#7a3800;border:1px solid #e67e22;}
+  .pdf-section{margin-bottom:12px;}
+  .pdf-section-title{background:#f0f2f8;border-left:4px solid #003087;padding:5px 10px;font-size:10pt;font-weight:700;color:#003087;margin-bottom:8px;}
+  .pdf-table{width:100%;border-collapse:collapse;font-size:10pt;}
+  .pdf-table td{padding:4px 8px;border-bottom:1px solid #eee;vertical-align:top;}
+  .pdf-table td:first-child{color:#6b7a99;width:38%;font-size:9.5pt;}
+  .pdf-table td:last-child{color:#1a2744;font-weight:600;}
+  .pdf-detail-box{background:#f8f9fc;border-left:3px solid #003087;padding:8px 10px;font-size:10pt;line-height:1.7;color:#1a2744;margin-top:6px;border-radius:0 4px 4px 0;}
+  .pdf-footer{border-top:1px solid #dde3ee;padding-top:6px;font-size:8pt;color:#8a9bc0;display:flex;justify-content:space-between;margin-top:16px;}
+  .pdf-refcode{background:#1a2744;color:#c9a84c;display:inline-block;padding:4px 14px;border-radius:4px;font-family:monospace;font-size:12pt;font-weight:800;letter-spacing:0.1em;margin-bottom:12px;}
 </style>
 </head>
 <body>
@@ -307,6 +339,7 @@
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
           <button class="btn-save-config" onclick="saveConfig()">💾 บันทึกการตั้งค่า</button>
           <button class="btn-save-config" style="background:var(--surface3);color:var(--gold);border:1px solid var(--gold);" onclick="testEmail()">📧 ทดสอบส่งอีเมล</button>
+          <button class="btn-save-config" style="background:rgba(231,76,60,0.15);color:var(--red);border:1px solid rgba(231,76,60,0.5);" onclick="testOverdueAlert()">⚠️ ทดสอบแจ้งเคสค้าง</button>
         </div>
         <div id="testEmailResult" style="margin-top:10px;font-size:13px;display:none;padding:10px 14px;border-radius:8px;"></div>
       </div>
@@ -590,58 +623,132 @@ function exportSelectedPDF(){
   if(!selectedIds.size){alert('กรุณาเลือกรายการก่อนค่ะ');return;}
   generatePDF(filteredData.filter(r=>selectedIds.has(r.refCode)));
 }
-function generatePDF(records){
+function buildPdfPage(r) {
+  const statusCls = r.status==='ปิดเคส'||r.status==='เสร็จสิ้น'?'pdf-badge-green':r.status==='ปฏิเสธ'?'pdf-badge-red':'pdf-badge-yellow';
+  const urgCls = r.urgency==='ฉุกเฉิน'?'pdf-badge-red':r.urgency==='เร่งด่วน'?'pdf-badge-orange':'pdf-badge-green';
+  const thDate = r.timestamp ? new Date(r.timestamp).toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'}) : '-';
+  const now = new Date().toLocaleString('th-TH');
+
+  function row(label, val) {
+    if(!val||val==='-') return '';
+    return `<tr><td>${label}</td><td>${val}</td></tr>`;
+  }
+
+  return `<div class="pdf-page pdf-doc">
+    <div class="pdf-header">
+      <div class="pdf-header-right">
+        <div style="font-size:10pt;color:#c9d8f0;">Ref:</div>
+        <div style="font-family:monospace;font-size:12pt;font-weight:800;color:#c9a84c;">${r.refCode||'-'}</div>
+        <div style="font-size:9pt;color:#c9d8f0;margin-top:4px;">${thDate}</div>
+      </div>
+      <h1>CCTV Request | มหาวิทยาลัยมหิดล</h1>
+      <p>งานจราจรและความปลอดภัย | กองกายภาพและสิ่งแวดล้อม | วิทยาเขตศาลายา</p>
+    </div>
+    <div class="pdf-header-gold"></div>
+
+    <div class="pdf-badges">
+      <span class="pdf-badge ${statusCls}">${r.status||'รอดำเนินการ'}</span>
+      <span class="pdf-badge ${urgCls}">ความเร่งด่วน: ${r.urgency||'ปกติ'}</span>
+    </div>
+
+    <div class="pdf-section">
+      <div class="pdf-section-title">[ 1 ] ข้อมูลผู้ขอดูกล้องวงจรปิด</div>
+      <table class="pdf-table">
+        ${row('ชื่อ-นามสกุล',`${r.prefix||''} ${r.fname||''} ${r.lname||''}`)}
+        ${row('เพศ', r.gender)}
+        ${row('ประเภทผู้ขอ', r.requesterType)}
+        ${row('เลขบัตร/รหัส', r.idCard)}
+        ${row('คณะ/หน่วยงาน', r.faculty||r.officialOrg)}
+        ${row('อีเมลมหาวิทยาลัย', r.muEmail)}
+        ${row('โทรศัพท์', r.phone)}
+        ${row('อีเมลติดต่อ', r.email)}
+        ${row('หน่วยงานราชการ', r.officialOrg)}
+        ${row('เลขหนังสือราชการ', r.officialDoc)}
+      </table>
+    </div>
+
+    <div class="pdf-section">
+      <div class="pdf-section-title">[ 2 ] วัตถุประสงค์และรายละเอียดเหตุการณ์</div>
+      <table class="pdf-table">
+        ${row('วัตถุประสงค์', `<strong>${r.purpose||'-'}</strong>`)}
+        ${row('ช่วงเวลาเกิดเหตุ', `${r.dateStart||''} ${r.timeStart?'เวลา '+r.timeStart:''} ${r.dateEnd&&r.dateEnd!==r.dateStart?' ถึง '+r.dateEnd:''} ${r.timeEnd||''}`)}
+        ${row('จุดที่ขอดูกล้อง', `<strong>${r.locations||'-'}</strong>`)}
+        ${row('ยานพาหนะ', r.vehiclePlate?`${r.vehiclePlate} ${r.vehicleDesc||''}`:'—')}
+        ${row('หลักฐานที่ต้องการ', r.evidenceTypes)}
+      </table>
+      ${r.purposeDetail?`<div class="pdf-detail-box"><strong>รายละเอียดเหตุการณ์:</strong><br>${r.purposeDetail}</div>`:''}
+    </div>
+
+    <div class="pdf-section">
+      <div class="pdf-section-title">[ 3 ] การขอรับข้อมูล / ไฟล์ภาพ</div>
+      <table class="pdf-table">
+        ${row('ขอรับไฟล์ภาพ', r.requestFile)}
+        ${row('เหตุผลขอไฟล์', r.fileReason)}
+        ${row('รูปแบบรับ', r.deliveryMethod)}
+        ${row('เอกสารที่นำมา', r.docs)}
+        ${row('ไฟล์แนบ', r.attachedFiles)}
+        ${row('หมายเหตุ', r.additionalNote)}
+      </table>
+    </div>
+
+    <div class="pdf-section">
+      <div class="pdf-section-title">[ 4 ] เจ้าหน้าที่และผลการดำเนินการ</div>
+      <table class="pdf-table">
+        ${row('เจ้าหน้าที่ผู้ให้บริการ', `<strong style="color:#003087;">${r.serviceOfficerName||'-'}</strong>`)}
+        ${row('เจ้าหน้าที่ผู้รับเรื่อง', r.officerName)}
+        ${row('ผลการตรวจสอบ', r.footageFound)}
+        ${row('มอบไฟล์ให้', r.fileGiven)}
+        ${row('การดำเนินการ', r.actionTaken)}
+        ${row('วันที่ปิดเคส', r.closedDate)}
+      </table>
+      ${r.officerNote?`<div class="pdf-detail-box"><strong>บันทึกของเจ้าหน้าที่:</strong><br>${r.officerNote}</div>`:''}
+    </div>
+
+    <div class="pdf-footer">
+      <span>ระบบ CCTV Request | งานจราจรและความปลอดภัย มหาวิทยาลัยมหิดล</span>
+      <span>พิมพ์เมื่อ: ${now}</span>
+    </div>
+  </div>`;
+}
+
+function generatePDF(records) {
   if(!records.length) return;
-  try{
-    const {jsPDF}=window.jspdf;if(!jsPDF){alert('ไม่สามารถโหลด jsPDF ได้');return;}
-    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    records.forEach((r,pi)=>{
-      if(pi>0)doc.addPage();
-      const mg=15,pw=doc.internal.pageSize.getWidth(),cw=pw-mg*2;let y=mg;
-      doc.setFillColor(0,48,135);doc.rect(0,0,pw,28,'F');
-      doc.setFillColor(201,168,76);doc.rect(0,28,pw,2,'F');
-      doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(255,255,255);
-      doc.text('CCTV Request | Mahidol University',mg,11);
-      doc.setFontSize(9);doc.setFont('helvetica','normal');
-      doc.text('Traffic & Safety | Salaya Campus',mg,18);
-      doc.text('Ref: '+(r.refCode||'-'),pw-mg,11,{align:'right'});
-      doc.text(r.timestamp?new Date(r.timestamp).toLocaleDateString('th-TH'):'',pw-mg,18,{align:'right'});
-      y=40;
-      const sc=r.status==='ปิดเคส'||r.status==='เสร็จสิ้น'?[46,204,113]:r.status==='ปฏิเสธ'?[231,76,60]:[241,196,15];
-      doc.setFillColor(...sc);doc.roundedRect(mg,y-5,38,8,2,2,'F');
-      doc.setTextColor(20,20,20);doc.setFont('helvetica','bold');doc.setFontSize(8);
-      doc.text(r.status||'รอดำเนินการ',mg+19,y,{align:'center'});
-      const uc=r.urgency==='ฉุกเฉิน'?[231,76,60]:r.urgency==='เร่งด่วน'?[230,126,34]:[26,92,56];
-      doc.setFillColor(...uc);doc.roundedRect(mg+42,y-5,28,8,2,2,'F');
-      doc.setTextColor(255,255,255);doc.setFontSize(8);doc.text(r.urgency||'ปกติ',mg+56,y,{align:'center'});
-      y+=12;
-      function sec(t){doc.setFillColor(240,242,251);doc.rect(mg,y,cw,7,'F');doc.setFillColor(0,48,135);doc.rect(mg,y,3,7,'F');doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(0,48,135);doc.text(t,mg+6,y+4.5);y+=10;}
-      function row(lb,val){if(!val||val==='-'||val==='—') return;doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(100,120,160);doc.text(lb,mg+4,y);doc.setTextColor(30,40,68);doc.setFont('helvetica','bold');const lines=doc.splitTextToSize(String(val),cw-52);doc.text(lines,mg+50,y);y+=lines.length*4.5+1;if(y>270){doc.addPage();y=20;}}
-      function lrow(lb,val){if(!val) return;doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(100,120,160);doc.text(lb+':',mg+4,y);y+=5;doc.setFont('helvetica','normal');doc.setTextColor(30,40,68);const lines=doc.splitTextToSize(String(val),cw-8);doc.text(lines,mg+4,y);y+=lines.length*4.5+2;if(y>270){doc.addPage();y=20;}}
-      sec('[ 1 ] ข้อมูลผู้ขอ');
-      row('ชื่อ-สกุล',`${r.prefix||''} ${r.fname||''} ${r.lname||''} (${r.gender||''})`);
-      row('ประเภท',r.requesterType);row('รหัส/บัตร',r.idCard);
-      row('คณะ/หน่วยงาน',r.faculty||r.officialOrg||'-');row('โทรศัพท์',r.phone);row('อีเมล',r.email||'-');y+=2;
-      sec('[ 2 ] วัตถุประสงค์และเหตุการณ์');
-      row('วัตถุประสงค์',r.purpose);
-      row('ช่วงเวลา',`${r.dateStart||''} ${r.timeStart||''} - ${r.dateEnd||r.dateStart||''} ${r.timeEnd||''}`);
-      row('จุดที่ขอดูกล้อง',r.locations);row('ยานพาหนะ',r.vehiclePlate?`${r.vehiclePlate} ${r.vehicleDesc||''}`:'-');
-      row('หลักฐาน',r.evidenceTypes||'-');lrow('รายละเอียด',r.purposeDetail);y+=2;
-      sec('[ 3 ] การขอรับข้อมูล');
-      row('ขอรับไฟล์',r.requestFile);row('เหตุผล',r.fileReason||'-');row('รูปแบบรับ',r.deliveryMethod||'-');
-      row('เอกสาร',r.docs||'-');row('ไฟล์แนบ',r.attachedFiles||'-');lrow('หมายเหตุ',r.additionalNote);y+=2;
-      sec('[ 4 ] เจ้าหน้าที่และผลดำเนินการ');
-      row('เจ้าหน้าที่ให้บริการ',r.serviceOfficerName||'-');row('เจ้าหน้าที่รับเรื่อง',r.officerName||'-');
-      row('ผลการตรวจสอบ',r.footageFound||'-');row('มอบไฟล์',r.fileGiven||'-');
-      row('วันที่ปิดเคส',r.closedDate||'-');lrow('บันทึกเจ้าหน้าที่',r.officerNote);
-      doc.setDrawColor(200,200,200);doc.line(mg,285,pw-mg,285);
-      doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(150);
-      doc.text('CCTV Request | Traffic & Safety | Mahidol University',mg,289);
-      doc.text(`Page ${pi+1}/${records.length} | ${new Date().toLocaleString('th-TH')}`,pw-mg,289,{align:'right'});
-    });
-    const fn=records.length===1?`CCTV_${records[0].refCode}_${new Date().toISOString().slice(0,10)}.pdf`:`CCTV_Export_${records.length}cases.pdf`;
-    doc.save(fn);
-  }catch(err){alert('เกิดข้อผิดพลาด: '+err.message);}
+  const pages = records.map(r => buildPdfPage(r)).join('');
+  const printArea = document.getElementById('printArea');
+  printArea.innerHTML = pages;
+  // แจ้งจำนวนเคสและ filename ใน title
+  const origTitle = document.title;
+  document.title = records.length===1
+    ? `CCTV_${records[0].refCode}_${new Date().toISOString().slice(0,10)}`
+    : `CCTV_Export_${records.length}cases_${new Date().toISOString().slice(0,10)}`;
+  window.print();
+  document.title = origTitle;
+}
+
+// ===== TEST OVERDUE (ทดสอบส่งแจ้งเตือนเคสค้าง) =====
+async function testOverdueAlert() {
+  const url = config.scriptUrl;
+  const resultEl = document.getElementById('testEmailResult');
+  if (!url) {
+    resultEl.style.display='block';resultEl.style.background='rgba(231,76,60,0.1)';resultEl.style.color='var(--red)';
+    resultEl.innerHTML='❌ กรุณากรอก Web App URL ก่อน'; return;
+  }
+  resultEl.style.display='block';resultEl.style.background='rgba(241,196,15,0.1)';resultEl.style.color='var(--yellow)';
+  resultEl.innerHTML='⏳ กำลังทดสอบแจ้งเตือนเคสค้าง...';
+  try {
+    const res = await fetch(url + '?action=testOverdue');
+    const json = await res.json();
+    if (json.success) {
+      resultEl.style.background='rgba(46,204,113,0.1)';resultEl.style.color='var(--green)';
+      resultEl.innerHTML=`✅ ส่งอีเมลทดสอบเคสค้างสำเร็จ! (ส่งไปยัง ${json.sentTo||'อีเมลที่ตั้งค่าไว้'})`;
+    } else {
+      resultEl.style.background='rgba(231,76,60,0.1)';resultEl.style.color='var(--red)';
+      resultEl.innerHTML='❌ เกิดข้อผิดพลาด: '+(json.error||'Unknown');
+    }
+  } catch(e) {
+    resultEl.style.background='rgba(231,76,60,0.1)';resultEl.style.color='var(--red)';
+    resultEl.innerHTML='❌ ไม่สามารถเชื่อมต่อได้';
+  }
 }
 
 function renderTable(data, compact) {
@@ -848,5 +955,6 @@ function saveConfig(){
   alert('✅ บันทึกการตั้งค่าแล้ว');
 }
 </script>
+<div id="printArea"></div>
 </body>
 </html>
