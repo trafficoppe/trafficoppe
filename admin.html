@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard | ระบบกล้องวงจรปิด CCTV | มหาวิทยาลัยมหิดล</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --navy: #1a2744;
+    --blue: #003087;
+    --gold: #c9a84c;
+    --gold-lt: #f5e9c0;
+    --bg: #0f1729;
+    --surface: #1a2744;
+    --surface2: #243057;
+    --surface3: #2d3d6a;
+    --border: #2d3d6a;
+    --text: #e8edf8;
+    --text-muted: #8a9bc0;
+    --green: #2ecc71;
+    --yellow: #f1c40f;
+    --red: #e74c3c;
+    --orange: #e67e22;
+    --radius: 12px;
+    --shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'IBM Plex Sans Thai', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+
+  /* LOGIN */
+  .login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at 30% 50%, #1a3a6a 0%, var(--bg) 70%);
+  }
+  .login-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 380px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  .login-logo { font-size: 48px; margin-bottom: 16px; }
+  .login-card h1 { font-size: 18px; font-weight: 700; color: var(--gold); margin-bottom: 4px; }
+  .login-card p { font-size: 12px; color: var(--text-muted); margin-bottom: 32px; }
+  .login-field { margin-bottom: 16px; text-align: left; }
+  .login-field label { font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .login-field input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .login-field input:focus { border-color: var(--gold); }
+  .btn-login {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--gold), #a8893e);
+    color: var(--navy);
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+  .btn-login:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.4); }
+  .login-error { color: var(--red); font-size: 12px; margin-top: 10px; display: none; }
+  .back-link { margin-top: 20px; }
+  .back-link a { color: var(--text-muted); font-size: 12px; text-decoration: none; }
+  .back-link a:hover { color: var(--text); }
+
+  /* DASHBOARD */
+  .dashboard { display: none; }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-logo { font-size: 22px; }
+  .topbar h1 { font-size: 15px; font-weight: 700; color: var(--gold); }
+  .topbar p { font-size: 11px; color: var(--text-muted); }
+  .topbar-spacer { flex: 1; }
+  .topbar-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .btn-logout {
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-logout:hover { color: var(--red); border-color: var(--red); }
+
+  /* TABS */
+  .tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    padding: 0 24px;
+    gap: 4px;
+  }
+  .tab {
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* CONTENT */
+  .content { padding: 24px; max-width: 1400px; margin: 0 auto; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* STAT CARDS */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s;
+  }
+  .stat-card:hover { transform: translateY(-2px); }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent, var(--gold));
+  }
+  .stat-icon { font-size: 28px; margin-bottom: 8px; }
+  .stat-value { font-size: 32px; font-weight: 800; color: var(--accent, var(--gold)); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+  .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  /* CHARTS GRID */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .charts-grid.triple { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 900px) { .charts-grid, .charts-grid.triple { grid-template-columns: 1fr; } }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .chart-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chart-wrap { position: relative; height: 220px; }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .table-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-header h3 { font-size: 14px; font-weight: 700; color: var(--gold); flex: 1; }
+  .search-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 7px 12px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    width: 220px;
+  }
+  .search-input::placeholder { color: var(--text-muted); }
+  .btn-refresh {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-refresh:hover { color: var(--gold); border-color: var(--gold); }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    background: var(--surface2);
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+  td {
+    padding: 11px 14px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  tr:hover td { background: var(--surface2); }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge-pending { background: rgba(241,196,15,0.15); color: var(--yellow); }
+  .badge-done { background: rgba(46,204,113,0.15); color: var(--green); }
+  .badge-processing { background: rgba(52,152,219,0.15); color: #3498db; }
+  .badge-rejected { background: rgba(231,76,60,0.15); color: var(--red); }
+  .badge-urgent { background: rgba(230,126,34,0.15); color: var(--orange); border: 1px solid rgba(230,126,34,0.3); }
+  .badge-emergency { background: rgba(231,76,60,0.2); color: var(--red); border: 1px solid rgba(231,76,60,0.4); }
+
+  /* DETAIL MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 28px;
+    width: 700px;
+    max-width: 95vw;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+  .modal-title { font-size: 16px; font-weight: 700; color: var(--gold); }
+  .modal-close { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
+  .modal-close:hover { color: var(--text); }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .detail-item label { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 3px; }
+  .detail-item .val { font-size: 13px; color: var(--text); }
+  .detail-full { grid-column: 1/-1; }
+  .modal-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+  /* OFFICER UPDATE FORM */
+  .officer-form { background: var(--surface2); border-radius: 10px; padding: 16px; margin-top: 16px; }
+  .officer-form h4 { font-size: 13px; font-weight: 700; color: var(--gold); margin-bottom: 14px; }
+  .officer-row { margin-bottom: 12px; }
+  .officer-row label { font-size: 12px; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 5px; }
+  .officer-row select, .officer-row textarea, .officer-row input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+  }
+  .officer-row select option { background: var(--surface); }
+  .btn-update {
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-update:hover { background: #e0ba5c; }
+
+  /* FILTER BAR */
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 7px 12px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+  }
+
+  /* LOADING */
+  .loading-msg {
+    text-align: center;
+    padding: 60px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .spinner-sm {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 48px; color: var(--text-muted); }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+
+  /* CONFIG PANEL */
+  .config-section { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 24px; margin-bottom: 20px; }
+  .config-section h3 { font-size: 14px; font-weight: 700; color: var(--gold); margin-bottom: 16px; }
+  .config-row { margin-bottom: 14px; }
+  .config-row label { font-size: 12px; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 5px; }
+  .config-row input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: monospace;
+    font-size: 13px;
+    outline: none;
+  }
+  .config-row input:focus { border-color: var(--gold); }
+  .btn-save-config {
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  code-block {
+    display: block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #88c0d0;
+    white-space: pre;
+    overflow-x: auto;
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">🔐</div>
+    <h1>Admin Dashboard</h1>
+    <p>ระบบกล้องวงจรปิด | งานจราจรและความปลอดภัย<br>มหาวิทยาลัยมหิดล</p>
+    <div class="login-field">
+      <label>USERNAME</label>
+      <input type="text" id="loginUser" placeholder="admin" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>PASSWORD</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-login" onclick="doLogin()">เข้าสู่ระบบ</button>
+    <p class="login-error" id="loginError">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</p>
+    <div class="back-link"><a href="index.html">← กลับหน้าแบบฟอร์ม</a></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboardScreen">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-logo">📹</div>
+    <div>
+      <h1>CCTV Admin Dashboard</h1>
+      <p>งานจราจรและความปลอดภัย | มหาวิทยาลัยมหิดล วิทยาเขตศาลายา</p>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-status"><div class="status-dot"></div> เชื่อมต่อแล้ว</div>
+    <div style="font-size:12px; color:var(--text-muted);" id="lastUpdate"></div>
+    <button class="btn-logout" onclick="doLogout()">ออกจากระบบ</button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('overview')">📊 ภาพรวม</div>
+    <div class="tab" onclick="switchTab('requests')">📋 รายการคำขอ</div>
+    <div class="tab" onclick="switchTab('analytics')">📈 วิเคราะห์</div>
+    <div class="tab" onclick="switchTab('config')">⚙️ ตั้งค่าระบบ</div>
+  </div>
+
+  <div class="content">
+
+    <!-- TAB: OVERVIEW -->
+    <div class="tab-panel active" id="panel-overview">
+
+      <!-- STAT CARDS -->
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-card" style="--accent:#c9a84c">
+          <div class="stat-icon">📋</div>
+          <div class="stat-value" id="stat-total">—</div>
+          <div class="stat-label">คำขอทั้งหมด</div>
+        </div>
+        <div class="stat-card" style="--accent:#f1c40f">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-value" id="stat-pending">—</div>
+          <div class="stat-label">รอดำเนินการ</div>
+        </div>
+        <div class="stat-card" style="--accent:#2ecc71">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value" id="stat-done">—</div>
+          <div class="stat-label">เสร็จสิ้น</div>
+        </div>
+        <div class="stat-card" style="--accent:#e74c3c">
+          <div class="stat-icon">🔴</div>
+          <div class="stat-value" id="stat-emergency">—</div>
+          <div class="stat-label">เร่งด่วน/ฉุกเฉิน</div>
+        </div>
+        <div class="stat-card" style="--accent:#3498db">
+          <div class="stat-icon">📁</div>
+          <div class="stat-value" id="stat-file">—</div>
+          <div class="stat-label">ขอรับไฟล์ภาพ</div>
+        </div>
+        <div class="stat-card" style="--accent:#9b59b6">
+          <div class="stat-icon">📅</div>
+          <div class="stat-value" id="stat-today">—</div>
+          <div class="stat-label">คำขอวันนี้</div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW 1 -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">🎯 วัตถุประสงค์การขอดูกล้อง</div>
+          <div class="chart-wrap"><canvas id="chartPurpose"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">👥 ประเภทผู้ขอ</div>
+          <div class="chart-wrap"><canvas id="chartRequester"></canvas></div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW 2 -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">📅 จำนวนคำขอรายเดือน</div>
+          <div class="chart-wrap"><canvas id="chartMonthly"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">⚡ ระดับความเร่งด่วน</div>
+          <div class="chart-wrap"><canvas id="chartUrgency"></canvas></div>
+        </div>
+      </div>
+
+      <!-- RECENT REQUESTS -->
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>📋 คำขอล่าสุด 10 รายการ</h3>
+          <button class="btn-refresh" onclick="loadData()">🔄 รีเฟรช</button>
+        </div>
+        <div id="recentTableWrap">
+          <div class="loading-msg"><div class="spinner-sm"></div>กำลังโหลด...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: REQUESTS -->
+    <div class="tab-panel" id="panel-requests">
+      <div class="filter-bar">
+        <select class="filter-select" id="filterStatus" onchange="renderRequestTable()">
+          <option value="">ทุกสถานะ</option>
+          <option value="รอดำเนินการ">รอดำเนินการ</option>
+          <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+          <option value="เสร็จสิ้น">เสร็จสิ้น</option>
+          <option value="ปฏิเสธ">ปฏิเสธ</option>
+        </select>
+        <select class="filter-select" id="filterUrgency" onchange="renderRequestTable()">
+          <option value="">ทุกระดับ</option>
+          <option value="ปกติ">ปกติ</option>
+          <option value="เร่งด่วน">เร่งด่วน</option>
+          <option value="ฉุกเฉิน">ฉุกเฉิน</option>
+        </select>
+        <select class="filter-select" id="filterType" onchange="renderRequestTable()">
+          <option value="">ทุกประเภท</option>
+          <option value="นักศึกษา">นักศึกษา</option>
+          <option value="บุคลากร">บุคลากร</option>
+          <option value="เจ้าหน้าที่ภายนอก">เจ้าหน้าที่ภายนอก</option>
+          <option value="บุคคลทั่วไป">บุคคลทั่วไป</option>
+        </select>
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 ค้นหาชื่อ, เลขอ้างอิง..." oninput="renderRequestTable()">
+        <button class="btn-refresh" onclick="loadData()">🔄 รีเฟรช</button>
+      </div>
+      <div class="table-wrap">
+        <div id="fullTableWrap">
+          <div class="loading-msg"><div class="spinner-sm"></div>กำลังโหลด...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ANALYTICS -->
+    <div class="tab-panel" id="panel-analytics">
+      <div class="charts-grid triple">
+        <div class="chart-card">
+          <div class="chart-title">📸 พบภาพ vs ไม่พบภาพ</div>
+          <div class="chart-wrap"><canvas id="chartFound"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">📁 ขอรับไฟล์ vs ดูอย่างเดียว</div>
+          <div class="chart-wrap"><canvas id="chartFile"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">✅ ผลการดำเนินการ</div>
+          <div class="chart-wrap"><canvas id="chartResult"></canvas></div>
+        </div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">📍 จุดที่ขอดูบ่อยที่สุด (Top 8)</div>
+          <div class="chart-wrap" style="height:280px;"><canvas id="chartLocation"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">🕒 เวลาที่พบเหตุการณ์บ่อย (ชั่วโมง)</div>
+          <div class="chart-wrap" style="height:280px;"><canvas id="chartHour"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CONFIG -->
+    <div class="tab-panel" id="panel-config">
+      <div class="config-section">
+        <h3>⚙️ ตั้งค่า Google Apps Script</h3>
+        <div class="config-row">
+          <label>Google Apps Script Web App URL (สำหรับรับข้อมูลจากฟอร์ม)</label>
+          <input type="text" id="cfgScriptUrl" placeholder="https://script.google.com/macros/s/XXXXXXX/exec">
+        </div>
+        <div class="config-row">
+          <label>Google Sheet ID (สำหรับดึงข้อมูลแสดงใน Dashboard)</label>
+          <input type="text" id="cfgSheetId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
+        </div>
+        <div class="config-row">
+          <label>Admin Password (สำหรับเข้าหน้า Dashboard นี้)</label>
+          <input type="password" id="cfgPassword" placeholder="••••••••">
+        </div>
+        <button class="btn-save-config" onclick="saveConfig()">💾 บันทึกการตั้งค่า</button>
+      </div>
+
+      <div class="config-section">
+        <h3>📧 อีเมลที่ได้รับแจ้งเตือน</h3>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">
+          อีเมลต่อไปนี้จะได้รับแจ้งเตือนทุกครั้งที่มีคำขอใหม่ (กำหนดในโค้ด Google Apps Script)
+        </p>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="background:var(--surface2); padding:10px 14px; border-radius:8px; font-size:13px; display:flex; align-items:center; gap:10px;">
+            <span style="color:var(--green);">✉️</span> anin.nak@mahidol.ac.th
+          </div>
+          <div style="background:var(--surface2); padding:10px 14px; border-radius:8px; font-size:13px; display:flex; align-items:center; gap:10px;">
+            <span style="color:var(--green);">✉️</span> pichaya.don@mahidol.ac.th
+          </div>
+          <div style="background:var(--surface2); padding:10px 14px; border-radius:8px; font-size:13px; display:flex; align-items:center; gap:10px;">
+            <span style="color:var(--green);">✉️</span> rawee.jum@mahidol.ac.th
+          </div>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <h3>📝 โครงสร้าง Google Sheet (คอลัมน์ที่ต้องสร้าง)</h3>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">
+          สร้าง Google Sheet ใหม่ ตั้งชื่อ Sheet ว่า <strong style="color:var(--gold);">CCTV_Requests</strong> และสร้างหัวคอลัมน์แถวแรกดังนี้:
+        </p>
+        <code-block>A: refCode          | B: timestamp        | C: pdpaConsent
+D: fname            | E: lname            | F: requesterType
+G: idCard           | H: faculty          | I: muEmail
+J: officialOrg      | K: officialDoc      | L: phone
+M: email            | N: purpose          | O: purposeDetail
+P: evidenceTypes    | Q: dateStart        | R: timeStart
+S: dateEnd          | T: timeEnd          | U: locations
+V: vehiclePlate     | W: vehicleDesc      | X: requestFile
+Y: fileReason       | Z: deliveryMethod   | AA: docs
+AB: additionalNote  | AC: urgency         |
+--- เจ้าหน้าที่กรอกภายหลัง ---
+AD: officerName     | AE: cctvResult      | AF: footageFound
+AG: fileGiven       | AH: actionTaken     | AI: closedDate
+AJ: satisfactionScore | AK: officerNote   | AL: status</code-block>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">รายละเอียดคำขอ</div>
+        <div style="font-size:12px; color:var(--text-muted); margin-top:2px;" id="modalRef"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ===== CONFIG & STATE =====
+let config = {
+  password: localStorage.getItem('admin_password') || 'cctv2024mu',
+  scriptUrl: localStorage.getItem('script_url') || '',
+  sheetId: localStorage.getItem('sheet_id') || ''
+};
+
+let allData = [];
+let charts = {};
+
+// ===== DEMO DATA (ใช้เมื่อยังไม่เชื่อมต่อ Sheet) =====
+function generateDemoData() {
+  const purposes = ['ติดตามทรัพย์สินสูญหาย','ติดตามยานพาหนะ','อุบัติเหตุ/เหตุฉุกเฉิน','การสอบสวนคดี','ร้องเรียน/พิพาท'];
+  const types = ['นักศึกษา','บุคลากร','เจ้าหน้าที่ภายนอก','บุคคลทั่วไป'];
+  const urgencies = ['ปกติ','ปกติ','ปกติ','เร่งด่วน','ฉุกเฉิน'];
+  const statuses = ['รอดำเนินการ','กำลังดำเนินการ','เสร็จสิ้น','เสร็จสิ้น','ปฏิเสธ'];
+  const locations = ['ลานจอดรถ A','หน้าตึก MU','ประตู 1','หอพัก','โรงอาหาร','ลานกิจกรรม','ห้องสมุด','ทางเดินใต้ตึก'];
+  const names = [['สมชาย','ใจดี'],['มาลี','สวรรค์'],['ประเสริฐ','มีสุข'],['นภา','ดาวเรือง'],['ก้องไกล','วรรณา']];
+
+  const data = [];
+  const now = new Date();
+  for (let i = 0; i < 35; i++) {
+    const d = new Date(now - Math.random() * 90 * 86400000);
+    const nm = names[i % names.length];
+    data.push({
+      refCode: `CCTV-${d.toISOString().slice(0,10).replace(/-/g,'')}-${Math.random().toString(36).substr(2,4).toUpperCase()}`,
+      timestamp: d.toISOString(),
+      fname: nm[0], lname: nm[1],
+      requesterType: types[Math.floor(Math.random()*types.length)],
+      purpose: purposes[Math.floor(Math.random()*purposes.length)],
+      purposeDetail: 'รายละเอียดเหตุการณ์ที่เกิดขึ้น...',
+      locations: locations[Math.floor(Math.random()*locations.length)],
+      dateStart: d.toISOString().slice(0,10),
+      urgency: urgencies[Math.floor(Math.random()*urgencies.length)],
+      requestFile: Math.random()>0.4 ? 'ดูอย่างเดียว' : 'ต้องการไฟล์',
+      phone: '08x-xxx-xxxx',
+      email: 'example@mahidol.ac.th',
+      status: statuses[Math.floor(Math.random()*statuses.length)],
+      footageFound: Math.random()>0.3 ? 'พบภาพ' : 'ไม่พบภาพ',
+      fileGiven: Math.random()>0.5 ? 'ใช่' : 'ไม่',
+      idCard: '****-****-***',
+      docs: 'บัตรประชาชน',
+      vehiclePlate: Math.random()>0.5 ? 'กก-1234' : '',
+    });
+  }
+  return data;
+}
+
+// ===== AUTH =====
+function doLogin() {
+  const u = document.getElementById('loginUser').value;
+  const p = document.getElementById('loginPass').value;
+  if ((u === 'admin' || u === 'cctv') && p === config.password) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboardScreen').style.display = 'block';
+    loadData();
+    loadConfig();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('dashboardScreen').style.display = 'none';
+  document.getElementById('loginPass').value = '';
+}
+
+// ===== TABS =====
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const names = ['overview','requests','analytics','config'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${name}`).classList.add('active');
+  if (name === 'analytics') renderAnalyticsCharts();
+}
+
+// ===== LOAD DATA =====
+async function loadData() {
+  // Demo mode if no Sheet ID
+  if (!config.sheetId) {
+    allData = generateDemoData();
+    renderAll();
+    return;
+  }
+  // Real: fetch from Apps Script
+  try {
+    const res = await fetch(`${config.scriptUrl}?action=getData`);
+    const json = await res.json();
+    allData = json.data || [];
+  } catch(e) {
+    allData = generateDemoData();
+  }
+  renderAll();
+}
+
+function renderAll() {
+  document.getElementById('lastUpdate').textContent = 'อัปเดต: ' + new Date().toLocaleTimeString('th-TH');
+  renderStats();
+  renderOverviewCharts();
+  renderRecentTable();
+  renderRequestTable();
+}
+
+// ===== STATS =====
+function renderStats() {
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('stat-total').textContent = allData.length;
+  document.getElementById('stat-pending').textContent = allData.filter(r=>r.status==='รอดำเนินการ').length;
+  document.getElementById('stat-done').textContent = allData.filter(r=>r.status==='เสร็จสิ้น').length;
+  document.getElementById('stat-emergency').textContent = allData.filter(r=>r.urgency==='ฉุกเฉิน'||r.urgency==='เร่งด่วน').length;
+  document.getElementById('stat-file').textContent = allData.filter(r=>r.requestFile==='ต้องการไฟล์').length;
+  document.getElementById('stat-today').textContent = allData.filter(r=>r.timestamp&&r.timestamp.startsWith(today)).length;
+}
+
+// ===== CHARTS HELPERS =====
+const CHART_COLORS = ['#c9a84c','#3498db','#2ecc71','#e74c3c','#9b59b6','#e67e22','#1abc9c','#e91e63'];
+
+function countBy(data, key) {
+  const map = {};
+  data.forEach(r => {
+    const v = r[key] || 'ไม่ระบุ';
+    map[v] = (map[v]||0)+1;
+  });
+  return map;
+}
+
+function makeChart(id, type, labels, values, opts={}) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id)?.getContext('2d');
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, {
+    type,
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: CHART_COLORS,
+        borderColor: type==='line'?'#c9a84c':'transparent',
+        borderWidth: type==='line'?2:0,
+        fill: type==='line',
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#c9a84c',
+        ...(opts.datasetOpts||{})
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: type==='doughnut'||type==='pie', labels: { color:'#8a9bc0', font:{size:11}, padding:12, boxWidth:12 } },
+        tooltip: { backgroundColor:'#1a2744', titleColor:'#c9a84c', bodyColor:'#e8edf8' }
+      },
+      scales: type!=='doughnut'&&type!=='pie' ? {
+        x: { ticks:{color:'#8a9bc0',font:{size:11}}, grid:{color:'#2d3d6a'} },
+        y: { ticks:{color:'#8a9bc0',font:{size:11}}, grid:{color:'#2d3d6a'}, beginAtZero:true }
+      } : undefined,
+      ...opts.chartOpts
+    }
+  });
+}
+
+// ===== OVERVIEW CHARTS =====
+function renderOverviewCharts() {
+  const purpose = countBy(allData, 'purpose');
+  makeChart('chartPurpose','doughnut',Object.keys(purpose),Object.values(purpose));
+
+  const req = countBy(allData, 'requesterType');
+  makeChart('chartRequester','doughnut',Object.keys(req),Object.values(req));
+
+  // Monthly
+  const monthMap = {};
+  allData.forEach(r => {
+    const m = (r.timestamp||'').slice(0,7);
+    if (m) monthMap[m] = (monthMap[m]||0)+1;
+  });
+  const months = Object.keys(monthMap).sort().slice(-6);
+  makeChart('chartMonthly','bar',months,months.map(m=>monthMap[m]),{datasetOpts:{backgroundColor:'#003087',borderRadius:6}});
+
+  const urgency = countBy(allData, 'urgency');
+  makeChart('chartUrgency','doughnut',Object.keys(urgency),Object.values(urgency));
+}
+
+// ===== ANALYTICS CHARTS =====
+function renderAnalyticsCharts() {
+  const found = countBy(allData, 'footageFound');
+  makeChart('chartFound','doughnut',Object.keys(found),Object.values(found));
+
+  const file = countBy(allData, 'requestFile');
+  makeChart('chartFile','doughnut',Object.keys(file),Object.values(file));
+
+  const res = countBy(allData, 'status');
+  makeChart('chartResult','doughnut',Object.keys(res),Object.values(res));
+
+  // Locations
+  const locMap = {};
+  allData.forEach(r => {
+    (r.locations||'').split(',').forEach(l => {
+      const loc = l.trim();
+      if (loc) locMap[loc] = (locMap[loc]||0)+1;
+    });
+  });
+  const top8 = Object.entries(locMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  makeChart('chartLocation','bar',top8.map(x=>x[0]),top8.map(x=>x[1]),{datasetOpts:{backgroundColor:'#c9a84c',borderRadius:6}});
+
+  // Hour of day
+  const hourMap = {};
+  for(let i=0;i<24;i++) hourMap[i]=0;
+  allData.forEach(r => {
+    if (r.timeStart) {
+      const h = parseInt(r.timeStart.split(':')[0]);
+      if (!isNaN(h)) hourMap[h]++;
+    } else {
+      hourMap[Math.floor(Math.random()*24)]++;
+    }
+  });
+  const hours = Object.keys(hourMap).map(Number).sort((a,b)=>a-b);
+  makeChart('chartHour','line',hours.map(h=>h+':00'),hours.map(h=>hourMap[h]),{datasetOpts:{backgroundColor:'rgba(201,168,76,0.15)',borderColor:'#c9a84c'}});
+}
+
+// ===== TABLES =====
+const statusBadge = {
+  'รอดำเนินการ': 'badge-pending',
+  'กำลังดำเนินการ': 'badge-processing',
+  'เสร็จสิ้น': 'badge-done',
+  'ปฏิเสธ': 'badge-rejected'
+};
+const urgencyBadge = { 'เร่งด่วน': 'badge-urgent', 'ฉุกเฉิน': 'badge-emergency' };
+
+function renderRecentTable() {
+  const sorted = [...allData].sort((a,b) => new Date(b.timestamp)-new Date(a.timestamp)).slice(0,10);
+  document.getElementById('recentTableWrap').innerHTML = renderTable(sorted, true);
+}
+
+function renderRequestTable() {
+  let data = [...allData];
+  const status = document.getElementById('filterStatus')?.value;
+  const urgency = document.getElementById('filterUrgency')?.value;
+  const type = document.getElementById('filterType')?.value;
+  const search = (document.getElementById('searchInput')?.value||'').toLowerCase();
+  if (status) data = data.filter(r=>r.status===status);
+  if (urgency) data = data.filter(r=>r.urgency===urgency);
+  if (type) data = data.filter(r=>r.requesterType===type);
+  if (search) data = data.filter(r=>
+    (r.refCode||'').toLowerCase().includes(search)||
+    (r.fname+' '+r.lname).toLowerCase().includes(search)||
+    (r.purpose||'').toLowerCase().includes(search)
+  );
+  data.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+  document.getElementById('fullTableWrap').innerHTML = renderTable(data, false);
+}
+
+function renderTable(data, compact) {
+  if (!data.length) return `<div class="empty-state"><div class="icon">📭</div><p>ไม่พบข้อมูล</p></div>`;
+  return `<table>
+    <thead><tr>
+      <th>เลขอ้างอิง</th>
+      <th>วันที่</th>
+      <th>ชื่อ-สกุล</th>
+      <th>ประเภท</th>
+      <th>วัตถุประสงค์</th>
+      <th>ความเร่งด่วน</th>
+      <th>สถานะ</th>
+      <th></th>
+    </tr></thead>
+    <tbody>
+    ${data.map((r,i)=>`<tr>
+      <td style="font-family:monospace;font-size:12px;color:var(--gold)">${r.refCode||'—'}</td>
+      <td style="white-space:nowrap;font-size:12px;">${r.timestamp?new Date(r.timestamp).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'}):'—'}</td>
+      <td>${r.fname||''} ${r.lname||''}</td>
+      <td><span class="badge" style="background:rgba(52,152,219,0.15);color:#3498db">${r.requesterType||'—'}</span></td>
+      <td style="font-size:12px;">${r.purpose||'—'}</td>
+      <td><span class="badge ${urgencyBadge[r.urgency]||'badge-pending'}">${r.urgency||'ปกติ'}</span></td>
+      <td><span class="badge ${statusBadge[r.status||'รอดำเนินการ']}">${r.status||'รอดำเนินการ'}</span></td>
+      <td><button onclick="openModal(${compact?i:allData.indexOf(r)})" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;">ดูรายละเอียด</button></td>
+    </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+// ===== MODAL =====
+function openModal(idx) {
+  const r = allData[idx];
+  if (!r) return;
+  document.getElementById('modalTitle').textContent = `${r.fname} ${r.lname}`;
+  document.getElementById('modalRef').textContent = r.refCode + ' | ' + (r.timestamp?new Date(r.timestamp).toLocaleString('th-TH'):'');
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-item"><label>ประเภทผู้ขอ</label><div class="val">${r.requesterType||'—'}</div></div>
+      <div class="detail-item"><label>ประเภทบัตร/รหัส</label><div class="val">${r.idCard||'—'}</div></div>
+      <div class="detail-item"><label>โทรศัพท์</label><div class="val">${r.phone||'—'}</div></div>
+      <div class="detail-item"><label>อีเมล</label><div class="val">${r.email||'—'}</div></div>
+      <div class="detail-item"><label>คณะ/หน่วยงาน</label><div class="val">${r.faculty||r.officialOrg||'—'}</div></div>
+      <div class="detail-item"><label>ความเร่งด่วน</label><div class="val"><span class="badge ${urgencyBadge[r.urgency]||'badge-pending'}">${r.urgency||'ปกติ'}</span></div></div>
+      <div class="detail-item detail-full"><label>วัตถุประสงค์</label><div class="val">${r.purpose||'—'}</div></div>
+      <div class="detail-item detail-full"><label>รายละเอียดเหตุการณ์</label><div class="val" style="white-space:pre-wrap;">${r.purposeDetail||'—'}</div></div>
+      <div class="detail-item"><label>ช่วงเวลาที่เกิดเหตุ</label><div class="val">${r.dateStart||'—'} ${r.timeStart||''} ${r.dateEnd?'→ '+r.dateEnd:''} ${r.timeEnd||''}</div></div>
+      <div class="detail-item"><label>จุดที่ขอดูกล้อง</label><div class="val">${r.locations||'—'}</div></div>
+      <div class="detail-item"><label>ยานพาหนะ</label><div class="val">${r.vehiclePlate||'—'} ${r.vehicleDesc||''}</div></div>
+      <div class="detail-item"><label>ขอรับไฟล์</label><div class="val">${r.requestFile||'—'}</div></div>
+      <div class="detail-item"><label>เอกสารที่นำมา</label><div class="val">${r.docs||'—'}</div></div>
+      <div class="detail-item detail-full"><label>หมายเหตุ</label><div class="val">${r.additionalNote||'—'}</div></div>
+    </div>
+    <hr class="modal-divider">
+    <div class="officer-form">
+      <h4>🔧 บันทึกผลการดำเนินการ (เจ้าหน้าที่)</h4>
+      <div class="officer-row">
+        <label>สถานะ</label>
+        <select id="of-status">
+          <option ${r.status==='รอดำเนินการ'?'selected':''}>รอดำเนินการ</option>
+          <option ${r.status==='กำลังดำเนินการ'?'selected':''}>กำลังดำเนินการ</option>
+          <option ${r.status==='เสร็จสิ้น'?'selected':''}>เสร็จสิ้น</option>
+          <option ${r.status==='ปฏิเสธ'?'selected':''}>ปฏิเสธ</option>
+        </select>
+      </div>
+      <div class="officer-row">
+        <label>ผลการตรวจสอบกล้อง</label>
+        <select id="of-found">
+          <option ${r.footageFound==='พบภาพ'?'selected':''}>พบภาพ</option>
+          <option ${r.footageFound==='ไม่พบภาพ'?'selected':''}>ไม่พบภาพ</option>
+          <option ${r.footageFound==='ภาพไม่ชัด'?'selected':''}>ภาพไม่ชัด</option>
+          <option ${r.footageFound==='ไม่อยู่ในช่วงบันทึก'?'selected':''}>ไม่อยู่ในช่วงบันทึก</option>
+        </select>
+      </div>
+      <div class="officer-row">
+        <label>มอบไฟล์ภาพให้</label>
+        <select id="of-file">
+          <option value="">—</option>
+          <option ${r.fileGiven==='ใช่'?'selected':''}>ใช่</option>
+          <option ${r.fileGiven==='ไม่'?'selected':''}>ไม่</option>
+        </select>
+      </div>
+      <div class="officer-row">
+        <label>เจ้าหน้าที่ผู้รับเรื่อง</label>
+        <input type="text" id="of-officer" value="${r.officerName||''}" placeholder="ชื่อเจ้าหน้าที่">
+      </div>
+      <div class="officer-row">
+        <label>บันทึกของเจ้าหน้าที่</label>
+        <textarea id="of-note" rows="3" placeholder="บันทึกการดำเนินการ...">${r.officerNote||''}</textarea>
+      </div>
+      <button class="btn-update" onclick="updateRecord(${idx})">💾 บันทึกผล</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').style.display = 'none';
+}
+
+function updateRecord(idx) {
+  allData[idx].status = document.getElementById('of-status').value;
+  allData[idx].footageFound = document.getElementById('of-found').value;
+  allData[idx].fileGiven = document.getElementById('of-file').value;
+  allData[idx].officerName = document.getElementById('of-officer').value;
+  allData[idx].officerNote = document.getElementById('of-note').value;
+  closeModal();
+  renderAll();
+  // TODO: ส่งอัปเดตกลับไป Apps Script
+  alert('✅ บันทึกผลการดำเนินการแล้ว');
+}
+
+// ===== CONFIG =====
+function loadConfig() {
+  document.getElementById('cfgScriptUrl').value = config.scriptUrl;
+  document.getElementById('cfgSheetId').value = config.sheetId;
+}
+
+function saveConfig() {
+  config.scriptUrl = document.getElementById('cfgScriptUrl').value;
+  config.sheetId = document.getElementById('cfgSheetId').value;
+  const newPass = document.getElementById('cfgPassword').value;
+  if (newPass) config.password = newPass;
+  localStorage.setItem('script_url', config.scriptUrl);
+  localStorage.setItem('sheet_id', config.sheetId);
+  localStorage.setItem('admin_password', config.password);
+  alert('✅ บันทึกการตั้งค่าแล้ว');
+}
+</script>
+</body>
+</html>
