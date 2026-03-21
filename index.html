@@ -8,508 +8,138 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --mu-navy: #1a2744;
-    --mu-blue: #003087;
-    --mu-gold: #c9a84c;
-    --mu-gold-light: #f0d98a;
-    --mu-red: #8b1a1a;
-    --bg: #f4f6fb;
-    --surface: #ffffff;
-    --surface2: #f8f9fc;
-    --border: #dde3ee;
-    --text: #1a2744;
-    --text-muted: #6b7a99;
-    --success: #1a7a4a;
-    --success-bg: #e8f5ee;
-    --danger: #8b1a1a;
-    --danger-bg: #fdf0f0;
+    --mu-navy: #1a2744; --mu-blue: #003087; --mu-gold: #c9a84c;
+    --bg: #f4f6fb; --surface: #ffffff; --surface2: #f8f9fc;
+    --border: #dde3ee; --text: #1a2744; --text-muted: #6b7a99;
+    --success: #1a7a4a; --success-bg: #e8f5ee;
     --shadow: 0 2px 16px rgba(26,39,68,0.08);
     --shadow-lg: 0 8px 40px rgba(26,39,68,0.14);
     --radius: 12px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'IBM Plex Sans Thai','Sarabun',sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
 
-  body {
-    font-family: 'IBM Plex Sans Thai', 'Sarabun', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 15px;
-    line-height: 1.6;
-  }
+  /* HEADER */
+  .header { background: linear-gradient(135deg,var(--mu-navy) 0%,var(--mu-blue) 60%,#1a4a8a 100%); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,0.25); }
+  .header-inner { max-width: 900px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+  .header-logo { width: 52px; height: 52px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .header-text h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.3; }
+  .header-text p { font-size: 12px; opacity: 0.75; font-weight: 300; margin-top: 2px; }
+  .header-badge { margin-left: auto; background: var(--mu-gold); color: var(--mu-navy); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .progress-bar-wrap { background: rgba(255,255,255,0.15); height: 4px; }
+  .progress-bar-fill { height: 100%; background: var(--mu-gold); transition: width 0.4s ease; }
 
-  /* ===== HEADER ===== */
-  .header {
-    background: linear-gradient(135deg, var(--mu-navy) 0%, var(--mu-blue) 60%, #1a4a8a 100%);
-    color: white;
-    padding: 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 20px rgba(0,0,0,0.25);
-  }
-  .header-inner {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .header-logo {
-    width: 52px;
-    height: 52px;
-    background: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 22px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  }
-  .header-text h1 {
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    line-height: 1.3;
-  }
-  .header-text p {
-    font-size: 12px;
-    opacity: 0.75;
-    font-weight: 300;
-    margin-top: 2px;
-  }
-  .header-badge {
-    margin-left: auto;
-    background: var(--mu-gold);
-    color: var(--mu-navy);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    white-space: nowrap;
-  }
+  /* ADMIN ICON */
+  .admin-icon-btn { position: fixed; bottom: 24px; right: 24px; width: 44px; height: 44px; background: var(--mu-navy); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.25); z-index: 99; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; }
+  .admin-icon-btn:hover { opacity: 1; transform: scale(1.1); }
+  .admin-icon-btn title { display: none; }
 
-  /* ===== PROGRESS ===== */
-  .progress-bar-wrap {
-    background: rgba(255,255,255,0.15);
-    height: 4px;
-    width: 100%;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    background: var(--mu-gold);
-    transition: width 0.4s ease;
-  }
+  /* MAIN */
+  .main { max-width: 900px; margin: 0 auto; padding: 32px 16px 80px; }
 
-  /* ===== MAIN ===== */
-  .main {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 32px 16px 80px;
-  }
-
-  /* ===== PDPA NOTICE ===== */
-  .pdpa-notice {
-    background: linear-gradient(135deg, #fff8e7, #fffdf4);
-    border: 2px solid var(--mu-gold);
-    border-radius: var(--radius);
-    padding: 20px 24px;
-    margin-bottom: 28px;
-    position: relative;
-    overflow: hidden;
-  }
-  .pdpa-notice::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 5px;
-    background: var(--mu-gold);
-  }
-  .pdpa-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--mu-navy);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-  .pdpa-title .icon { font-size: 18px; }
+  /* PDPA */
+  .pdpa-notice { background: linear-gradient(135deg,#fff8e7,#fffdf4); border: 2px solid var(--mu-gold); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 28px; position: relative; overflow: hidden; }
+  .pdpa-notice::before { content:''; position: absolute; left:0; top:0; bottom:0; width:5px; background: var(--mu-gold); }
+  .pdpa-title { font-size: 14px; font-weight: 700; color: var(--mu-navy); display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
   .pdpa-body { font-size: 13px; color: #555; line-height: 1.7; }
-  .pdpa-body strong { color: var(--mu-navy); }
-  .pdpa-consent {
-    margin-top: 14px;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    background: white;
-    border-radius: 8px;
-    padding: 12px 14px;
-    border: 1px solid #e0c87a;
-    cursor: pointer;
-  }
-  .pdpa-consent input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    margin-top: 1px;
-    cursor: pointer;
-    accent-color: var(--mu-blue);
-    flex-shrink: 0;
-  }
-  .pdpa-consent label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--mu-navy);
-    cursor: pointer;
-    line-height: 1.5;
-  }
+  .pdpa-consent { margin-top: 14px; display: flex; align-items: flex-start; gap: 10px; background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid #e0c87a; cursor: pointer; }
+  .pdpa-consent input[type="checkbox"] { width: 18px; height: 18px; margin-top: 1px; cursor: pointer; accent-color: var(--mu-blue); flex-shrink: 0; }
+  .pdpa-consent label { font-size: 13px; font-weight: 600; color: var(--mu-navy); cursor: pointer; line-height: 1.5; }
 
-  /* ===== CARD ===== */
-  .card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-  .card-header {
-    background: linear-gradient(90deg, var(--mu-navy), #1e3a6e);
-    color: white;
-    padding: 14px 22px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .card-header .step-num {
-    background: var(--mu-gold);
-    color: var(--mu-navy);
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 800;
-    flex-shrink: 0;
-  }
-  .card-header h2 {
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-  }
+  /* CARD */
+  .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; }
+  .card-header { background: linear-gradient(90deg,var(--mu-navy),#1e3a6e); color: white; padding: 14px 22px; display: flex; align-items: center; gap: 10px; }
+  .card-header .step-num { background: var(--mu-gold); color: var(--mu-navy); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+  .card-header h2 { font-size: 14px; font-weight: 700; }
   .card-body { padding: 22px; }
 
-  /* ===== FORM FIELDS ===== */
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
+  /* FORM */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
   .form-row.single { grid-template-columns: 1fr; }
   .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
-  @media (max-width: 600px) {
-    .form-row, .form-row.triple { grid-template-columns: 1fr; }
-  }
-
+  .form-row.quad { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  @media(max-width:600px){ .form-row,.form-row.triple,.form-row.quad { grid-template-columns: 1fr; } }
   .form-group { display: flex; flex-direction: column; gap: 5px; }
-  .form-group label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--mu-navy);
-    display: flex;
-    align-items: center;
-    gap: 4px;
+  .form-group label { font-size: 13px; font-weight: 600; color: var(--mu-navy); }
+  .required { color: #c0392b; }
+  .form-hint { font-size: 11px; color: var(--text-muted); }
+  input[type="text"],input[type="email"],input[type="tel"],input[type="date"],input[type="time"],textarea,select {
+    width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: inherit; font-size: 14px; color: var(--text); background: white;
+    transition: border-color 0.2s, box-shadow 0.2s; outline: none; appearance: none;
   }
-  .required { color: #c0392b; font-size: 14px; }
-  .form-hint { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-weight: 400; }
-
-  input[type="text"],
-  input[type="email"],
-  input[type="tel"],
-  input[type="date"],
-  input[type="time"],
-  textarea,
-  select {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 14px;
-    color: var(--text);
-    background: white;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    outline: none;
-    appearance: none;
-  }
-  input:focus, textarea:focus, select:focus {
-    border-color: var(--mu-blue);
-    box-shadow: 0 0 0 3px rgba(0,48,135,0.1);
-  }
-  input.error, textarea.error, select.error {
-    border-color: #c0392b;
-    box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
-  }
+  input:focus,textarea:focus,select:focus { border-color: var(--mu-blue); box-shadow: 0 0 0 3px rgba(0,48,135,0.1); }
+  input.error,textarea.error,select.error { border-color: #c0392b; box-shadow: 0 0 0 3px rgba(192,57,43,0.1); }
   textarea { resize: vertical; min-height: 90px; }
   select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231a2744' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; }
 
-  /* ===== RADIO / CHECKBOX GROUP ===== */
-  .radio-group, .check-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 4px;
-  }
-  .radio-item, .check-item {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    background: var(--surface2);
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-size: 13px;
-    font-weight: 500;
-  }
-  .radio-item:hover, .check-item:hover { border-color: var(--mu-blue); background: #eef2fb; }
-  .radio-item input, .check-item input { accent-color: var(--mu-blue); }
-  .radio-item.selected, .check-item.selected {
-    border-color: var(--mu-blue);
-    background: #e8eef9;
-    color: var(--mu-blue);
-  }
+  /* RADIO / CHECK */
+  .radio-group,.check-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .radio-item,.check-item { display: flex; align-items: center; gap: 7px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; transition: all 0.15s; font-size: 13px; font-weight: 500; }
+  .radio-item:hover,.check-item:hover { border-color: var(--mu-blue); background: #eef2fb; }
+  .radio-item input,.check-item input { accent-color: var(--mu-blue); }
+  .radio-item.selected,.check-item.selected { border-color: var(--mu-blue); background: #e8eef9; color: var(--mu-blue); }
 
-  /* ===== DATETIME RANGE ===== */
-  .datetime-range {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 12px;
-    align-items: center;
-  }
+  /* DATETIME */
+  .datetime-range { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; }
   .datetime-arrow { color: var(--text-muted); font-size: 20px; text-align: center; }
 
-  /* ===== LOCATION TAG ===== */
-  .location-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
-  }
-  .location-tag {
-    background: var(--mu-navy);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .location-tag .remove {
-    cursor: pointer;
-    opacity: 0.7;
-    font-size: 14px;
-  }
+  /* LOCATION TAGS */
+  .location-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .location-tag { background: var(--mu-navy); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .location-tag .remove { cursor: pointer; opacity: 0.7; font-size: 14px; }
   .location-tag .remove:hover { opacity: 1; }
 
-  /* ===== INFO BOX ===== */
-  .info-box {
-    background: #eef2fb;
-    border-left: 4px solid var(--mu-blue);
-    border-radius: 0 8px 8px 0;
-    padding: 12px 16px;
-    font-size: 13px;
-    color: #344a7a;
-    margin-bottom: 16px;
-  }
-  .info-box strong { font-weight: 700; }
+  /* PRESET LOCATIONS */
+  .preset-locations { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .preset-btn { background: white; border: 1px dashed var(--border); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .preset-btn:hover { border-color: var(--mu-blue); color: var(--mu-blue); background: #eef2fb; }
 
-  .warn-box {
-    background: #fff8e7;
-    border-left: 4px solid var(--mu-gold);
-    border-radius: 0 8px 8px 0;
-    padding: 12px 16px;
-    font-size: 13px;
-    color: #7a5800;
-    margin-top: 12px;
-  }
+  /* INFO BOX */
+  .info-box { background: #eef2fb; border-left: 4px solid var(--mu-blue); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 13px; color: #344a7a; margin-bottom: 16px; }
+  .warn-box { background: #fff8e7; border-left: 4px solid var(--mu-gold); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 13px; color: #7a5800; margin-top: 12px; }
 
-  /* ===== SUBMIT AREA ===== */
-  .submit-area {
-    background: var(--surface);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-    padding: 24px 22px;
-    text-align: center;
-  }
-  .btn-submit {
-    background: linear-gradient(135deg, var(--mu-blue), #1a4a8a);
-    color: white;
-    border: none;
-    padding: 14px 48px;
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 14px rgba(0,48,135,0.3);
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    letter-spacing: 0.02em;
-  }
-  .btn-submit:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,48,135,0.4);
-  }
+  /* UPLOAD */
+  .upload-area { border: 2px dashed var(--border); border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; margin-top: 8px; background: var(--surface2); }
+  .upload-area:hover,.upload-area.dragover { border-color: var(--mu-blue); background: #eef2fb; }
+  .upload-area input[type="file"] { display: none; }
+  .upload-area .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-area p { font-size: 13px; color: var(--text-muted); }
+  .upload-area span { font-size: 12px; color: var(--text-muted); }
+  .file-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .file-item { display: flex; align-items: center; gap: 8px; background: white; border: 1px solid var(--border); border-radius: 7px; padding: 7px 12px; font-size: 13px; }
+  .file-item .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-item .file-remove { color: #c0392b; cursor: pointer; font-size: 16px; flex-shrink: 0; }
+
+  /* SUBMIT */
+  .submit-area { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 24px 22px; text-align: center; }
+  .btn-submit { background: linear-gradient(135deg,var(--mu-blue),#1a4a8a); color: white; border: none; padding: 14px 48px; border-radius: 10px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(0,48,135,0.3); display: inline-flex; align-items: center; gap: 10px; }
+  .btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,48,135,0.4); }
   .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-  .submit-note { font-size: 12px; color: var(--text-muted); margin-top: 12px; }
+  .submit-note { font-size: 13px; color: var(--text-muted); margin-top: 14px; line-height: 1.8; }
+  .submit-note strong { color: var(--mu-navy); }
 
-  /* ===== SUCCESS ===== */
-  .success-screen {
-    display: none;
-    text-align: center;
-    padding: 60px 24px;
-  }
-  .success-icon {
-    width: 80px;
-    height: 80px;
-    background: var(--success-bg);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 36px;
-    margin: 0 auto 20px;
-    animation: pop 0.4s ease;
-  }
-  @keyframes pop {
-    0% { transform: scale(0); }
-    70% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-  }
+  /* SUCCESS */
+  .success-screen { display: none; text-align: center; padding: 60px 24px; }
+  .success-icon { width: 80px; height: 80px; background: var(--success-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 20px; animation: pop 0.4s ease; }
+  @keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.1)} 100%{transform:scale(1)} }
   .success-screen h2 { font-size: 22px; color: var(--success); font-weight: 700; margin-bottom: 8px; }
-  .success-screen p { color: var(--text-muted); font-size: 14px; max-width: 400px; margin: 0 auto 24px; line-height: 1.7; }
-  .ref-code {
-    background: var(--mu-navy);
-    color: var(--mu-gold);
-    display: inline-block;
-    padding: 8px 24px;
-    border-radius: 8px;
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    margin-bottom: 24px;
-    font-family: monospace;
-  }
-  .btn-new {
-    background: white;
-    color: var(--mu-blue);
-    border: 2px solid var(--mu-blue);
-    padding: 10px 28px;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
+  .ref-code { background: var(--mu-navy); color: var(--mu-gold); display: inline-block; padding: 8px 24px; border-radius: 8px; font-size: 18px; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 24px; font-family: monospace; }
+  .btn-new { background: white; color: var(--mu-blue); border: 2px solid var(--mu-blue); padding: 10px 28px; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
   .btn-new:hover { background: var(--mu-blue); color: white; }
 
-  /* ===== LOADING OVERLAY ===== */
-  .loading-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(26,39,68,0.6);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-  }
-  .loading-card {
-    background: white;
-    border-radius: 16px;
-    padding: 32px 40px;
-    text-align: center;
-    box-shadow: var(--shadow-lg);
-  }
-  .spinner {
-    width: 48px;
-    height: 48px;
-    border: 4px solid #dde3ee;
-    border-top-color: var(--mu-blue);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 16px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-card p { color: var(--text-muted); font-size: 14px; }
+  /* LOADING */
+  .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(26,39,68,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .loading-card { background: white; border-radius: 16px; padding: 32px 40px; text-align: center; }
+  .spinner { width: 48px; height: 48px; border: 4px solid #dde3ee; border-top-color: var(--mu-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to{transform:rotate(360deg)} }
 
-  /* ===== ADMIN LINK ===== */
-  .admin-link-wrap {
-    text-align: center;
-    margin-top: 24px;
-  }
-  .admin-link {
-    font-size: 12px;
-    color: var(--text-muted);
-    text-decoration: none;
-  }
-  .admin-link:hover { color: var(--mu-blue); text-decoration: underline; }
-
-  /* ===== ERROR MSG ===== */
-  .error-msg {
-    font-size: 11px;
-    color: #c0392b;
-    margin-top: 3px;
-    display: none;
-  }
+  /* MISC */
+  .section-divider { border: none; border-top: 1px dashed var(--border); margin: 16px 0; }
+  .conditional-section { overflow: hidden; max-height: 0; opacity: 0; transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease; margin-top: 0; }
+  .conditional-section.show { max-height: 800px; opacity: 1; margin-top: 16px; }
+  .error-msg { font-size: 11px; color: #c0392b; margin-top: 3px; display: none; }
   .error-msg.show { display: block; }
-
-  /* ===== DIVIDER ===== */
-  .section-divider {
-    border: none;
-    border-top: 1px dashed var(--border);
-    margin: 16px 0;
-  }
-
-  /* ===== CONDITIONAL SECTION ===== */
-  .conditional-section {
-    overflow: hidden;
-    max-height: 0;
-    opacity: 0;
-    transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
-    margin-top: 0;
-  }
-  .conditional-section.show {
-    max-height: 600px;
-    opacity: 1;
-    margin-top: 16px;
-  }
-
-  /* config notice */
-  .config-banner {
-    background: #fff3cd;
-    border: 2px dashed #ffc107;
-    border-radius: 10px;
-    padding: 16px 20px;
-    margin-bottom: 24px;
-    font-size: 13px;
-    color: #856404;
-  }
-  .config-banner strong { display: block; margin-bottom: 4px; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -524,656 +154,504 @@
     </div>
     <div class="header-badge">CCTV Request</div>
   </div>
-  <div class="progress-bar-wrap">
-    <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
-  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
 </header>
+
+<!-- Admin icon (bottom right) -->
+<a href="admin.html" class="admin-icon-btn" title="ผู้ดูแลระบบ">🔐</a>
 
 <!-- LOADING -->
 <div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-card">
-    <div class="spinner"></div>
-    <p>กำลังส่งข้อมูล กรุณารอสักครู่...</p>
-  </div>
+  <div class="loading-card"><div class="spinner"></div><p style="color:var(--text-muted);font-size:14px;">กำลังส่งข้อมูล กรุณารอสักครู่...</p></div>
 </div>
 
-<!-- MAIN -->
 <main class="main">
+<form id="cctvForm" novalidate>
 
-  <!-- CONFIG NOTICE - จะถูกซ่อนหลัง config แล้ว -->
-  <div class="config-banner" id="configBanner">
-    <strong>⚙️ สำหรับผู้ดูแลระบบ: ต้องตั้งค่า Google Apps Script URL</strong>
-    กรุณาแก้ไขตัวแปร <code>APPS_SCRIPT_URL</code> ในไฟล์ JavaScript และแทนที่ด้วย Web App URL จาก Google Apps Script ของท่าน
-    | <a href="admin.html" style="color: #856404; font-weight:700;">→ เข้าหน้า Admin</a>
+  <!-- PDPA -->
+  <div class="pdpa-notice">
+    <div class="pdpa-title"><span>🔒</span> นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA) — พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</div>
+    <div class="pdpa-body">
+      มหาวิทยาลัยมหิดลเก็บรวบรวมข้อมูลส่วนบุคคลของท่านเพื่อ<strong>วัตถุประสงค์ด้านความปลอดภัยและการให้บริการดูกล้องวงจรปิดย้อนหลัง</strong>เท่านั้น
+      ข้อมูลของท่านจะถูกเก็บไว้ในระบบฐานข้อมูลของมหาวิทยาลัยและจะไม่ถูกเปิดเผยต่อบุคคลภายนอก เว้นแต่จะมีคำสั่งทางกฎหมาย
+      ท่านมีสิทธิ์ขอเข้าถึง แก้ไข หรือลบข้อมูลของตนเองได้ตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562
+      <br><br>ข้อมูลภาพจากกล้องวงจรปิดถือเป็น<strong>ข้อมูลส่วนบุคคลที่มีความอ่อนไหว</strong> การเข้าถึงจะได้รับอนุญาตเฉพาะเมื่อมีเหตุผลอันชอบธรรมตามกฎหมายเท่านั้น
+    </div>
+    <div class="pdpa-consent">
+      <input type="checkbox" id="pdpaConsent" required>
+      <label for="pdpaConsent">ข้าพเจ้ายินยอมให้มหาวิทยาลัยมหิดลเก็บรวบรวมและประมวลผลข้อมูลส่วนบุคคลของข้าพเจ้า เพื่อวัตถุประสงค์ในการขอดูกล้องวงจรปิดย้อนหลัง และรับทราบสิทธิ์ของข้าพเจ้าตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 <span class="required">*</span></label>
+    </div>
+    <p class="error-msg" id="pdpaError">กรุณายินยอมให้เก็บข้อมูลส่วนบุคคลก่อนดำเนินการ</p>
   </div>
 
-  <!-- FORM -->
-  <form id="cctvForm" novalidate>
+  <!-- SECTION 1: ข้อมูลผู้ขอ -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">1</div><h2>ข้อมูลผู้ขอดูกล้องวงจรปิด</h2></div>
+    <div class="card-body">
+      <div class="info-box">📋 กรุณากรอกข้อมูลตามบัตรประชาชนหรือบัตรประจำตัวที่ออกโดยมหาวิทยาลัยมหิดล</div>
 
-    <!-- PDPA NOTICE -->
-    <div class="pdpa-notice">
-      <div class="pdpa-title">
-        <span class="icon">🔒</span>
-        <span>นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA) — พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</span>
-      </div>
-      <div class="pdpa-body">
-        มหาวิทยาลัยมหิดลเก็บรวบรวมข้อมูลส่วนบุคคลของท่านเพื่อ<strong>วัตถุประสงค์ด้านความปลอดภัยและการให้บริการดูกล้องวงจรปิดย้อนหลัง</strong>เท่านั้น
-        ข้อมูลของท่านจะถูกเก็บไว้ในระบบฐานข้อมูลของมหาวิทยาลัยและจะไม่ถูกเปิดเผยต่อบุคคลภายนอก เว้นแต่จะมีคำสั่งทางกฎหมาย
-        ท่านมีสิทธิ์ขอเข้าถึง แก้ไข หรือลบข้อมูลของตนเองได้ตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562
-        และนโยบายความเป็นส่วนตัวของมหาวิทยาลัยมหิดล
-        <br><br>
-        ข้อมูลภาพจากกล้องวงจรปิดถือเป็น<strong>ข้อมูลส่วนบุคคลที่มีความอ่อนไหว</strong> การเข้าถึงจะได้รับอนุญาตเฉพาะเมื่อมีเหตุผลอันชอบธรรมตามกฎหมายเท่านั้น
-      </div>
-      <div class="pdpa-consent">
-        <input type="checkbox" id="pdpaConsent" required>
-        <label for="pdpaConsent">
-          ข้าพเจ้ายินยอมให้มหาวิทยาลัยมหิดลเก็บรวบรวมและประมวลผลข้อมูลส่วนบุคคลของข้าพเจ้า
-          เพื่อวัตถุประสงค์ในการขอดูกล้องวงจรปิดย้อนหลัง และรับทราบสิทธิ์ของข้าพเจ้าตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 <span class="required">*</span>
-        </label>
-      </div>
-      <p class="error-msg" id="pdpaError">กรุณายินยอมให้เก็บข้อมูลส่วนบุคคลก่อนดำเนินการ</p>
-    </div>
-
-    <!-- SECTION 1: ข้อมูลผู้ขอ -->
-    <div class="card">
-      <div class="card-header">
-        <div class="step-num">1</div>
-        <h2>ข้อมูลผู้ขอดูกล้องวงจรปิด</h2>
-      </div>
-      <div class="card-body">
-        <div class="info-box">
-          📋 กรุณากรอกข้อมูลตามบัตรประชาชนหรือบัตรประจำตัวที่ออกโดยมหาวิทยาลัยมหิดล
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="fname">ชื่อ <span class="required">*</span></label>
-            <input type="text" id="fname" name="fname" placeholder="ชื่อจริง" required>
-            <p class="error-msg" id="fnameError">กรุณากรอกชื่อ</p>
-          </div>
-          <div class="form-group">
-            <label for="lname">นามสกุล <span class="required">*</span></label>
-            <input type="text" id="lname" name="lname" placeholder="นามสกุล" required>
-            <p class="error-msg" id="lnameError">กรุณากรอกนามสกุล</p>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="requesterType">ประเภทผู้ขอ <span class="required">*</span></label>
-            <select id="requesterType" name="requesterType" required onchange="handleRequesterType()">
-              <option value="">-- เลือกประเภท --</option>
-              <option value="นักศึกษา">นักศึกษา</option>
-              <option value="บุคลากร">บุคลากร / อาจารย์</option>
-              <option value="เจ้าหน้าที่ภายนอก">เจ้าหน้าที่ภายนอก (ตำรวจ / หน่วยงานราชการ)</option>
-              <option value="บุคคลทั่วไป">บุคคลทั่วไป / ผู้ปกครอง</option>
-              <option value="หน่วยงานเอกชน">หน่วยงานเอกชน</option>
-            </select>
-            <p class="error-msg" id="requesterTypeError">กรุณาเลือกประเภทผู้ขอ</p>
-          </div>
-          <div class="form-group">
-            <label for="idCard">เลขบัตรประชาชน / รหัสนักศึกษา / รหัสพนักงาน <span class="required">*</span></label>
-            <input type="text" id="idCard" name="idCard" placeholder="กรอกเลขบัตรหรือรหัส" required>
-            <span class="form-hint">ข้อมูลนี้ใช้เพื่อยืนยันตัวตนตามข้อกำหนด PDPA เท่านั้น</span>
-            <p class="error-msg" id="idCardError">กรุณากรอกเลขบัตรหรือรหัส</p>
-          </div>
-        </div>
-
-        <!-- Conditional: สำหรับนักศึกษา/บุคลากร -->
-        <div class="conditional-section" id="muSection">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="faculty">คณะ / หน่วยงาน</label>
-              <input type="text" id="faculty" name="faculty" placeholder="เช่น คณะแพทยศาสตร์ศิริราชพยาบาล">
-            </div>
-            <div class="form-group">
-              <label for="muEmail">อีเมล มหาวิทยาลัย</label>
-              <input type="email" id="muEmail" name="muEmail" placeholder="@student.mahidol.ac.th หรือ @mahidol.ac.th">
-            </div>
-          </div>
-        </div>
-
-        <!-- Conditional: สำหรับเจ้าหน้าที่ภายนอก -->
-        <div class="conditional-section" id="officialSection">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="officialOrg">หน่วยงาน <span class="required">*</span></label>
-              <input type="text" id="officialOrg" name="officialOrg" placeholder="เช่น สถานีตำรวจภูธรสามพราน">
-            </div>
-            <div class="form-group">
-              <label for="officialDoc">เลขที่หนังสือราชการ</label>
-              <input type="text" id="officialDoc" name="officialDoc" placeholder="(ถ้ามี)">
-            </div>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="phone">เบอร์โทรศัพท์ติดต่อ <span class="required">*</span></label>
-            <input type="tel" id="phone" name="phone" placeholder="0xx-xxx-xxxx" required>
-            <p class="error-msg" id="phoneError">กรุณากรอกเบอร์โทรศัพท์</p>
-          </div>
-          <div class="form-group">
-            <label for="email">อีเมลติดต่อ</label>
-            <input type="email" id="email" name="email" placeholder="email@example.com">
-            <span class="form-hint">สำหรับรับแจ้งผลการดำเนินการ</span>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- SECTION 2: วัตถุประสงค์ -->
-    <div class="card">
-      <div class="card-header">
-        <div class="step-num">2</div>
-        <h2>วัตถุประสงค์การขอดูกล้อง</h2>
-      </div>
-      <div class="card-body">
-        <div class="form-group" style="margin-bottom:16px;">
-          <label>วัตถุประสงค์หลัก <span class="required">*</span></label>
-          <div class="radio-group" id="purposeGroup">
-            <div class="radio-item" onclick="selectRadio('purpose','ติดตามทรัพย์สินสูญหาย',this)">
-              <input type="radio" name="purpose" value="ติดตามทรัพย์สินสูญหาย"> 🔍 ติดตามทรัพย์สินสูญหาย
-            </div>
-            <div class="radio-item" onclick="selectRadio('purpose','ติดตามยานพาหนะ',this)">
-              <input type="radio" name="purpose" value="ติดตามยานพาหนะ"> 🚗 ติดตามยานพาหนะ
-            </div>
-            <div class="radio-item" onclick="selectRadio('purpose','อุบัติเหตุ/เหตุฉุกเฉิน',this)">
-              <input type="radio" name="purpose" value="อุบัติเหตุ/เหตุฉุกเฉิน"> 🚨 อุบัติเหตุ / เหตุฉุกเฉิน
-            </div>
-            <div class="radio-item" onclick="selectRadio('purpose','การสอบสวนคดี',this)">
-              <input type="radio" name="purpose" value="การสอบสวนคดี"> ⚖️ การสอบสวนคดี
-            </div>
-            <div class="radio-item" onclick="selectRadio('purpose','ร้องเรียน/พิพาท',this)">
-              <input type="radio" name="purpose" value="ร้องเรียน/พิพาท"> 📢 ร้องเรียน / พิพาท
-            </div>
-            <div class="radio-item" onclick="selectRadio('purpose','อื่นๆ',this)">
-              <input type="radio" name="purpose" value="อื่นๆ"> 📝 อื่นๆ
-            </div>
-          </div>
-          <p class="error-msg" id="purposeError">กรุณาเลือกวัตถุประสงค์</p>
-        </div>
-
-        <div class="form-group" style="margin-bottom:16px;">
-          <label for="purposeDetail">รายละเอียดเหตุการณ์ที่เกิดขึ้น <span class="required">*</span></label>
-          <textarea id="purposeDetail" name="purposeDetail" required
-            placeholder="กรุณาอธิบายเหตุการณ์ที่เกิดขึ้นโดยละเอียด เช่น สูญหาย/เกิดอุบัติเหตุ ที่ไหน เมื่อไหร่ อะไรบ้าง..."></textarea>
-          <p class="error-msg" id="purposeDetailError">กรุณากรอกรายละเอียดเหตุการณ์</p>
-        </div>
-
+      <!-- คำนำหน้า + ชื่อ + นามสกุล -->
+      <div class="form-row triple" style="margin-bottom:16px;">
         <div class="form-group">
-          <label for="evidenceType">ลักษณะหลักฐานที่ต้องการ</label>
-          <div class="check-group" id="evidenceGroup">
-            <div class="check-item" onclick="toggleCheck(this)">
-              <input type="checkbox" name="evidence" value="ภาพบุคคล"> 👤 ภาพบุคคล
-            </div>
-            <div class="check-item" onclick="toggleCheck(this)">
-              <input type="checkbox" name="evidence" value="ภาพยานพาหนะ"> 🚗 ภาพยานพาหนะ
-            </div>
-            <div class="check-item" onclick="toggleCheck(this)">
-              <input type="checkbox" name="evidence" value="ทิศทางการเคลื่อนที่"> 🗺️ ทิศทางการเคลื่อนที่
-            </div>
-            <div class="check-item" onclick="toggleCheck(this)">
-              <input type="checkbox" name="evidence" value="เวลาเข้า-ออกสถานที่"> ⏰ เวลาเข้า-ออกสถานที่
-            </div>
-          </div>
+          <label for="prefix">คำนำหน้า <span class="required">*</span></label>
+          <select id="prefix" name="prefix" required>
+            <option value="">-- เลือก --</option>
+            <option value="นาย">นาย</option>
+            <option value="นาง">นาง</option>
+            <option value="นางสาว">นางสาว</option>
+            <option value="เด็กชาย">เด็กชาย</option>
+            <option value="เด็กหญิง">เด็กหญิง</option>
+            <option value="ดร.">ดร.</option>
+            <option value="รศ.">รศ.</option>
+            <option value="ผศ.">ผศ.</option>
+            <option value="ศ.">ศ.</option>
+            <option value="พ.ต.อ.">พ.ต.อ.</option>
+            <option value="ร.ต.อ.">ร.ต.อ.</option>
+            <option value="อื่นๆ">อื่นๆ</option>
+          </select>
+          <p class="error-msg" id="prefixError">กรุณาเลือกคำนำหน้า</p>
         </div>
-      </div>
-    </div>
-
-    <!-- SECTION 3: วันเวลาและสถานที่ -->
-    <div class="card">
-      <div class="card-header">
-        <div class="step-num">3</div>
-        <h2>ช่วงเวลาและสถานที่ที่ต้องการดูย้อนหลัง</h2>
-      </div>
-      <div class="card-body">
-        <div class="info-box">
-          📅 กล้องวงจรปิดบันทึกย้อนหลังได้ตามระยะเวลาที่กำหนดในแต่ละจุด กรุณาระบุช่วงเวลาให้ชัดเจน
-        </div>
-
-        <div class="form-group" style="margin-bottom:16px;">
-          <label>วันและเวลาที่เกิดเหตุ (โดยประมาณ) <span class="required">*</span></label>
-          <div class="datetime-range">
-            <div>
-              <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">เริ่มต้น</div>
-              <input type="date" id="dateStart" name="dateStart" required>
-              <input type="time" id="timeStart" name="timeStart" style="margin-top:6px;">
-            </div>
-            <div class="datetime-arrow">→</div>
-            <div>
-              <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">สิ้นสุด</div>
-              <input type="date" id="dateEnd" name="dateEnd">
-              <input type="time" id="timeEnd" name="timeEnd" style="margin-top:6px;">
-            </div>
-          </div>
-          <p class="error-msg" id="dateError">กรุณาระบุวันที่เกิดเหตุ</p>
-        </div>
-
-        <hr class="section-divider">
-
-        <div class="form-group" style="margin-bottom:12px;">
-          <label for="locationInput">จุดที่ต้องการดูกล้อง <span class="required">*</span></label>
-          <div style="display:flex; gap:8px;">
-            <input type="text" id="locationInput" placeholder="พิมพ์จุด/บริเวณที่ต้องการ เช่น ลานจอดรถ A, หน้าตึก MU" style="flex:1;">
-            <button type="button" onclick="addLocation()" style="background:var(--mu-navy);color:white;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;white-space:nowrap;">+ เพิ่ม</button>
-          </div>
-          <div class="location-tags" id="locationTags"></div>
-          <input type="hidden" id="locations" name="locations">
-          <p class="error-msg" id="locationError">กรุณาระบุจุดที่ต้องการดูกล้องอย่างน้อย 1 จุด</p>
-        </div>
-
         <div class="form-group">
-          <label for="vehicleInfo">ข้อมูลยานพาหนะที่เกี่ยวข้อง (ถ้ามี)</label>
-          <div class="form-row" style="margin-bottom:0;">
-            <input type="text" id="vehiclePlate" name="vehiclePlate" placeholder="ทะเบียนรถ">
-            <input type="text" id="vehicleDesc" name="vehicleDesc" placeholder="รุ่น/สี เช่น Toyota Yaris สีขาว">
+          <label for="fname">ชื่อ <span class="required">*</span></label>
+          <input type="text" id="fname" name="fname" placeholder="ชื่อจริง" required>
+          <p class="error-msg" id="fnameError">กรุณากรอกชื่อ</p>
+        </div>
+        <div class="form-group">
+          <label for="lname">นามสกุล <span class="required">*</span></label>
+          <input type="text" id="lname" name="lname" placeholder="นามสกุล" required>
+          <p class="error-msg" id="lnameError">กรุณากรอกนามสกุล</p>
+        </div>
+      </div>
+
+      <!-- เพศ + ประเภทผู้ขอ -->
+      <div class="form-row" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label for="gender">เพศ <span class="required">*</span></label>
+          <select id="gender" name="gender" required>
+            <option value="">-- เลือก --</option>
+            <option value="ชาย">ชาย</option>
+            <option value="หญิง">หญิง</option>
+            <option value="ไม่ระบุ">ไม่ระบุ</option>
+          </select>
+          <p class="error-msg" id="genderError">กรุณาเลือกเพศ</p>
+        </div>
+        <div class="form-group">
+          <label for="requesterType">ประเภทผู้ขอ <span class="required">*</span></label>
+          <select id="requesterType" name="requesterType" required onchange="handleRequesterType()">
+            <option value="">-- เลือกประเภท --</option>
+            <option value="นักศึกษา">นักศึกษา</option>
+            <option value="บุคลากร">บุคลากร / อาจารย์</option>
+            <option value="เจ้าหน้าที่ภายนอก">เจ้าหน้าที่ภายนอก (ตำรวจ / หน่วยงานราชการ)</option>
+            <option value="บุคคลทั่วไป">บุคคลทั่วไป / ผู้ปกครอง</option>
+            <option value="หน่วยงานเอกชน">หน่วยงานเอกชน</option>
+          </select>
+          <p class="error-msg" id="requesterTypeError">กรุณาเลือกประเภทผู้ขอ</p>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label for="idCard">เลขบัตรประชาชน / รหัสนักศึกษา / รหัสพนักงาน <span class="required">*</span></label>
+          <input type="text" id="idCard" name="idCard" placeholder="กรอกเลขบัตรหรือรหัส" required>
+          <span class="form-hint">ใช้เพื่อยืนยันตัวตนตามข้อกำหนด PDPA เท่านั้น</span>
+          <p class="error-msg" id="idCardError">กรุณากรอกเลขบัตรหรือรหัส</p>
+        </div>
+        <div class="form-group">
+          <label for="phone">เบอร์โทรศัพท์ติดต่อ <span class="required">*</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="0xx-xxx-xxxx" required>
+          <p class="error-msg" id="phoneError">กรุณากรอกเบอร์โทรศัพท์</p>
+        </div>
+      </div>
+
+      <!-- MU section -->
+      <div class="conditional-section" id="muSection">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="faculty">คณะ / หน่วยงาน</label>
+            <input type="text" id="faculty" name="faculty" placeholder="เช่น คณะแพทยศาสตร์ศิริราชพยาบาล">
+          </div>
+          <div class="form-group">
+            <label for="muEmail">อีเมลมหาวิทยาลัย</label>
+            <input type="email" id="muEmail" name="muEmail" placeholder="@student.mahidol.ac.th หรือ @mahidol.ac.th">
           </div>
         </div>
+      </div>
 
+      <!-- Official section -->
+      <div class="conditional-section" id="officialSection">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="officialOrg">หน่วยงาน</label>
+            <input type="text" id="officialOrg" name="officialOrg" placeholder="เช่น สถานีตำรวจภูธรสามพราน">
+          </div>
+          <div class="form-group">
+            <label for="officialDoc">เลขที่หนังสือราชการ</label>
+            <input type="text" id="officialDoc" name="officialDoc" placeholder="(ถ้ามี)">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row single">
+        <div class="form-group">
+          <label for="email">อีเมลติดต่อ</label>
+          <input type="email" id="email" name="email" placeholder="email@example.com">
+          <span class="form-hint">สำหรับรับแจ้งผลการดำเนินการ</span>
+        </div>
       </div>
     </div>
+  </div>
 
-    <!-- SECTION 4: การขอรับไฟล์ -->
-    <div class="card">
-      <div class="card-header">
-        <div class="step-num">4</div>
-        <h2>การขอรับข้อมูล / ไฟล์ภาพ</h2>
+  <!-- SECTION 2: วัตถุประสงค์ -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">2</div><h2>วัตถุประสงค์การขอดูกล้อง</h2></div>
+    <div class="card-body">
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>วัตถุประสงค์หลัก <span class="required">*</span></label>
+        <div class="radio-group" id="purposeGroup">
+          <div class="radio-item" onclick="selectRadio('purpose','ติดตามทรัพย์สินสูญหาย',this)"><input type="radio" name="purpose" value="ติดตามทรัพย์สินสูญหาย"> 🔍 ติดตามทรัพย์สินสูญหาย</div>
+          <div class="radio-item" onclick="selectRadio('purpose','ติดตามยานพาหนะ',this)"><input type="radio" name="purpose" value="ติดตามยานพาหนะ"> 🚗 ติดตามยานพาหนะ</div>
+          <div class="radio-item" onclick="selectRadio('purpose','อุบัติเหตุ/เหตุฉุกเฉิน',this)"><input type="radio" name="purpose" value="อุบัติเหตุ/เหตุฉุกเฉิน"> 🚨 อุบัติเหตุ / เหตุฉุกเฉิน</div>
+          <div class="radio-item" onclick="selectRadio('purpose','การสอบสวนคดี',this)"><input type="radio" name="purpose" value="การสอบสวนคดี"> ⚖️ การสอบสวนคดี</div>
+          <div class="radio-item" onclick="selectRadio('purpose','ร้องเรียน/พิพาท',this)"><input type="radio" name="purpose" value="ร้องเรียน/พิพาท"> 📢 ร้องเรียน / พิพาท</div>
+          <div class="radio-item" onclick="selectRadio('purpose','อื่นๆ',this)"><input type="radio" name="purpose" value="อื่นๆ"> 📝 อื่นๆ</div>
+        </div>
+        <p class="error-msg" id="purposeError">กรุณาเลือกวัตถุประสงค์</p>
       </div>
-      <div class="card-body">
-        <div class="form-group" style="margin-bottom:16px;">
-          <label>ต้องการขอรับไฟล์ภาพ/วิดีโอกลับไปหรือไม่? <span class="required">*</span></label>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label for="purposeDetail">รายละเอียดเหตุการณ์ที่เกิดขึ้น <span class="required">*</span></label>
+        <textarea id="purposeDetail" name="purposeDetail" required placeholder="กรุณาอธิบายเหตุการณ์โดยละเอียด เช่น สูญหาย/เกิดอุบัติเหตุ ที่ไหน เมื่อไหร่ อะไรบ้าง..."></textarea>
+        <p class="error-msg" id="purposeDetailError">กรุณากรอกรายละเอียดเหตุการณ์</p>
+      </div>
+      <div class="form-group">
+        <label>ลักษณะหลักฐานที่ต้องการ</label>
+        <div class="check-group">
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="ภาพบุคคล"> 👤 ภาพบุคคล</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="ภาพยานพาหนะ"> 🚗 ภาพยานพาหนะ</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="ทิศทางการเคลื่อนที่"> 🗺️ ทิศทางการเคลื่อนที่</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="เวลาเข้า-ออกสถานที่"> ⏰ เวลาเข้า-ออกสถานที่</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: วันเวลา/สถานที่ -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">3</div><h2>ช่วงเวลาและสถานที่ที่ต้องการดูย้อนหลัง</h2></div>
+    <div class="card-body">
+      <div class="info-box">📅 กล้องวงจรปิดบันทึกย้อนหลังได้ตามระยะเวลาที่กำหนดในแต่ละจุด กรุณาระบุช่วงเวลาให้ชัดเจน</div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>วันและเวลาที่เกิดเหตุ (โดยประมาณ) <span class="required">*</span></label>
+        <div class="datetime-range">
+          <div><div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">เริ่มต้น</div><input type="date" id="dateStart" name="dateStart" required><input type="time" id="timeStart" name="timeStart" style="margin-top:6px;"></div>
+          <div class="datetime-arrow">→</div>
+          <div><div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">สิ้นสุด</div><input type="date" id="dateEnd" name="dateEnd"><input type="time" id="timeEnd" name="timeEnd" style="margin-top:6px;"></div>
+        </div>
+        <p class="error-msg" id="dateError">กรุณาระบุวันที่เกิดเหตุ</p>
+      </div>
+      <hr class="section-divider">
+      <div class="form-group" style="margin-bottom:12px;">
+        <label for="locationInput">จุดที่ต้องการดูกล้อง <span class="required">*</span></label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="locationInput" placeholder="พิมพ์จุด/บริเวณที่ต้องการ" style="flex:1;">
+          <button type="button" onclick="addLocation()" style="background:var(--mu-navy);color:white;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;white-space:nowrap;">+ เพิ่ม</button>
+        </div>
+        <!-- Preset locations จาก Admin -->
+        <div id="presetWrap" style="margin-top:6px;"></div>
+        <div class="location-tags" id="locationTags"></div>
+        <input type="hidden" id="locations" name="locations">
+        <p class="error-msg" id="locationError">กรุณาระบุจุดที่ต้องการดูกล้องอย่างน้อย 1 จุด</p>
+      </div>
+      <div class="form-group">
+        <label>ข้อมูลยานพาหนะที่เกี่ยวข้อง (ถ้ามี)</label>
+        <div class="form-row" style="margin-bottom:0;">
+          <input type="text" id="vehiclePlate" name="vehiclePlate" placeholder="ทะเบียนรถ">
+          <input type="text" id="vehicleDesc" name="vehicleDesc" placeholder="รุ่น/สี เช่น Toyota Yaris สีขาว">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: การขอรับไฟล์ -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">4</div><h2>การขอรับข้อมูล / ไฟล์ภาพ</h2></div>
+    <div class="card-body">
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>ต้องการขอรับไฟล์ภาพ/วิดีโอกลับไปหรือไม่? <span class="required">*</span></label>
+        <div class="radio-group">
+          <div class="radio-item" onclick="selectRadio('requestFile','ต้องการไฟล์',this);showFileSection(true)"><input type="radio" name="requestFile" value="ต้องการไฟล์"> 📁 ต้องการขอไฟล์กลับไป</div>
+          <div class="radio-item" onclick="selectRadio('requestFile','ดูอย่างเดียว',this);showFileSection(false)"><input type="radio" name="requestFile" value="ดูอย่างเดียว"> 👁️ ดูอย่างเดียว (ไม่ขอไฟล์)</div>
+        </div>
+        <p class="error-msg" id="requestFileError">กรุณาเลือก</p>
+      </div>
+      <div class="conditional-section" id="fileSection">
+        <div class="warn-box">⚠️ การขอรับไฟล์ภาพจากกล้องวงจรปิดเป็นการประมวลผลข้อมูลส่วนบุคคล ต้องมีเหตุผลทางกฎหมายที่ชอบด้วย PDPA</div>
+        <div class="form-group" style="margin-top:12px;">
+          <label for="fileReason">เหตุผลที่ต้องการไฟล์</label>
+          <textarea id="fileReason" name="fileReason" placeholder="ระบุเหตุผล เช่น เป็นหลักฐานแจ้งความ เพื่อประกันภัย..."></textarea>
+        </div>
+        <div class="form-group" style="margin-top:12px;">
+          <label>รูปแบบการรับข้อมูล</label>
           <div class="radio-group">
-            <div class="radio-item" onclick="selectRadio('requestFile','ต้องการไฟล์',this); showFileSection(true)">
-              <input type="radio" name="requestFile" value="ต้องการไฟล์"> 📁 ต้องการขอไฟล์กลับไป
-            </div>
-            <div class="radio-item" onclick="selectRadio('requestFile','ดูอย่างเดียว',this); showFileSection(false)">
-              <input type="radio" name="requestFile" value="ดูอย่างเดียว"> 👁️ ดูอย่างเดียว (ไม่ขอไฟล์)
-            </div>
-          </div>
-          <p class="error-msg" id="requestFileError">กรุณาเลือก</p>
-        </div>
-
-        <div class="conditional-section" id="fileSection">
-          <div class="warn-box">
-            ⚠️ การขอรับไฟล์ภาพจากกล้องวงจรปิดเป็นการประมวลผลข้อมูลส่วนบุคคล ต้องมีเหตุผลทางกฎหมายที่ชอบด้วย PDPA
-            เจ้าหน้าที่อาจพิจารณาเป็นรายกรณีและอาจต้องใช้เอกสารเพิ่มเติม
-          </div>
-          <div class="form-group" style="margin-top:12px;">
-            <label for="fileReason">เหตุผลที่ต้องการไฟล์ <span class="required">*</span></label>
-            <textarea id="fileReason" name="fileReason" placeholder="ระบุเหตุผลที่ต้องการนำไฟล์ภาพไป เช่น เป็นหลักฐานแจ้งความ เพื่อประกันภัย..."></textarea>
-          </div>
-          <div class="form-group" style="margin-top:12px;">
-            <label>รูปแบบการรับข้อมูล</label>
-            <div class="radio-group">
-              <div class="radio-item" onclick="selectRadio('deliveryMethod','รับด้วยตัวเอง',this)">
-                <input type="radio" name="deliveryMethod" value="รับด้วยตัวเอง"> 🏢 รับด้วยตัวเอง
-              </div>
-              <div class="radio-item" onclick="selectRadio('deliveryMethod','USB Drive',this)">
-                <input type="radio" name="deliveryMethod" value="USB Drive"> 💾 บันทึกลง USB Drive (นำมาเอง)
-              </div>
-            </div>
+            <div class="radio-item" onclick="selectRadio('deliveryMethod','รับด้วยตัวเอง',this)"><input type="radio" name="deliveryMethod" value="รับด้วยตัวเอง"> 🏢 รับด้วยตัวเอง</div>
+            <div class="radio-item" onclick="selectRadio('deliveryMethod','USB Drive',this)"><input type="radio" name="deliveryMethod" value="USB Drive"> 💾 บันทึกลง USB Drive (นำมาเอง)</div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- SECTION 5: เอกสารแนบ -->
-    <div class="card">
-      <div class="card-header">
-        <div class="step-num">5</div>
-        <h2>เอกสารประกอบคำขอ</h2>
-      </div>
-      <div class="card-body">
-        <div class="info-box">
-          📎 เอกสารที่ควรนำมาแสดง: สำเนาบัตรประชาชน, บัตรนักศึกษา/พนักงาน, และเอกสารอื่นที่เกี่ยวข้อง
-          เจ้าหน้าที่จะตรวจสอบเอกสารก่อนดำเนินการ
-        </div>
-        <div class="form-group" style="margin-bottom:16px;">
-          <label>เอกสารที่นำมาด้วย</label>
-          <div class="check-group">
-            <div class="check-item" onclick="toggleCheck(this)">
-              <input type="checkbox" name="docs" value="บัตรประชาชน"> 🪪 บัตรประชาชน
-            </div>
-            <div class="check-item" onclick="toggleCheck(this)">
-              <input type="checkbox" name="docs" value="บัตรนักศึกษา/พนักงาน"> 🎓 บัตรนักศึกษา/พนักงาน
-            </div>
-            <div class="check-item" onclick="toggleCheck(this)">
-              <input type="checkbox" name="docs" value="หนังสือมอบอำนาจ"> 📜 หนังสือมอบอำนาจ
-            </div>
-            <div class="check-item" onclick="toggleCheck(this)">
-              <input type="checkbox" name="docs" value="หนังสือราชการ"> 🏛️ หนังสือราชการ
-            </div>
-            <div class="check-item" onclick="toggleCheck(this)">
-              <input type="checkbox" name="docs" value="คำสั่งศาล"> ⚖️ คำสั่งศาล
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="additionalNote">หมายเหตุเพิ่มเติม</label>
-          <textarea id="additionalNote" name="additionalNote" style="min-height:70px;"
-            placeholder="ข้อมูลเพิ่มเติมที่ต้องการแจ้งเจ้าหน้าที่..."></textarea>
-        </div>
-
-        <!-- ความเร่งด่วน -->
-        <div class="form-group" style="margin-top:16px;">
-          <label>ระดับความเร่งด่วน <span class="required">*</span></label>
-          <div class="radio-group">
-            <div class="radio-item" onclick="selectRadio('urgency','ปกติ',this)">
-              <input type="radio" name="urgency" value="ปกติ"> 🟢 ปกติ (ภายใน 24-48 ชม.)
-            </div>
-            <div class="radio-item" onclick="selectRadio('urgency','เร่งด่วน',this)">
-              <input type="radio" name="urgency" value="เร่งด่วน"> 🟡 เร่งด่วน (มีเหตุจำเป็น)
-            </div>
-            <div class="radio-item" onclick="selectRadio('urgency','ฉุกเฉิน',this)">
-              <input type="radio" name="urgency" value="ฉุกเฉิน"> 🔴 ฉุกเฉิน (เกี่ยวกับชีวิต/อาชญากรรม)
-            </div>
-          </div>
-          <p class="error-msg" id="urgencyError">กรุณาเลือกระดับความเร่งด่วน</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUBMIT -->
-    <div class="submit-area">
-      <button type="submit" class="btn-submit" id="submitBtn">
-        <span>📤</span> ส่งคำขอดูกล้องวงจรปิด
-      </button>
-      <p class="submit-note">
-        เมื่อส่งแล้ว เจ้าหน้าที่จะได้รับแจ้งทันที และจะดำเนินการแจ้งผลภายใน 24–48 ชั่วโมง<br>
-        หากมีข้อสงสัยติดต่อ งานจราจรและความปลอดภัย โทร 02-849-6XXX
-      </p>
-    </div>
-
-  </form>
-
-  <!-- SUCCESS SCREEN -->
-  <div class="success-screen" id="successScreen">
-    <div class="success-icon">✅</div>
-    <h2>ส่งคำขอสำเร็จ!</h2>
-    <p>คำขอของท่านได้รับการบันทึกแล้ว เจ้าหน้าที่จะตรวจสอบและแจ้งผลการดำเนินการภายใน 24–48 ชั่วโมง</p>
-    <p style="margin-top:8px;">หมายเลขอ้างอิงคำขอ:</p>
-    <div class="ref-code" id="refCode">CCTV-XXXXXXXX</div>
-    <p>ระบบได้ส่งอีเมลแจ้งเตือนไปยังเจ้าหน้าที่ที่รับผิดชอบแล้ว</p>
-    <br>
-    <button class="btn-new" onclick="resetForm()">+ ส่งคำขอใหม่</button>
   </div>
 
-  <div class="admin-link-wrap">
-    <a href="admin.html" class="admin-link">🔐 เข้าสู่หน้าผู้ดูแลระบบ (Admin)</a>
+  <!-- SECTION 5: เอกสารประกอบ -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">5</div><h2>เอกสารประกอบคำขอ</h2></div>
+    <div class="card-body">
+      <div class="info-box">📎 เอกสารที่ควรนำมาแสดง: สำเนาบัตรประชาชน, บัตรนักศึกษา/พนักงาน และเอกสารอื่นที่เกี่ยวข้อง</div>
+
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>เอกสารที่นำมาด้วย</label>
+        <div class="check-group">
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="docs" value="บัตรประชาชน"> 🪪 บัตรประชาชน</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="docs" value="บัตรนักศึกษา/พนักงาน"> 🎓 บัตรนักศึกษา/พนักงาน</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="docs" value="ใบแจ้งความ"> 📋 ใบแจ้งความ</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="docs" value="หนังสือมอบอำนาจ"> 📜 หนังสือมอบอำนาจ</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="docs" value="หนังสือราชการ"> 🏛️ หนังสือราชการ</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="docs" value="คำสั่งศาล"> ⚖️ คำสั่งศาล</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="docs" value="อื่นๆ"> 📝 อื่นๆ</div>
+        </div>
+      </div>
+
+      <!-- อัปโหลดไฟล์ -->
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>อัปโหลดรูปภาพ / ไฟล์เอกสารประกอบ</label>
+        <span class="form-hint" style="margin-bottom:4px;">รองรับ JPG, PNG, PDF, DOC ขนาดไม่เกิน 10MB ต่อไฟล์ (สูงสุด 5 ไฟล์)</span>
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="this.classList.remove('dragover')">
+          <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" onchange="handleFileSelect(event)">
+          <div class="upload-icon">📎</div>
+          <p>คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</p>
+          <span>JPG, PNG, PDF, DOC — ไม่เกิน 10MB ต่อไฟล์</span>
+        </div>
+        <div class="file-list" id="fileList"></div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:20px;">
+        <label for="additionalNote">หมายเหตุเพิ่มเติม</label>
+        <textarea id="additionalNote" name="additionalNote" style="min-height:70px;" placeholder="ข้อมูลเพิ่มเติมที่ต้องการแจ้งเจ้าหน้าที่..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>ระดับความเร่งด่วน <span class="required">*</span></label>
+        <div class="radio-group">
+          <div class="radio-item" onclick="selectRadio('urgency','ปกติ',this)"><input type="radio" name="urgency" value="ปกติ"> 🟢 ปกติ (ภายใน 24-48 ชม.)</div>
+          <div class="radio-item" onclick="selectRadio('urgency','เร่งด่วน',this)"><input type="radio" name="urgency" value="เร่งด่วน"> 🟡 เร่งด่วน (มีเหตุจำเป็น)</div>
+          <div class="radio-item" onclick="selectRadio('urgency','ฉุกเฉิน',this)"><input type="radio" name="urgency" value="ฉุกเฉิน"> 🔴 ฉุกเฉิน (เกี่ยวกับชีวิต/อาชญากรรม)</div>
+        </div>
+        <p class="error-msg" id="urgencyError">กรุณาเลือกระดับความเร่งด่วน</p>
+      </div>
+    </div>
   </div>
 
+  <!-- SUBMIT -->
+  <div class="submit-area">
+    <button type="submit" class="btn-submit" id="submitBtn"><span>📤</span> ส่งคำขอดูกล้องวงจรปิด</button>
+    <div class="submit-note">
+      เมื่อส่งแล้ว เจ้าหน้าที่จะได้รับแจ้งทันที และจะดำเนินการแจ้งผลภายใน 24–48 ชั่วโมง
+      <br><br>
+      หากมีข้อสงสัยหรือต้องการสอบถามข้อมูลเพิ่มเติม
+      <br>
+      โปรดติดต่อ <strong>งานจราจรและความปลอดภัย</strong> โทร <strong>02-4414400 กด 0</strong> &nbsp;|&nbsp; อีเมล <strong>Traffic.oppe@gmail.com</strong>
+    </div>
+  </div>
+
+</form>
+
+<!-- SUCCESS -->
+<div class="success-screen" id="successScreen">
+  <div class="success-icon">✅</div>
+  <h2>ส่งคำขอสำเร็จ!</h2>
+  <p style="color:var(--text-muted);font-size:14px;max-width:400px;margin:0 auto 16px;line-height:1.7;">คำขอของท่านได้รับการบันทึกแล้ว เจ้าหน้าที่จะตรวจสอบและแจ้งผลภายใน 24–48 ชั่วโมง</p>
+  <p style="font-size:13px;color:var(--text-muted);">หมายเลขอ้างอิงคำขอ:</p>
+  <div class="ref-code" id="refCode">CCTV-XXXXXXXX</div>
+  <p style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">ระบบได้ส่งอีเมลแจ้งเตือนไปยังเจ้าหน้าที่ที่รับผิดชอบแล้ว</p>
+  <button class="btn-new" onclick="resetForm()">+ ส่งคำขอใหม่</button>
+</div>
 </main>
 
 <script>
-// ===== CONFIG =====
-// ⚙️ แก้ไข URL นี้หลัง Deploy Google Apps Script
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz5Elu9eGyEkO8AH9sdDdS_jKnCbX0Q_vFDg8YMXPgCIOq8Ze9JiDvfsMpGWDJCCMAYIg/exec';
+const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
 
-// ===== LOCATION TAGS =====
+// Load preset locations from localStorage (set by Admin)
+function loadPresets() {
+  const presets = JSON.parse(localStorage.getItem('cctv_preset_locations') || '[]');
+  const wrap = document.getElementById('presetWrap');
+  if (!presets.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">จุดที่ใช้บ่อย:</div><div class="preset-locations">' +
+    presets.map(p => `<button type="button" class="preset-btn" onclick="addPreset('${p}')">${p}</button>`).join('') + '</div>';
+}
+function addPreset(name) {
+  document.getElementById('locationInput').value = name;
+  addLocation();
+}
+
+// Location tags
 let locationList = [];
-
 function addLocation() {
   const input = document.getElementById('locationInput');
   const val = input.value.trim();
-  if (!val) return;
-  if (locationList.includes(val)) { input.value = ''; return; }
+  if (!val || locationList.includes(val)) { input.value=''; return; }
   locationList.push(val);
   renderLocationTags();
   input.value = '';
   document.getElementById('locations').value = locationList.join(', ');
 }
-
-document.getElementById('locationInput').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') { e.preventDefault(); addLocation(); }
-});
-
-function removeLocation(idx) {
-  locationList.splice(idx, 1);
-  renderLocationTags();
-  document.getElementById('locations').value = locationList.join(', ');
-}
-
+document.getElementById('locationInput').addEventListener('keydown', e => { if(e.key==='Enter'){e.preventDefault();addLocation();} });
+function removeLocation(idx) { locationList.splice(idx,1); renderLocationTags(); document.getElementById('locations').value = locationList.join(', '); }
 function renderLocationTags() {
-  const container = document.getElementById('locationTags');
-  container.innerHTML = locationList.map((loc, i) =>
-    `<div class="location-tag">📍 ${loc} <span class="remove" onclick="removeLocation(${i})">✕</span></div>`
-  ).join('');
+  document.getElementById('locationTags').innerHTML = locationList.map((loc,i) =>
+    `<div class="location-tag">📍 ${loc} <span class="remove" onclick="removeLocation(${i})">✕</span></div>`).join('');
 }
 
-// ===== RADIO SELECT =====
-function selectRadio(name, value, el) {
-  document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
-    r.parentElement.classList.remove('selected');
+// File upload
+let uploadedFiles = [];
+function handleFileSelect(e) { addFiles(Array.from(e.target.files)); }
+function handleDragOver(e) { e.preventDefault(); document.getElementById('uploadArea').classList.add('dragover'); }
+function handleDrop(e) { e.preventDefault(); document.getElementById('uploadArea').classList.remove('dragover'); addFiles(Array.from(e.dataTransfer.files)); }
+function addFiles(files) {
+  files.forEach(f => {
+    if (uploadedFiles.length >= 5) { alert('อัปโหลดได้สูงสุด 5 ไฟล์ค่ะ'); return; }
+    if (f.size > 10*1024*1024) { alert(`ไฟล์ "${f.name}" มีขนาดเกิน 10MB`); return; }
+    if (!uploadedFiles.find(x => x.name===f.name)) uploadedFiles.push(f);
   });
-  el.classList.add('selected');
-  el.querySelector('input').checked = true;
+  renderFileList();
+}
+function removeFile(idx) { uploadedFiles.splice(idx,1); renderFileList(); }
+function renderFileList() {
+  const ext = f => f.name.split('.').pop().toLowerCase();
+  const icon = f => ({jpg:'🖼️',jpeg:'🖼️',png:'🖼️',pdf:'📄',doc:'📝',docx:'📝'}[ext(f)]||'📎');
+  document.getElementById('fileList').innerHTML = uploadedFiles.map((f,i) =>
+    `<div class="file-item">${icon(f)} <span class="file-name">${f.name}</span> <span style="font-size:11px;color:var(--text-muted)">${(f.size/1024).toFixed(0)} KB</span> <span class="file-remove" onclick="removeFile(${i})">✕</span></div>`).join('');
 }
 
-// ===== CHECKBOX TOGGLE =====
-function toggleCheck(el) {
-  el.classList.toggle('selected');
-  el.querySelector('input').checked = el.classList.contains('selected');
+// Radio / checkbox
+function selectRadio(name, value, el) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.parentElement.classList.remove('selected'));
+  el.classList.add('selected'); el.querySelector('input').checked = true;
 }
+function toggleCheck(el) { el.classList.toggle('selected'); el.querySelector('input').checked = el.classList.contains('selected'); }
 
-// ===== CONDITIONAL SECTIONS =====
+// Conditional
 function handleRequesterType() {
   const val = document.getElementById('requesterType').value;
   document.getElementById('muSection').classList.toggle('show', ['นักศึกษา','บุคลากร'].includes(val));
-  document.getElementById('officialSection').classList.toggle('show', val === 'เจ้าหน้าที่ภายนอก');
+  document.getElementById('officialSection').classList.toggle('show', val==='เจ้าหน้าที่ภายนอก');
 }
+function showFileSection(show) { document.getElementById('fileSection').classList.toggle('show', show); }
 
-function showFileSection(show) {
-  document.getElementById('fileSection').classList.toggle('show', show);
-}
-
-// ===== PROGRESS BAR =====
+// Progress
 function updateProgress() {
   const required = ['fname','lname','requesterType','idCard','phone','dateStart','locations'];
-  const filled = required.filter(id => {
-    const el = document.getElementById(id);
-    return el && el.value.trim();
-  }).length;
-  const purposeFilled = document.querySelector('input[name="purpose"]:checked') ? 1 : 0;
-  const urgencyFilled = document.querySelector('input[name="urgency"]:checked') ? 1 : 0;
-  const pdpa = document.getElementById('pdpaConsent').checked ? 1 : 0;
-  const total = required.length + 3;
-  const done = filled + purposeFilled + urgencyFilled + pdpa;
-  document.getElementById('progressBar').style.width = Math.round((done / total) * 100) + '%';
+  const filled = required.filter(id => { const el=document.getElementById(id); return el&&el.value.trim(); }).length;
+  const extras = (document.querySelector('input[name="purpose"]:checked')?1:0) + (document.querySelector('input[name="urgency"]:checked')?1:0) + (document.getElementById('pdpaConsent').checked?1:0);
+  document.getElementById('progressBar').style.width = Math.round(((filled+extras)/10)*100)+'%';
 }
-
 document.addEventListener('change', updateProgress);
 document.addEventListener('input', updateProgress);
 
-// ===== VALIDATION =====
+// Validate
 function validate() {
   let valid = true;
-
   const checks = [
-    ['pdpaConsent', 'pdpaError', () => !document.getElementById('pdpaConsent').checked],
-    ['fname', 'fnameError'],
-    ['lname', 'lnameError'],
-    ['requesterType', 'requesterTypeError'],
-    ['idCard', 'idCardError'],
-    ['phone', 'phoneError'],
-    ['dateStart', 'dateError'],
+    {id:'pdpaConsent', errId:'pdpaError', fn:()=>!document.getElementById('pdpaConsent').checked},
+    {id:'prefix', errId:'prefixError'},
+    {id:'fname', errId:'fnameError'},
+    {id:'lname', errId:'lnameError'},
+    {id:'gender', errId:'genderError'},
+    {id:'requesterType', errId:'requesterTypeError'},
+    {id:'idCard', errId:'idCardError'},
+    {id:'phone', errId:'phoneError'},
+    {id:'dateStart', errId:'dateError'},
+    {id:'purposeDetail', errId:'purposeDetailError'},
   ];
-
-  checks.forEach(([id, errId, customCheck]) => {
-    const el = document.getElementById(id);
-    const errEl = document.getElementById(errId);
-    const invalid = customCheck ? customCheck() : !el.value.trim();
-    if (invalid) {
-      if (el) el.classList.add('error');
-      if (errEl) errEl.classList.add('show');
-      valid = false;
-    } else {
-      if (el) el.classList.remove('error');
-      if (errEl) errEl.classList.remove('show');
-    }
+  checks.forEach(({id,errId,fn}) => {
+    const el=document.getElementById(id), errEl=document.getElementById(errId);
+    const invalid = fn ? fn() : !el.value.trim();
+    if(invalid){ if(el)el.classList.add('error'); if(errEl)errEl.classList.add('show'); valid=false; }
+    else { if(el)el.classList.remove('error'); if(errEl)errEl.classList.remove('show'); }
   });
-
-  // location
-  if (locationList.length === 0) {
-    document.getElementById('locationError').classList.add('show');
-    valid = false;
-  } else {
-    document.getElementById('locationError').classList.remove('show');
-  }
-
-  // purpose
-  if (!document.querySelector('input[name="purpose"]:checked')) {
-    document.getElementById('purposeError').classList.add('show');
-    valid = false;
-  } else {
-    document.getElementById('purposeError').classList.remove('show');
-  }
-
-  // requestFile
-  if (!document.querySelector('input[name="requestFile"]:checked')) {
-    document.getElementById('requestFileError').classList.add('show');
-    valid = false;
-  } else {
-    document.getElementById('requestFileError').classList.remove('show');
-  }
-
-  // urgency
-  if (!document.querySelector('input[name="urgency"]:checked')) {
-    document.getElementById('urgencyError').classList.add('show');
-    valid = false;
-  } else {
-    document.getElementById('urgencyError').classList.remove('show');
-  }
-
-  // purposeDetail
-  if (!document.getElementById('purposeDetail').value.trim()) {
-    document.getElementById('purposeDetail').classList.add('error');
-    document.getElementById('purposeDetailError').classList.add('show');
-    valid = false;
-  } else {
-    document.getElementById('purposeDetail').classList.remove('error');
-    document.getElementById('purposeDetailError').classList.remove('show');
-  }
-
+  if(!locationList.length){ document.getElementById('locationError').classList.add('show'); valid=false; }
+  else document.getElementById('locationError').classList.remove('show');
+  if(!document.querySelector('input[name="purpose"]:checked')){ document.getElementById('purposeError').classList.add('show'); valid=false; }
+  else document.getElementById('purposeError').classList.remove('show');
+  if(!document.querySelector('input[name="requestFile"]:checked')){ document.getElementById('requestFileError').classList.add('show'); valid=false; }
+  else document.getElementById('requestFileError').classList.remove('show');
+  if(!document.querySelector('input[name="urgency"]:checked')){ document.getElementById('urgencyError').classList.add('show'); valid=false; }
+  else document.getElementById('urgencyError').classList.remove('show');
   return valid;
 }
 
-// ===== GENERATE REF CODE =====
 function generateRefCode() {
-  const now = new Date();
-  const date = now.toISOString().slice(0,10).replace(/-/g,'');
-  const rand = Math.random().toString(36).substr(2,4).toUpperCase();
-  return `CCTV-${date}-${rand}`;
+  const date = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  return `CCTV-${date}-${Math.random().toString(36).substr(2,4).toUpperCase()}`;
 }
 
-// ===== COLLECT FORM DATA =====
 function collectData(refCode) {
-  const get = id => (document.getElementById(id) || {}).value || '';
+  const get = id => (document.getElementById(id)||{}).value||'';
   const getChecked = name => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(e=>e.value).join(', ');
-  const getRadio = name => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ''; };
-
+  const getRadio = name => { const el=document.querySelector(`input[name="${name}"]:checked`); return el?el.value:''; };
   return {
-    refCode,
-    timestamp: new Date().toISOString(),
-    pdpaConsent: 'ยินยอม',
-    fname: get('fname'),
-    lname: get('lname'),
-    requesterType: get('requesterType'),
-    idCard: get('idCard'),
-    faculty: get('faculty'),
-    muEmail: get('muEmail'),
-    officialOrg: get('officialOrg'),
-    officialDoc: get('officialDoc'),
-    phone: get('phone'),
-    email: get('email'),
-    purpose: getRadio('purpose'),
-    purposeDetail: get('purposeDetail'),
-    evidenceTypes: getChecked('evidence'),
-    dateStart: get('dateStart'),
-    timeStart: get('timeStart'),
-    dateEnd: get('dateEnd'),
-    timeEnd: get('timeEnd'),
-    locations: get('locations'),
-    vehiclePlate: get('vehiclePlate'),
-    vehicleDesc: get('vehicleDesc'),
-    requestFile: getRadio('requestFile'),
-    fileReason: get('fileReason'),
-    deliveryMethod: getRadio('deliveryMethod'),
-    docs: getChecked('docs'),
-    additionalNote: get('additionalNote'),
-    urgency: getRadio('urgency'),
-    // เจ้าหน้าที่กรอกภายหลัง (ส่งเป็น blank)
-    officerName: '',
-    cctvResult: '',
-    footageFound: '',
-    fileGiven: '',
-    actionTaken: '',
-    closedDate: '',
-    satisfactionScore: '',
-    officerNote: ''
+    refCode, timestamp: new Date().toISOString(), pdpaConsent:'ยินยอม',
+    prefix: get('prefix'), fname: get('fname'), lname: get('lname'),
+    gender: get('gender'), requesterType: get('requesterType'), idCard: get('idCard'),
+    faculty: get('faculty'), muEmail: get('muEmail'), officialOrg: get('officialOrg'), officialDoc: get('officialDoc'),
+    phone: get('phone'), email: get('email'),
+    purpose: getRadio('purpose'), purposeDetail: get('purposeDetail'), evidenceTypes: getChecked('evidence'),
+    dateStart: get('dateStart'), timeStart: get('timeStart'), dateEnd: get('dateEnd'), timeEnd: get('timeEnd'),
+    locations: get('locations'), vehiclePlate: get('vehiclePlate'), vehicleDesc: get('vehicleDesc'),
+    requestFile: getRadio('requestFile'), fileReason: get('fileReason'), deliveryMethod: getRadio('deliveryMethod'),
+    docs: getChecked('docs'), additionalNote: get('additionalNote'), urgency: getRadio('urgency'),
+    attachedFiles: uploadedFiles.map(f=>f.name).join(', '),
+    officerName:'', cctvResult:'', footageFound:'', fileGiven:'', actionTaken:'', closedDate:'', satisfactionScore:'', officerNote:'', status:''
   };
 }
 
-// ===== SUBMIT =====
 document.getElementById('cctvForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-  if (!validate()) {
-    document.querySelector('.error-msg.show')?.closest('.card')?.scrollIntoView({behavior:'smooth', block:'center'});
-    return;
-  }
-
+  if(!validate()){ document.querySelector('.error-msg.show')?.closest('.card')?.scrollIntoView({behavior:'smooth',block:'center'}); return; }
   const refCode = generateRefCode();
   const data = collectData(refCode);
-
-  document.getElementById('loadingOverlay').style.display = 'flex';
-  document.getElementById('submitBtn').disabled = true;
-
-  if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
-    // Demo mode — simulate success
-    await new Promise(r => setTimeout(r, 1500));
-    showSuccess(refCode);
-    return;
-  }
-
+  document.getElementById('loadingOverlay').style.display='flex';
+  document.getElementById('submitBtn').disabled=true;
+  if(APPS_SCRIPT_URL==='YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'){ await new Promise(r=>setTimeout(r,1500)); showSuccess(refCode); return; }
   try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
+    await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
     showSuccess(refCode);
-  } catch (err) {
-    document.getElementById('loadingOverlay').style.display = 'none';
-    document.getElementById('submitBtn').disabled = false;
-    alert('เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้งหรือติดต่อเจ้าหน้าที่');
+  } catch(err) {
+    document.getElementById('loadingOverlay').style.display='none';
+    document.getElementById('submitBtn').disabled=false;
+    alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
   }
 });
 
 function showSuccess(refCode) {
-  document.getElementById('loadingOverlay').style.display = 'none';
-  document.getElementById('cctvForm').style.display = 'none';
-  document.getElementById('configBanner').style.display = 'none';
-  document.getElementById('refCode').textContent = refCode;
-  document.getElementById('successScreen').style.display = 'block';
-  document.getElementById('progressBar').style.width = '100%';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('loadingOverlay').style.display='none';
+  document.getElementById('cctvForm').style.display='none';
+  document.getElementById('refCode').textContent=refCode;
+  document.getElementById('successScreen').style.display='block';
+  document.getElementById('progressBar').style.width='100%';
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function resetForm() {
   document.getElementById('cctvForm').reset();
-  document.getElementById('cctvForm').style.display = 'block';
-  document.getElementById('successScreen').style.display = 'none';
-  locationList = [];
-  renderLocationTags();
-  document.querySelectorAll('.radio-item, .check-item').forEach(el => el.classList.remove('selected'));
-  document.querySelectorAll('.conditional-section').forEach(el => el.classList.remove('show'));
-  document.getElementById('submitBtn').disabled = false;
-  document.getElementById('progressBar').style.width = '0%';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('cctvForm').style.display='block';
+  document.getElementById('successScreen').style.display='none';
+  locationList=[]; uploadedFiles=[]; renderLocationTags(); renderFileList();
+  document.querySelectorAll('.radio-item,.check-item').forEach(el=>el.classList.remove('selected'));
+  document.querySelectorAll('.conditional-section').forEach(el=>el.classList.remove('show'));
+  document.getElementById('submitBtn').disabled=false;
+  document.getElementById('progressBar').style.width='0%';
+  window.scrollTo({top:0,behavior:'smooth'});
 }
+
+loadPresets();
 </script>
 </body>
 </html>
