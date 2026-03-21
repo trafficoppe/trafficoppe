@@ -482,6 +482,63 @@
     </div>
   </div>
 
+  <!-- SECTION 6: เจ้าหน้าที่ผู้ให้บริการ -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">6</div><h2>เจ้าหน้าที่ผู้ให้บริการดูกล้อง CCTV</h2></div>
+    <div class="card-body">
+      <div class="info-box">👮 กรุณาระบุเจ้าหน้าที่ที่ให้บริการดูกล้อง CCTV ณ วันที่มาติดต่อ</div>
+
+      <div class="form-row" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label>เจ้าหน้าที่ผู้ให้บริการ <span class="required">*</span></label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+            <div class="radio-item" id="officerKnownBtn" onclick="selectOfficerMode('known')" style="flex:1;min-width:160px;">
+              <input type="radio" name="officerMode" value="known"> 👮 เลือกจากฐานข้อมูล
+            </div>
+            <div class="radio-item" id="officerOtherBtn" onclick="selectOfficerMode('other')" style="flex:1;min-width:160px;">
+              <input type="radio" name="officerMode" value="other"> 📝 อื่นๆ (ไม่มีในฐานข้อมูล)
+            </div>
+          </div>
+          <p class="error-msg" id="officerModeError">กรุณาเลือกประเภทเจ้าหน้าที่</p>
+        </div>
+      </div>
+
+      <!-- ค้นหาจากฐานข้อมูล -->
+      <div class="conditional-section" id="officerKnownSection">
+        <div class="form-group">
+          <label for="officerNameInput">ค้นหาชื่อเจ้าหน้าที่ <span class="required">*</span></label>
+          <div class="autocomplete-wrap">
+            <input type="text" id="officerNameInput" name="officerNameInput"
+              placeholder="พิมพ์ชื่อ-นามสกุล เจ้าหน้าที่..." autocomplete="off"
+              oninput="officerSearch(this)" onkeydown="acKeydown(event,'officerDrop')"
+              onfocus="officerSearch(this)" onblur="setTimeout(()=>acHide('officerDrop'),180)">
+            <div class="autocomplete-dropdown" id="officerDrop"></div>
+          </div>
+          <input type="hidden" id="officerName" name="officerName">
+          <input type="hidden" id="officerEmail" name="officerEmail">
+          <span class="form-hint" id="officerSelectedHint" style="color:var(--success);display:none;margin-top:4px;">✓ เลือกแล้ว: <strong id="officerSelectedName"></strong></span>
+          <p class="error-msg" id="officerNameError">กรุณาเลือกชื่อเจ้าหน้าที่จากรายการ</p>
+        </div>
+      </div>
+
+      <!-- อื่นๆ -->
+      <div class="conditional-section" id="officerOtherSection">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="officerOtherName">ชื่อ-นามสกุล เจ้าหน้าที่ <span class="required">*</span></label>
+            <input type="text" id="officerOtherName" name="officerOtherName" placeholder="ชื่อ-นามสกุล เจ้าหน้าที่">
+            <p class="error-msg" id="officerOtherNameError">กรุณากรอกชื่อ-นามสกุล</p>
+          </div>
+          <div class="form-group">
+            <label for="officerOtherEmail">อีเมล เจ้าหน้าที่ <span class="required">*</span></label>
+            <input type="email" id="officerOtherEmail" name="officerOtherEmail" placeholder="officer@example.com">
+            <p class="error-msg" id="officerOtherEmailError">กรุณากรอกอีเมล</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- SUBMIT -->
   <div class="submit-area">
     <button type="submit" class="btn-submit" id="submitBtn"><span>📤</span> ส่งคำขอดูกล้องวงจรปิด</button>
@@ -509,7 +566,7 @@
 </main>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVU0ebO7oc4uLaHpCKJbd5jtcYUHX7TdilXLtsl3C4msywTNqZOMhPQACmL80tbPoNqw/exec';
+const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
 
 // Load preset locations from localStorage (set by Admin)
 function loadPresets() {
@@ -618,6 +675,25 @@ function validate() {
   else document.getElementById('requestFileError').classList.remove('show');
   if(!document.querySelector('input[name="urgency"]:checked')){ document.getElementById('urgencyError').classList.add('show'); valid=false; }
   else document.getElementById('urgencyError').classList.remove('show');
+  // officer validation
+  const mode = currentOfficerMode;
+  const modeEl = document.getElementById('officerModeError');
+  if (!mode) { modeEl.classList.add('show'); valid=false; }
+  else { modeEl.classList.remove('show'); }
+  if (mode==='known') {
+    const ov = document.getElementById('officerName').value;
+    const oe = document.getElementById('officerNameError');
+    if (!ov) { document.getElementById('officerNameInput').classList.add('error'); oe.classList.add('show'); valid=false; }
+    else { document.getElementById('officerNameInput').classList.remove('error'); oe.classList.remove('show'); }
+  }
+  if (mode==='other') {
+    const on2 = document.getElementById('officerOtherName').value.trim();
+    const oe2 = document.getElementById('officerOtherEmail').value.trim();
+    if (!on2) { document.getElementById('officerOtherName').classList.add('error'); document.getElementById('officerOtherNameError').classList.add('show'); valid=false; }
+    else { document.getElementById('officerOtherName').classList.remove('error'); document.getElementById('officerOtherNameError').classList.remove('show'); }
+    if (!oe2) { document.getElementById('officerOtherEmail').classList.add('error'); document.getElementById('officerOtherEmailError').classList.add('show'); valid=false; }
+    else { document.getElementById('officerOtherEmail').classList.remove('error'); document.getElementById('officerOtherEmailError').classList.remove('show'); }
+  }
   return valid;
 }
 
@@ -644,6 +720,13 @@ function collectData(refCode) {
     docs: getChecked('docs') + (get('docsOther') ? ', อื่นๆ: '+get('docsOther') : ''),
     additionalNote: get('additionalNote'), urgency: getRadio('urgency'),
     attachedFiles: uploadedFiles.map(f=>f.name).join(', '),
+    serviceOfficerName: currentOfficerMode==='known'
+      ? (document.getElementById('officerName').value||'')
+      : (document.getElementById('officerOtherName').value||''),
+    serviceOfficerEmail: currentOfficerMode==='known'
+      ? (document.getElementById('officerEmail').value||'')
+      : (document.getElementById('officerOtherEmail').value||''),
+    officerMode: currentOfficerMode,
     officerName:'', cctvResult:'', footageFound:'', fileGiven:'', actionTaken:'', closedDate:'', satisfactionScore:'', officerNote:'', status:''
   };
 }
@@ -702,6 +785,85 @@ function toggleOtherDoc(el) {
 const _origSelectRadio = selectRadio;
 
 loadPresets();
+
+
+// ===== ฐานข้อมูลเจ้าหน้าที่งานจราจรฯ =====
+const OFFICER_DB = [
+  {name:'นายไกรสอน คชมิตร',     email:'kaison.noum@gmail.com'},
+  {name:'นายชนสรณ์ เนียมสุภาพ', email:'chanasorn.nem@mahidol.ac.th'},
+  {name:'นายชัยเทพ เจียมวีระบรรยง', email:'chaiyathep.jia@mahidol.ac.th'},
+  {name:'นายตะวัน ทรัพย์อบรมย์', email:'tawan.sap@mahidol.ac.th'},
+  {name:'นายทรงกลด สุดตา',      email:'songklod.sud@mahidol.ac.th'},
+  {name:'นายนพกร เมืองแก้ว',    email:'noppakorn.mua@mahidol.ac.th'},
+  {name:'นายนฤเดช เวชบุญ',      email:'wetbun1063@gmail.com'},
+  {name:'นายบัญชา ฟักเฟื่อง',   email:'bancha.fak@mahidol.ac.th'},
+  {name:'นายบุญฤทธิ์ สายลือนาม',email:'klaoklao195@gmail.com'},
+  {name:'นายปิยนันท์ ศรีชุมพวง',email:'piyanan.sri@mahidol.ac.th'},
+  {name:'นางสาวปิยะพร มาลัย',   email:'traffic.oppe@gmail.com'},
+  {name:'นายพชร สาธร',          email:'pup2441@gmail.com'},
+  {name:'นายพรชัย โพธิ์ไซย์',   email:'phrchayphothichi@gmail.com'},
+  {name:'นางสาวพิชญา ดลมินทร์', email:'pichaya.don@mahidol.ac.th'},
+  {name:'นายยุทธภูมิ ญานเพิ่ม', email:'yuthapoom.yan@mahidol.ac.th'},
+  {name:'นายรวี จำเนียร',        email:'rawee.jum@mahidol.ac.th'},
+  {name:'นายวิฑูรย์ สุวรรณกิจ', email:'withun.suw@mahidol.ac.th'},
+  {name:'นายศักดิ์นรินทร์ คัญทัพ',email:'saknarin.kha@mahidol.ac.th'},
+  {name:'นายศุภชัย เรืองเพชร',  email:'suphachai.rue@mahidol.ac.th'},
+  {name:'นายสถาพร แจ่มใจ',      email:'sathaphon1051@gmail.com'},
+  {name:'นายสุรชัย สุวรรณราฐ',  email:'suwannarat1472@gmail.com'},
+  {name:'นางสาวโสภาณา จันทร์ทวีนุช',email:'sopanachanthawinut52@gmail.com'},
+  {name:'นายอนิน นาควัชระ',     email:'anin.nak@mahidol.ac.th'},
+  {name:'นายอำนาจ แม้นพรม',     email:'amnartmaen90@gmail.com'}
+];
+
+let currentOfficerMode = '';
+
+function selectOfficerMode(mode) {
+  currentOfficerMode = mode;
+  document.getElementById('officerKnownSection').classList.toggle('show', mode==='known');
+  document.getElementById('officerOtherSection').classList.toggle('show', mode==='other');
+  document.getElementById('officerKnownBtn').classList.toggle('selected', mode==='known');
+  document.getElementById('officerOtherBtn').classList.toggle('selected', mode==='other');
+  document.querySelector(`input[name="officerMode"][value="${mode}"]`).checked = true;
+  if (mode==='known') {
+    document.getElementById('officerOtherName').value='';
+    document.getElementById('officerOtherEmail').value='';
+  } else {
+    document.getElementById('officerName').value='';
+    document.getElementById('officerEmail').value='';
+    document.getElementById('officerNameInput').value='';
+    document.getElementById('officerSelectedHint').style.display='none';
+  }
+}
+
+function officerSearch(input) {
+  const q = input.value.trim().toLowerCase();
+  const drop = document.getElementById('officerDrop');
+  acActiveIdx = -1;
+  const results = q.length===0
+    ? OFFICER_DB.slice(0,8)
+    : OFFICER_DB.filter(o => o.name.toLowerCase().includes(q)).slice(0,10);
+  if (!results.length) { drop.classList.remove('show'); return; }
+  drop.innerHTML = results.map(o =>
+    `<div class="autocomplete-item" data-val="${o.name}" data-email="${o.email}"
+      onmousedown="selectOfficer('${o.name.replace(/'/g,"\'")}','${o.email}')">
+      <span class="item-icon">👮</span>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <span style="font-weight:600;">${highlightMatch(o.name, input.value.trim())}</span>
+        <span style="font-size:11px;color:var(--text-muted);">${o.email}</span>
+      </div>
+    </div>`
+  ).join('');
+  drop.classList.add('show');
+}
+
+function selectOfficer(name, email) {
+  document.getElementById('officerNameInput').value = name;
+  document.getElementById('officerName').value = name;
+  document.getElementById('officerEmail').value = email;
+  document.getElementById('officerDrop').classList.remove('show');
+  document.getElementById('officerSelectedHint').style.display='block';
+  document.getElementById('officerSelectedName').textContent = name + ' (' + email + ')';
+}
 
 // ===== AUTOCOMPLETE: รายชื่อคณะ/หน่วยงาน มหาวิทยาลัยมหิดล =====
 const MU_ORGS = [
