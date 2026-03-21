@@ -247,7 +247,11 @@
         <div class="config-row"><label>Web App URL</label><input type="text" id="cfgScriptUrl" placeholder="https://script.google.com/macros/s/XXXXXXX/exec"></div>
         <div class="config-row"><label>Google Sheet ID</label><input type="text" id="cfgSheetId" placeholder="Sheet ID"></div>
         <div class="config-row"><label>เปลี่ยน Admin Password</label><input type="password" id="cfgPassword" placeholder="••••••••"></div>
-        <button class="btn-save-config" onclick="saveConfig()">💾 บันทึกการตั้งค่า</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn-save-config" onclick="saveConfig()">💾 บันทึกการตั้งค่า</button>
+          <button class="btn-save-config" style="background:var(--surface3);color:var(--gold);border:1px solid var(--gold);" onclick="testEmail()">📧 ทดสอบส่งอีเมล</button>
+        </div>
+        <div id="testEmailResult" style="margin-top:10px;font-size:13px;display:none;padding:10px 14px;border-radius:8px;"></div>
       </div>
 
       <!-- EMAIL MANAGEMENT -->
@@ -348,14 +352,35 @@ function generateDemoData() {
 }
 
 // ===== AUTH =====
+const USERS = {
+  admin:  { passwords: () => [config.password], role: 'admin' },
+  cctv:   { passwords: () => [config.password], role: 'admin' },
+  Admin01:{ passwords: () => ['024414400'], role: 'viewer' }
+};
+let currentRole = 'viewer';
+
 function doLogin() {
-  const u=document.getElementById('loginUser').value;
-  const p=document.getElementById('loginPass').value;
-  if((u==='admin'||u==='cctv')&&p===config.password){
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const user = USERS[u];
+  if (user && user.passwords().includes(p)) {
+    currentRole = user.role;
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('dashboardScreen').style.display='block';
+    applyRoleUI();
     loadData(); loadConfig(); renderEmailList(); renderPresetList();
   } else { document.getElementById('loginError').style.display='block'; }
+}
+
+function applyRoleUI() {
+  // Viewer: ซ่อนแท็บ analytics และ config
+  if (currentRole === 'viewer') {
+    document.querySelectorAll('.tab').forEach((t,i) => {
+      if (i >= 2) t.style.display = 'none'; // ซ่อน analytics, config
+    });
+    // ซ่อนปุ่ม officer update ใน modal
+    document.querySelectorAll('.officer-form').forEach(f => f.style.display='none');
+  }
 }
 function doLogout(){
   document.getElementById('loginScreen').style.display='flex';
@@ -587,6 +612,39 @@ function loadConfig(){
   document.getElementById('cfgScriptUrl').value=config.scriptUrl;
   document.getElementById('cfgSheetId').value=config.sheetId;
 }
+async function testEmail() {
+  const url = config.scriptUrl;
+  const resultEl = document.getElementById('testEmailResult');
+  if (!url || url === '') {
+    resultEl.style.display = 'block';
+    resultEl.style.background = 'rgba(231,76,60,0.1)';
+    resultEl.style.color = 'var(--red)';
+    resultEl.innerHTML = '❌ กรุณากรอก Web App URL ก่อนทดสอบ';
+    return;
+  }
+  resultEl.style.display = 'block';
+  resultEl.style.background = 'rgba(241,196,15,0.1)';
+  resultEl.style.color = 'var(--yellow)';
+  resultEl.innerHTML = '⏳ กำลังส่งอีเมลทดสอบ...';
+  try {
+    const res = await fetch(url + '?action=testEmail');
+    const json = await res.json();
+    if (json.success) {
+      resultEl.style.background = 'rgba(46,204,113,0.1)';
+      resultEl.style.color = 'var(--green)';
+      resultEl.innerHTML = '✅ ส่งอีเมลทดสอบสำเร็จ! กรุณาตรวจสอบกล่องอีเมล';
+    } else {
+      resultEl.style.background = 'rgba(231,76,60,0.1)';
+      resultEl.style.color = 'var(--red)';
+      resultEl.innerHTML = '❌ เกิดข้อผิดพลาด: ' + (json.error || 'Unknown error');
+    }
+  } catch(e) {
+    resultEl.style.background = 'rgba(231,76,60,0.1)';
+    resultEl.style.color = 'var(--red)';
+    resultEl.innerHTML = '❌ ไม่สามารถเชื่อมต่อได้ กรุณาตรวจสอบ URL และ Deploy ใหม่';
+  }
+}
+
 function saveConfig(){
   config.scriptUrl=document.getElementById('cfgScriptUrl').value;
   config.sheetId=document.getElementById('cfgSheetId').value;
