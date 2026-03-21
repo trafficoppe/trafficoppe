@@ -233,6 +233,7 @@
     <div><h1>CCTV Admin Dashboard</h1><p>งานจราจรและความปลอดภัย | มหาวิทยาลัยมหิดล วิทยาเขตศาลายา</p></div>
     <div class="topbar-spacer"></div>
     <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);"><div class="status-dot"></div> เชื่อมต่อแล้ว</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--gold);" id="userRoleBadge">Admin</div>
     <div style="font-size:12px;color:var(--text-muted);" id="lastUpdate"></div>
     <button class="btn-logout" onclick="doLogout()">ออกจากระบบ</button>
   </div>
@@ -442,35 +443,49 @@ function generateDemoData() {
 }
 
 // ===== AUTH =====
-const USERS = {
-  admin:  { passwords: () => [config.password], role: 'admin' },
-  cctv:   { passwords: () => [config.password], role: 'admin' },
-  Admin01:{ passwords: () => ['024414400'], role: 'closer' }
-};
 let currentRole = 'viewer';
+
+function getAdminPassword() {
+  return localStorage.getItem('admin_password') || 'cctv2026musafety';
+}
 
 function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value;
-  const user = USERS[u];
-  if (user && user.passwords().includes(p)) {
+  document.getElementById('loginError').style.display='none';
+
+  // กำหนด users และ password แบบ dynamic
+  const USERS = {
+    'admin':   { password: getAdminPassword(), role: 'admin' },
+    'cctv':    { password: getAdminPassword(), role: 'admin' },
+    'admin01': { password: '024414400',        role: 'closer' }
+  };
+
+  const user = USERS[u.toLowerCase()]; // case-insensitive
+  if (user && p === user.password) {
     currentRole = user.role;
+    // อัปเดต config ด้วย password ล่าสุด
+    config.password = getAdminPassword();
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('dashboardScreen').style.display='block';
     applyRoleUI();
     loadData(); loadConfig(); renderEmailList(); renderPresetList();
-  } else { document.getElementById('loginError').style.display='block'; }
+  } else {
+    document.getElementById('loginError').style.display='block';
+  }
 }
 
 function applyRoleUI() {
-  // Viewer: ซ่อนแท็บ analytics และ config
-  if (currentRole === 'viewer') {
+  if (currentRole === 'viewer' || currentRole === 'closer') {
+    // ซ่อนแท็บ analytics และ config
     document.querySelectorAll('.tab').forEach((t,i) => {
-      if (i >= 2) t.style.display = 'none'; // ซ่อน analytics, config
+      if (i >= 2) t.style.display = 'none';
     });
-    // ซ่อนปุ่ม officer update ใน modal
-    document.querySelectorAll('.officer-form').forEach(f => f.style.display='none');
   }
+  // แสดง badge ชื่อ user
+  const roleLabel = {'admin':'Admin','closer':'Admin01 (ปิดเคส)'};
+  const badge = document.getElementById('userRoleBadge');
+  if (badge) badge.textContent = roleLabel[currentRole] || currentRole;
 }
 function doLogout(){
   document.getElementById('loginScreen').style.display='flex';
