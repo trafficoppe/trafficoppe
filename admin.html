@@ -445,7 +445,7 @@ function generateDemoData() {
 const USERS = {
   admin:  { passwords: () => [config.password], role: 'admin' },
   cctv:   { passwords: () => [config.password], role: 'admin' },
-  Admin01:{ passwords: () => ['024414400'], role: 'viewer' }
+  Admin01:{ passwords: () => ['024414400'], role: 'closer' }
 };
 let currentRole = 'viewer';
 
@@ -780,7 +780,7 @@ function renderTable(data, compact) {
       <td><span class="badge ${statusBadge[r.status||'รอดำเนินการ']}">${r.status||'รอดำเนินการ'}</span></td>
       <td style="white-space:nowrap;">
         <button onclick="openModal(${idx})" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);padding:4px 8px;border-radius:5px;cursor:pointer;font-size:11px;margin-right:3px;">รายละเอียด</button>
-        ${!compact&&currentRole==='admin'?`<button onclick="exportSinglePDF(${idx})" style="background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.4);color:var(--red);padding:4px 8px;border-radius:5px;cursor:pointer;font-size:11px;">PDF</button>`:''}
+        ${!compact&&(currentRole==='admin'||currentRole==='closer')?`<button onclick="exportSinglePDF(${idx})" style="background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.4);color:var(--red);padding:4px 8px;border-radius:5px;cursor:pointer;font-size:11px;">PDF</button>`:''}
       </td>
     </tr>`;
   }).join('')+`</tbody></table>`;
@@ -810,10 +810,13 @@ function openModal(idx){
       <div class="detail-item detail-full"><label>หมายเหตุ</label><div class="val">${r.additionalNote||'—'}</div></div>
     </div>
     <hr class="modal-divider">
-    ${currentRole==='admin'?`
+    ${(currentRole==='admin'||currentRole==='closer')?`
     <div class="officer-form">
-      <h4>🔧 บันทึกผลการดำเนินการ</h4>
-      <div class="officer-row"><label>เจ้าหน้าที่ผู้ให้บริการ</label><div style="padding:8px 12px;background:var(--surface);border-radius:6px;font-size:13px;color:var(--gold);">${r.serviceOfficerName||'ไม่ระบุ'}</div></div>
+      <h4>🔧 ${currentRole==='closer'?'ปิดเคส':'บันทึกผลการดำเนินการ'}</h4>
+      <div class="officer-row"><label>เจ้าหน้าที่ผู้ให้บริการ</label>
+        <div style="padding:8px 12px;background:var(--surface);border-radius:6px;font-size:13px;color:var(--gold);">${r.serviceOfficerName||'ไม่ระบุ'}</div>
+      </div>
+      ${currentRole==='admin'?`
       <div class="officer-row"><label>สถานะ</label>
         <select id="of-status">
           ${['รอดำเนินการ','กำลังดำเนินการ','เสร็จสิ้น','ปฏิเสธ','ปิดเคส'].map(s=>`<option ${r.status===s?'selected':''}>${s}</option>`).join('')}
@@ -824,12 +827,19 @@ function openModal(idx){
         </select></div>
       <div class="officer-row"><label>มอบไฟล์ให้</label>
         <select id="of-file"><option value="">—</option><option ${r.fileGiven==='ใช่'?'selected':''}>ใช่</option><option ${r.fileGiven==='ไม่'?'selected':''}>ไม่</option></select></div>
-      <div class="officer-row"><label>เจ้าหน้าที่ผู้รับเรื่อง</label><input type="text" id="of-officer" value="${r.officerName||''}" placeholder="ชื่อเจ้าหน้าที่"></div>
-      <div class="officer-row"><label>วันที่ปิดเคส</label><input type="date" id="of-closed" value="${r.closedDate||''}"></div>
-      <div class="officer-row"><label>บันทึกของเจ้าหน้าที่</label><textarea id="of-note" rows="3">${r.officerNote||''}</textarea></div>
+      <div class="officer-row"><label>เจ้าหน้าที่ผู้รับเรื่อง</label>
+        <input type="text" id="of-officer" value="${r.officerName||''}" placeholder="ชื่อเจ้าหน้าที่"></div>
+      `:'<input type="hidden" id="of-status" value="${r.status||'รอดำเนินการ'}"><input type="hidden" id="of-found" value="${r.footageFound||''}"><input type="hidden" id="of-file" value="${r.fileGiven||''}"><input type="hidden" id="of-officer" value="${r.officerName||''}">'}
+      <div class="officer-row">
+        <label>วันที่ปิดเคส ${currentRole==='closer'?'<span style="color:var(--red);">*</span>':''}</label>
+        <input type="date" id="of-closed" value="${r.closedDate||new Date().toISOString().slice(0,10)}">
+      </div>
+      <div class="officer-row"><label>บันทึก${currentRole==='closer'?'เหตุผลการปิดเคส':'ของเจ้าหน้าที่'}</label>
+        <textarea id="of-note" rows="3" placeholder="${currentRole==='closer'?'ระบุเหตุผลการปิดเคส...':''}">${r.officerNote||''}</textarea>
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
-        <button class="btn-update" onclick="updateRecord(${idx})">💾 บันทึกผล</button>
-        ${r.status!=='ปิดเคส'?`<button class="btn-close-case" onclick="closeCase(${idx})">🔒 ปิดเคสนี้</button>`:''}
+        ${currentRole==='admin'?`<button class="btn-update" onclick="updateRecord(${idx})">💾 บันทึกผล</button>`:''}
+        ${r.status!=='ปิดเคส'?`<button class="btn-close-case" onclick="closeCase(${idx})">🔒 ปิดเคสนี้</button>`:`<div style="padding:10px 16px;background:rgba(46,204,113,0.1);border:1px solid var(--green);border-radius:8px;color:var(--green);font-size:13px;font-weight:700;">✅ ปิดเคสแล้ว เมื่อ ${r.closedDate||''}</div>`}
         <button onclick="exportSinglePDF(${idx})" style="background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.4);color:var(--red);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">📄 Export PDF</button>
       </div>
     </div>`:''}
