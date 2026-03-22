@@ -895,25 +895,53 @@ function buildOfficerForm(r, idx) {
 }
 
 function closeModal(){ document.getElementById('modalOverlay').style.display='none'; }
-function updateRecord(idx){
-  allData[idx].status=document.getElementById('of-status').value;
-  allData[idx].footageFound=document.getElementById('of-found').value;
-  allData[idx].fileGiven=document.getElementById('of-file').value;
-  allData[idx].officerName=document.getElementById('of-officer').value;
-  allData[idx].closedDate=document.getElementById('of-closed').value;
-  allData[idx].officerNote=document.getElementById('of-note').value;
-  closeModal(); renderAll();
-  alert('✅ บันทึกผลการดำเนินการแล้ว');
+async function saveToSheet(refCode, payload) {
+  if (!config.scriptUrl) return; // ถ้าไม่มี URL ข้ามไป
+  try {
+    await fetch(config.scriptUrl + '?action=updateRecord&payload=' + encodeURIComponent(JSON.stringify({refCode, ...payload})));
+  } catch(e) {
+    console.warn('saveToSheet error:', e);
+  }
 }
 
-function closeCase(idx){
-  if(!confirm('ยืนยันปิดเคสนี้?')) return;
-  allData[idx].status='ปิดเคส';
-  allData[idx].closedDate=new Date().toISOString().slice(0,10);
-  if(document.getElementById('of-officer')?.value) allData[idx].officerName=document.getElementById('of-officer').value;
-  if(document.getElementById('of-note')?.value) allData[idx].officerNote=document.getElementById('of-note').value;
+function updateRecord(idx) {
+  const r = allData[idx];
+  r.status        = document.getElementById('of-status').value;
+  r.footageFound  = document.getElementById('of-found').value;
+  r.fileGiven     = document.getElementById('of-file').value;
+  r.officerName   = document.getElementById('of-officer').value;
+  r.closedDate    = document.getElementById('of-closed').value;
+  r.officerNote   = document.getElementById('of-note').value;
+  saveToSheet(r.refCode, {
+    status: r.status, footageFound: r.footageFound,
+    fileGiven: r.fileGiven, officerName: r.officerName,
+    closedDate: r.closedDate, officerNote: r.officerNote
+  });
   closeModal(); renderAll();
-  alert('🔒 ปิดเคสสำเร็จแล้ว');
+  alert('\u2705 บันทึกผลการดำเนินการแล้ว');
+}
+
+function closeCase(idx) {
+  const note = document.getElementById('of-note')?.value || '';
+  if (currentRole === 'closer' && !note.trim()) {
+    alert('กรุณากรอกเหตุผลการปิดเคสด้วยค่ะ');
+    return;
+  }
+  if (!confirm('ยืนยันปิดเคสนี้?')) return;
+  const r = allData[idx];
+  const closedDate = document.getElementById('of-closed')?.value || new Date().toISOString().slice(0,10);
+  r.status     = 'ปิดเคส';
+  r.closedDate = closedDate;
+  if (note) r.officerNote = note;
+  if (document.getElementById('of-officer')?.value) r.officerName = document.getElementById('of-officer').value;
+  saveToSheet(r.refCode, {
+    status: 'ปิดเคส',
+    closedDate: closedDate,
+    officerNote: r.officerNote || '',
+    officerName: r.officerName || ''
+  });
+  closeModal(); renderAll();
+  alert('\uD83D\uDD12 ปิดเคสสำเร็จแล้ว');
 }
 
 // ===== EMAIL MANAGEMENT =====
