@@ -566,7 +566,7 @@
 </main>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVfwqmg24QmG37NbdIpn5w90_TWzbilayADz2QdG29CY2qFH_fuD0FhZRinslAQL4I1Q/exec';
+const APPS_SCRIPT_URL = 'const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVfwqmg24QmG37NbdIpn5w90_TWzbilayADz2QdG29CY2qFH_fuD0FhZRinslAQL4I1Q/exec';';
 
 // Load preset locations from localStorage (set by Admin)
 function loadPresets() {
@@ -731,21 +731,88 @@ function collectData(refCode) {
   };
 }
 
+// Upload files to Google Drive via Apps Script
+async function uploadFilesToDrive(files, refCode) {
+  const results = [];
+  for (const file of files) {
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise((resolve, reject) => {
+        reader.onload = e => resolve(e.target.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'uploadFile',
+          refCode: refCode,
+          fileName: file.name,
+          mimeType: file.type || 'application/octet-stream',
+          base64Data: base64
+        })
+      });
+      const json = await res.json();
+      if (json.success) {
+        results.push({ name: file.name, url: json.viewUrl, id: json.fileId });
+      } else {
+        results.push({ name: file.name, url: '', id: '' });
+      }
+    } catch(e) {
+      console.warn('upload failed:', file.name, e);
+      results.push({ name: file.name, url: '', id: '' });
+    }
+  }
+  return results;
+}
+
 document.getElementById('cctvForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   if(!validate()){ document.querySelector('.error-msg.show')?.closest('.card')?.scrollIntoView({behavior:'smooth',block:'center'}); return; }
   const refCode = generateRefCode();
-  const data = collectData(refCode);
   document.getElementById('loadingOverlay').style.display='flex';
   document.getElementById('submitBtn').disabled=true;
-  if(APPS_SCRIPT_URL==='YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'){ await new Promise(r=>setTimeout(r,1500)); showSuccess(refCode); return; }
+
+  if(APPS_SCRIPT_URL==='YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'){
+    await new Promise(r=>setTimeout(r,1500));
+    showSuccess(refCode); return;
+  }
+
   try {
-    await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-    showSuccess(refCode);
+    // 1. Upload ไฟล์ก่อน (ถ้ามี)
+    let fileLinks = [];
+    if (uploadedFiles.length > 0) {
+      document.getElementById('loadingText').textContent = 'กำลังอัปโหลดไฟล์...';
+      fileLinks = await uploadFilesToDrive(uploadedFiles, refCode);
+    }
+
+    // 2. สร้าง attachedFiles เป็น JSON string ของ links
+    const attachedFilesData = fileLinks.map(f =>
+      f.url ? `[${f.name}](${f.url})` : f.name
+    ).join(', ');
+
+    // 3. Collect data แล้วใส่ link แทนชื่อไฟล์
+    const data = collectData(refCode);
+    data.attachedFiles = attachedFilesData;
+
+    // 4. ส่ง form data
+    document.getElementById('loadingText').textContent = 'กำลังส่งข้อมูล...';
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const json = await res.json();
+    if (json.success || json.refCode) {
+      showSuccess(refCode);
+    } else {
+      throw new Error(json.error || 'Unknown error');
+    }
   } catch(err) {
     document.getElementById('loadingOverlay').style.display='none';
     document.getElementById('submitBtn').disabled=false;
-    alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+    alert('เกิดข้อผิดพลาด: ' + err.message);
   }
 });
 
