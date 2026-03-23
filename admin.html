@@ -449,6 +449,18 @@ function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// แปลง "[name](url), [name2](url2)" เป็น HTML links
+function formatFileLinks(str) {
+  if (!str) return '—';
+  return str.split(', ').map(item => {
+    const m = item.match(/^\[(.+?)\]\((https?:\/\/.+?)\)$/);
+    if (m) {
+      return '<a href="' + m[2] + '" target="_blank" style="color:var(--gold);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:4px;">&#128279; ' + escHtml(m[1]) + '</a>';
+    }
+    return '<span style="color:var(--text-muted);">&#128196; ' + escHtml(item) + ' (ไม่มีลิงค์)</span>';
+  }).join('<br>');
+}
+
 function getAdminPassword() {
   return localStorage.getItem('admin_password') || 'cctv2026musafety';
 }
@@ -508,13 +520,40 @@ function switchTab(name) {
 
 // ===== LOAD DATA =====
 async function loadData(){
-  if(!config.sheetId){ allData=generateDemoData(); renderAll(); return; }
+  // ถ้าไม่มี scriptUrl เลย → ใช้ demo data
+  if(!config.scriptUrl){
+    allData=generateDemoData();
+    renderAll();
+    showDemoBanner(true);
+    return;
+  }
+  showDemoBanner(false);
   try {
-    const res=await fetch(`${config.scriptUrl}?action=getData`);
+    const res=await fetch(config.scriptUrl+'?action=getData');
     const json=await res.json();
-    allData=json.data||[];
-  } catch(e){ allData=generateDemoData(); }
+    if(json.success && json.data){
+      allData=json.data||[];
+    } else {
+      allData=[];
+    }
+  } catch(e){
+    console.warn('loadData error:',e);
+    allData=[];
+  }
   renderAll();
+}
+
+function showDemoBanner(show){
+  let b=document.getElementById('demoBanner');
+  if(!b){
+    b=document.createElement('div');
+    b.id='demoBanner';
+    b.style.cssText='background:rgba(241,196,15,0.1);border:1px solid rgba(241,196,15,0.4);border-radius:8px;padding:10px 16px;margin-bottom:12px;font-size:13px;color:var(--yellow);display:none;';
+    b.innerHTML='⚠️ ยังไม่ได้ตั้งค่า Web App URL — กำลังแสดงข้อมูลตัวอย่าง ไปที่ <b>⚙️ ตั้งค่าระบบ</b> เพื่อเชื่อมต่อ Google Sheet';
+    const content=document.querySelector('.content');
+    if(content)content.prepend(b);
+  }
+  b.style.display=show?'block':'none';
 }
 
 function renderAll(){
@@ -705,7 +744,7 @@ function buildPdfPage(r) {
         ${row('เหตุผลขอไฟล์', r.fileReason)}
         ${row('รูปแบบรับ', r.deliveryMethod)}
         ${row('เอกสารที่นำมา', r.docs)}
-        ${row('ไฟล์แนบ', r.attachedFiles)}
+        ${row('ไฟล์แนบ', r.attachedFiles ? r.attachedFiles.replace(/\[(.+?)\]\((.+?)\)/g, '$1: $2') : '')}
         ${row('หมายเหตุ', r.additionalNote)}
       </table>
     </div>
@@ -825,7 +864,7 @@ function openModal(idx){
       <div class="detail-item"><label>ยานพาหนะ</label><div class="val">${r.vehiclePlate||'—'} ${r.vehicleDesc||''}</div></div>
       <div class="detail-item"><label>ขอรับไฟล์</label><div class="val">${r.requestFile||'—'}</div></div>
       <div class="detail-item"><label>เอกสารที่นำมา</label><div class="val">${r.docs||'—'}</div></div>
-      ${r.attachedFiles?`<div class="detail-item detail-full"><label>ไฟล์แนบ</label><div class="val">${r.attachedFiles}</div></div>`:''}
+      ${r.attachedFiles?`<div class="detail-item detail-full"><label>ไฟล์แนบ</label><div class="val">${formatFileLinks(r.attachedFiles)}</div></div>`:''}
       <div class="detail-item detail-full"><label>หมายเหตุ</label><div class="val">${r.additionalNote||'—'}</div></div>
     </div>
     <hr class="modal-divider">
