@@ -396,10 +396,13 @@
 
 <script>
 // ===== STATE =====
+const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxVfwqmg24QmG37NbdIpn5w90_TWzbilayADz2QdG29CY2qFH_fuD0FhZRinslAQL4I1Q/exec';
+if (!localStorage.getItem('script_url')) localStorage.setItem('script_url', SCRIPT_URL_DEFAULT);
+
 let config = {
-  password: localStorage.getItem('admin_password') || 'cctv2026musafety',
-  scriptUrl: localStorage.getItem('script_url') || '',
-  sheetId: localStorage.getItem('sheet_id') || ''
+  password:  localStorage.getItem('admin_password') || 'cctv2026musafety',
+  scriptUrl: localStorage.getItem('script_url') || SCRIPT_URL_DEFAULT,
+  sheetId:   localStorage.getItem('sheet_id') || ''
 };
 let allData = [];
 let charts = {};
@@ -520,22 +523,16 @@ function switchTab(name) {
 
 // ===== LOAD DATA =====
 async function loadData(){
-  // ถ้าไม่มี scriptUrl เลย → ใช้ demo data
   if(!config.scriptUrl){
     allData=generateDemoData();
     renderAll();
-    showDemoBanner(true);
     return;
   }
-  showDemoBanner(false);
   try {
     const res=await fetch(config.scriptUrl+'?action=getData');
     const json=await res.json();
-    if(json.success && json.data){
-      allData=json.data||[];
-    } else {
-      allData=[];
-    }
+    allData=json.data||[];
+    console.log('Loaded '+allData.length+' records');
   } catch(e){
     console.warn('loadData error:',e);
     allData=[];
