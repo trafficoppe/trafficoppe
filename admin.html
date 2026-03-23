@@ -267,7 +267,7 @@
         <div class="chart-card"><div class="chart-title">⚡ ระดับความเร่งด่วน</div><div class="chart-wrap"><canvas id="chartUrgency"></canvas></div></div>
       </div>
       <div class="table-wrap">
-        <div class="table-header"><h3>📋 คำขอล่าสุด 10 รายการ</h3><button class="btn-refresh" onclick="loadData()">🔄 รีเฟรช</button></div>
+        <div class="table-header"><h3 id="recentTableTitle">📋 คำขอล่าสุด</h3><button class="btn-refresh" onclick="loadData()">🔄 รีเฟรช</button></div>
         <div id="recentTableWrap"><div class="loading-msg"><div class="spinner-sm"></div>กำลังโหลด...</div></div>
       </div>
     </div>
@@ -553,6 +553,36 @@ function showDemoBanner(show){
   b.style.display=show?'block':'none';
 }
 
+// ===== TIMESTAMP HELPERS =====
+// Apps Script ส่ง timestamp มาเป็น string ISO หรือ Date serial number
+function safeTimestamp(val) {
+  if (!val) return null;
+  // กรณีเป็น string ISO
+  if (typeof val === 'string') {
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? null : d.getTime();
+  }
+  // กรณีเป็น number (Date serial จาก Google Sheet)
+  if (typeof val === 'number') {
+    // Google Sheet date serial: days since Dec 30, 1899
+    const d = new Date((val - 25569) * 86400000);
+    return isNaN(d.getTime()) ? null : d.getTime();
+  }
+  return null;
+}
+
+function safeDate(val) {
+  const ts = safeTimestamp(val);
+  if (!ts) return '—';
+  return new Date(ts).toLocaleDateString('th-TH', {day:'2-digit',month:'short',year:'2-digit'});
+}
+
+function safeDateTime(val) {
+  const ts = safeTimestamp(val);
+  if (!ts) return '—';
+  return new Date(ts).toLocaleString('th-TH');
+}
+
 function renderAll(){
   document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH');
   renderStats();
@@ -571,7 +601,7 @@ function renderStats(){
   document.getElementById('stat-emergency').textContent=allData.filter(r=>r.urgency==='ฉุกเฉิน'||r.urgency==='เร่งด่วน').length;
   document.getElementById('stat-overdue').textContent=overdueCt;
   document.getElementById('stat-file').textContent=allData.filter(r=>r.requestFile==='ต้องการไฟล์').length;
-  document.getElementById('stat-today').textContent=allData.filter(r=>r.timestamp&&r.timestamp.startsWith(today)).length;
+  document.getElementById('stat-today').textContent=allData.filter(r=>{const ts=safeTimestamp(r.timestamp);return ts&&new Date(ts).toISOString().startsWith(today);}).length;
 }
 
 // ===== CHARTS =====
@@ -617,10 +647,17 @@ function renderRecentTable(){
   if(!el) return;
   if(!allData.length){
     el.innerHTML='<div class="empty-state"><div style="font-size:36px;margin-bottom:8px;">📭</div><p>ยังไม่มีข้อมูล</p></div>';
+    const titleEl=document.getElementById('recentTableTitle');
+    if(titleEl) titleEl.textContent='📋 คำขอล่าสุด';
     return;
   }
-  const sorted=[...allData].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)).slice(0,10);
-  el.innerHTML=renderTable(sorted,true);
+  const sorted=[...allData].sort((a,b)=>(safeTimestamp(b.timestamp)||0)-(safeTimestamp(a.timestamp)||0));
+  const count=Math.min(sorted.length, 10);
+  const display=sorted.slice(0, count);
+  // อัปเดตหัวข้อให้ตรงกับจำนวนจริง
+  const titleEl=document.getElementById('recentTableTitle');
+  if(titleEl) titleEl.textContent='📋 คำขอล่าสุด '+count+' รายการ (ทั้งหมด '+allData.length+' รายการ)';
+  el.innerHTML=renderTable(display,true);
 }
 
 // ===== FILTER + PDF STATE =====
@@ -629,7 +666,9 @@ let filteredData=[], selectedIds=new Set(), pdfPanelOpen=false;
 function isOverdue(r){
   if(['ปิดเคส','เสร็จสิ้น','ปฏิเสธ'].includes(r.status)) return false;
   if(!r.timestamp) return false;
-  return (Date.now()-new Date(r.timestamp))/86400000>2;
+  const ts = safeTimestamp(r.timestamp);
+  if(!ts) return false;
+  return (Date.now()-ts)/86400000>2;
 }
 
 function applyFilters(){
@@ -644,12 +683,13 @@ function applyFilters(){
     if(urgency&&r.urgency!==urgency) return false;
     if(type&&r.requesterType!==type) return false;
     if(search&&!((r.refCode||'').toLowerCase().includes(search)||((r.fname||'')+' '+(r.lname||'')).toLowerCase().includes(search)||(r.purpose||'').toLowerCase().includes(search)||(r.serviceOfficerName||'').toLowerCase().includes(search))) return false;
-    const rd=(r.timestamp||'').slice(0,10);
-    if(df&&rd<df) return false;
-    if(dt&&rd>dt) return false;
+    const ts=safeTimestamp(r.timestamp);
+    const rd=ts?new Date(ts).toISOString().slice(0,10):'';
+    if(df&&rd&&rd<df) return false;
+    if(dt&&rd&&rd>dt) return false;
     return true;
   });
-  filteredData.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+  filteredData.sort((a,b)=>(safeTimestamp(b.timestamp)||0)-(safeTimestamp(a.timestamp)||0));
   renderRequestTable();
   updatePdfCounts();
   const oc=filteredData.filter(isOverdue).length;
@@ -835,7 +875,7 @@ function renderTable(data, compact) {
     return`<tr class="${cls.trim()}">
       ${showCheck?`<td><input type="checkbox" class="row-check" value="${r.refCode}" ${selectedIds.has(r.refCode)?'checked':''} onchange="toggleSelect('${r.refCode}',this.checked)"></td>`:''}
       <td style="font-family:monospace;font-size:11px;color:var(--gold);">${r.refCode||'—'}${overdue?'<br><span class="overdue-badge">⚠️ เกิน 2 วัน</span>':''}</td>
-      <td style="white-space:nowrap;font-size:12px;">${r.timestamp?new Date(r.timestamp).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'}):'—'}</td>
+      <td style="white-space:nowrap;font-size:12px;">${r.timestamp?safeDate(r.timestamp):'—'}</td>
       <td>${r.prefix||''} ${r.fname||''} ${r.lname||''}</td>
       <td><span class="badge" style="background:rgba(52,152,219,0.15);color:#3498db;font-size:10px;">${r.requesterType||'—'}</span></td>
       <td style="font-size:12px;">${r.purpose||'—'}</td>
@@ -854,7 +894,7 @@ function renderTable(data, compact) {
 function openModal(idx){
   const r=allData[idx];if(!r)return;
   document.getElementById('modalTitle').textContent=`${r.prefix||''} ${r.fname} ${r.lname}`;
-  document.getElementById('modalRef').textContent=(r.refCode||'')+'  |  '+(r.timestamp?new Date(r.timestamp).toLocaleString('th-TH'):'');
+  document.getElementById('modalRef').textContent=(r.refCode||'')+'  |  '+(r.timestamp?safeDateTime(r.timestamp):'');
   document.getElementById('modalBody').innerHTML=`
     <div class="detail-grid">
       <div class="detail-item"><label>ประเภทผู้ขอ</label><div class="val">${r.requesterType||'—'}</div></div>
