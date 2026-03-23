@@ -742,38 +742,6 @@ function fileToBase64(file) {
   });
 }
 
-// Upload ไฟล์ทั้งหมดพร้อมกันหลัง form ส่งสำเร็จ
-// ส่งเป็น action:uploadFiles — Apps Script อัปเดต Sheet และส่ง link กลับ
-async function uploadFilesAfterSubmit(files, refCode) {
-  try {
-    // แปลงทุกไฟล์เป็น base64 ก่อน
-    const fileDataArr = [];
-    for (const file of files) {
-      const base64 = await fileToBase64(file);
-      fileDataArr.push({
-        fileName:  file.name,
-        mimeType:  file.type || 'application/octet-stream',
-        base64Data: base64
-      });
-    }
-
-    // ส่งทีเดียวใน request เดียว — ใช้ no-cors (Apps Script จะอัปเดต Sheet เอง)
-    fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({
-        action: 'uploadFiles',
-        refCode: refCode,
-        files: fileDataArr
-      })
-    });
-    console.log('Files uploaded to Drive for', refCode);
-  } catch(err) {
-    console.warn('Upload error (non-critical):', err);
-  }
-}
-
 document.getElementById('cctvForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   if(!validate()){
@@ -790,33 +758,45 @@ document.getElementById('cctvForm').addEventListener('submit', async function(e)
   }
 
   try {
-    // 1. Collect ข้อมูล — ใส่ชื่อไฟล์ไว้ก่อน (link จะถูกอัปเดตหลัง upload)
-    const data = collectData(refCode);
-    data.attachedFiles = uploadedFiles.length > 0
-      ? uploadedFiles.map((f,i) => {
-          const ext = f.name.includes('.') ? '.' + f.name.split('.').pop() : '';
-          return i === 0 ? refCode + ext : refCode + '_' + (i+1) + ext;
-        }).join(', ')
-      : '';
+    document.getElementById('loadingText').textContent = 'กำลังเตรียมข้อมูล...';
 
-    // 2. ส่ง form data หลัก (no-cors — ทำงานได้แน่นอน)
+    // 1. แปลงไฟล์ทั้งหมดเป็น base64 ก่อน
+    const filesData = [];
+    for (let i = 0; i < uploadedFiles.length; i++) {
+      document.getElementById('loadingText').textContent =
+        'กำลังเตรียมไฟล์ ' + (i+1) + '/' + uploadedFiles.length + '...';
+      const file = uploadedFiles[i];
+      const base64 = await fileToBase64(file);
+      filesData.push({
+        fileName:   file.name,
+        mimeType:   file.type || 'application/octet-stream',
+        base64Data: base64
+      });
+    }
+
+    // 2. Collect ข้อมูลฟอร์ม
+    const data = collectData(refCode);
+    // แนบ files ไปพร้อมกันใน payload เดียว
+    // Apps Script จะ upload → ได้ link → บันทึก Sheet → ส่งอีเมลพร้อม link
+    if (filesData.length > 0) {
+      data.filesToUpload = filesData;
+      data.attachedFiles = filesData.map((f,i) => {
+        const ext = f.fileName.includes('.') ? '.' + f.fileName.split('.').pop() : '';
+        return i === 0 ? refCode + ext : refCode + '_' + (i+1) + ext;
+      }).join(', ');
+    }
+
+    // 3. ส่งทุกอย่างพร้อมกันแบบ no-cors (ไม่มี CORS error แน่นอน)
     document.getElementById('loadingText').textContent = 'กำลังส่งข้อมูล...';
     fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      mode:   'no-cors',
+      headers:{ 'Content-Type': 'text/plain' },
+      body:   JSON.stringify(data)
     });
 
-    // 3. แสดงหน้าสำเร็จทันที
+    // 4. showSuccess ทันที
     showSuccess(refCode);
-
-    // 4. Upload ไฟล์ background (ไม่บล็อก UI)
-    //    Apps Script จะอัปเดต link ใน Sheet โดยอัตโนมัติ
-    if (uploadedFiles.length > 0) {
-      document.getElementById('loadingText').textContent = 'กำลังอัปโหลดไฟล์...';
-      uploadFilesAfterSubmit([...uploadedFiles], refCode);
-    }
 
   } catch(err) {
     document.getElementById('loadingOverlay').style.display='none';
