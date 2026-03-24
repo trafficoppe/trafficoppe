@@ -401,32 +401,160 @@
     </div>
   </div>
 
-  <!-- SECTION 4: การขอรับไฟล์ -->
+  <!-- SECTION 4: การขอรับข้อมูล/ไฟล์ภาพ -->
   <div class="card">
     <div class="card-header"><div class="step-num">4</div><h2>การขอรับข้อมูล / ไฟล์ภาพ</h2></div>
     <div class="card-body">
-      <div class="form-group" style="margin-bottom:16px;">
-        <label>ต้องการขอรับไฟล์ภาพ/วิดีโอกลับไปหรือไม่? <span class="required">*</span></label>
-        <div class="radio-group">
-          <div class="radio-item" onclick="selectRadio('requestFile','ต้องการไฟล์',this);showFileSection(true)"><input type="radio" name="requestFile" value="ต้องการไฟล์"> 📁 ต้องการขอไฟล์กลับไป</div>
-          <div class="radio-item" onclick="selectRadio('requestFile','ดูอย่างเดียว',this);showFileSection(false)"><input type="radio" name="requestFile" value="ดูอย่างเดียว"> 👁️ ดูอย่างเดียว (ไม่ขอไฟล์)</div>
+
+      <!-- 4.1 PDPA ยินยอมก่อนเลือกข้ออื่น -->
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>4.1 การรับทราบและยินยอมตามกฎหมาย PDPA <span class="required">*</span></label>
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px 16px;margin-top:6px;">
+          <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer;font-weight:400;">
+            <input type="checkbox" id="pdpaFileConsent" name="pdpaFileConsent"
+              style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:#16a34a;"
+              onchange="toggleSection4Consent(this.checked)">
+            <span style="font-size:13px;line-height:1.8;color:#14532d;">
+              ข้าพเจ้ารับทราบและยืนยันว่า การขอรับข้อมูลนี้เป็นไปเพื่อวัตถุประสงค์ที่ระบุไว้เท่านั้น
+              ข้าพเจ้า<strong>จะไม่นำภาพหรือข้อมูลจากกล้องวงจรปิดไปเผยแพร่</strong>ต่อสาธารณะ สื่อสังคมออนไลน์
+              หรือกระทำการใดๆ ที่ละเมิดสิทธิส่วนบุคคลของผู้อื่น ทั้งนี้ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562
+              หากฝ่าฝืน ข้าพเจ้ายินยอมรับผิดชอบความเสียหายและรับโทษทางกฎหมายทั้งทางแพ่งและทางอาญาแต่เพียงผู้เดียว
+            </span>
+          </label>
         </div>
-        <p class="error-msg" id="requestFileError">กรุณาเลือก</p>
+        <p class="error-msg" id="pdpaFileConsentError">กรุณายืนยันการรับทราบ PDPA ก่อนดำเนินการต่อ</p>
       </div>
-      <div class="conditional-section" id="fileSection">
-        <div class="warn-box">⚠️ การขอรับไฟล์ภาพจากกล้องวงจรปิดเป็นการประมวลผลข้อมูลส่วนบุคคล ต้องมีเหตุผลทางกฎหมายที่ชอบด้วย PDPA</div>
-        <div class="form-group" style="margin-top:12px;">
-          <label for="fileReason">เหตุผลที่ต้องการไฟล์</label>
-          <textarea id="fileReason" name="fileReason" placeholder="ระบุเหตุผล เช่น เป็นหลักฐานแจ้งความ เพื่อประกันภัย..."></textarea>
-        </div>
-        <div class="form-group" style="margin-top:12px;">
-          <label>รูปแบบการรับข้อมูล</label>
-          <div class="radio-group">
-            <div class="radio-item" onclick="selectRadio('deliveryMethod','รับด้วยตัวเอง',this)"><input type="radio" name="deliveryMethod" value="รับด้วยตัวเอง"> 🏢 รับด้วยตัวเอง</div>
-            <div class="radio-item" onclick="selectRadio('deliveryMethod','USB Drive',this)"><input type="radio" name="deliveryMethod" value="USB Drive"> 💾 บันทึกลง USB Drive (นำมาเอง)</div>
+
+      <!-- 4.2–4.5 ล็อคไว้จนกว่าจะติ๊ก 4.1 -->
+      <div id="section4Rest" style="opacity:0.4;pointer-events:none;transition:all 0.3s;">
+
+        <!-- 4.2 ความประสงค์ -->
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>4.2 ความประสงค์ในการขอรับข้อมูล <span class="required">*</span></label>
+          <div style="background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;font-size:12px;color:#78350f;margin-bottom:10px;">
+            📌 ตาม พ.ร.บ. PDPA การขอรับสำเนาไฟล์ภาพที่มีบุคคลอื่นปรากฏอยู่ ต้องใช้เวลาดำเนินการเพื่อปกปิดข้อมูลบุคคลที่สาม และจำเป็นต้องมีเอกสารทางกฎหมายประกอบ
           </div>
+          <div class="radio-group" style="flex-direction:column;gap:10px;">
+            <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:14px 16px;"
+              onclick="selectRadio('requestFile','ดูอย่างเดียว',this);showFileSection(false)">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="radio" name="requestFile" value="ดูอย่างเดียว">
+                <strong>👁️ ขอดูภาพอย่างเดียว (View Only)</strong>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:5px;padding-left:22px;">
+                ไม่ต้องใช้ใบแจ้งความ — ดูได้เฉพาะหน้าจอมอนิเตอร์ของเจ้าหน้าที่เท่านั้น ไม่อนุญาตให้บันทึกภาพหน้าจอ
+              </div>
+            </div>
+            <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:14px 16px;"
+              onclick="selectRadio('requestFile','ต้องการไฟล์',this);showFileSection(true)">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="radio" name="requestFile" value="ต้องการไฟล์">
+                <strong>📁 ขอรับสำเนาไฟล์ภาพ (Export File)</strong>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:5px;padding-left:22px;">
+                ต้องมีใบแจ้งความ/บันทึกประจำวันเป็นหลักฐานประกอบเสมอ — ใช้เวลาดำเนินการ 3–5 วันทำการ
+              </div>
+            </div>
+          </div>
+          <p class="error-msg" id="requestFileError">กรุณาเลือกความประสงค์</p>
         </div>
-      </div>
+
+        <!-- 4.3–4.5 แสดงเฉพาะเมื่อเลือก "ขอรับสำเนา" -->
+        <div class="conditional-section" id="fileSection">
+
+          <!-- 4.3 เหตุผล -->
+          <div class="form-group" style="margin-bottom:16px;">
+            <label>4.3 เหตุผลความจำเป็นในการขอรับสำเนา <span class="required">*</span></label>
+            <div class="radio-group" style="flex-direction:column;gap:8px;">
+              <div class="radio-item" onclick="selectRadio('fileReason','ใช้เป็นหลักฐานประกอบคดีความ/แจ้งความร้องทุกข์',this)">
+                <input type="radio" name="fileReason" value="ใช้เป็นหลักฐานประกอบคดีความ/แจ้งความร้องทุกข์">
+                ⚖️ ใช้เป็นหลักฐานประกอบคดีความ / แจ้งความร้องทุกข์
+              </div>
+              <div class="radio-item" onclick="selectRadio('fileReason','ใช้ประกอบการสอบสวนของเจ้าพนักงานตำรวจ/หน่วยงานรัฐ',this)">
+                <input type="radio" name="fileReason" value="ใช้ประกอบการสอบสวนของเจ้าพนักงานตำรวจ/หน่วยงานรัฐ">
+                🏛️ ใช้ประกอบการสอบสวนของเจ้าพนักงานตำรวจ / หน่วยงานรัฐ
+              </div>
+              <div class="radio-item" onclick="selectRadio('fileReason','ใช้ประกอบการเรียกร้องค่าสินไหมทดแทนจากบริษัทประกันภัย',this)">
+                <input type="radio" name="fileReason" value="ใช้ประกอบการเรียกร้องค่าสินไหมทดแทนจากบริษัทประกันภัย">
+                🛡️ ใช้ประกอบการเรียกร้องค่าสินไหมทดแทนจากบริษัทประกันภัย
+              </div>
+            </div>
+            <p class="error-msg" id="fileReasonError">กรุณาเลือกเหตุผล</p>
+          </div>
+
+          <!-- 4.4 เอกสาร -->
+          <div class="form-group" style="margin-bottom:16px;">
+            <label>4.4 เอกสารที่ต้องแนบ / นำมาแสดง <span class="required">*</span></label>
+            <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;color:#7f1d1d;margin-bottom:10px;">
+              ⚠️ <strong>ต้องครบถ้วนทุกรายการ</strong> มิฉะนั้นหน่วยงานขอสงวนสิทธิ์ในการปฏิเสธการให้ไฟล์ภาพ
+            </div>
+            <div class="check-group" style="flex-direction:column;gap:8px;">
+              <div class="check-item" onclick="toggleCheck(this)">
+                <input type="checkbox" name="exportDocs" value="สำเนาบัตรประชาชน/บัตรนักศึกษา/บัตรพนักงาน">
+                🪪 สำเนาบัตรประชาชน / บัตรนักศึกษา / บัตรพนักงาน (พร้อมเซ็นรับรองสำเนาถูกต้อง)
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)">
+                <input type="checkbox" name="exportDocs" value="สำเนาบันทึกประจำวันหรือใบแจ้งความ">
+                📋 สำเนาบันทึกประจำวัน หรือ ใบแจ้งความจากเจ้าหน้าที่ตำรวจ (ระบุวันที่ เวลา และสถานที่เกิดเหตุชัดเจน)
+              </div>
+              <div class="check-item" onclick="toggleCheck(this)">
+                <input type="checkbox" name="exportDocs" value="หนังสือมอบอำนาจ (กรณีรับแทน)">
+                📜 หนังสือมอบอำนาจ และสำเนาบัตรประชาชนของผู้มอบและผู้รับมอบ <em style="color:var(--text-muted);">(เฉพาะกรณีรับแทน)</em>
+              </div>
+            </div>
+            <p class="error-msg" id="exportDocsError">กรุณายืนยันเอกสารที่นำมา</p>
+          </div>
+
+          <!-- 4.5 ช่องทางรับไฟล์ -->
+          <div class="form-group" style="margin-bottom:8px;">
+            <label>4.5 ช่องทางการรับไฟล์ภาพ <span class="required">*</span></label>
+            <div class="radio-group" style="flex-direction:column;gap:10px;">
+              <!-- Flash Drive -->
+              <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:14px 16px;"
+                onclick="selectRadio('deliveryMethod','นำ Flash Drive มาเองในวันรับไฟล์',this);toggleGDriveEmail(false)">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <input type="radio" name="deliveryMethod" value="นำ Flash Drive มาเองในวันรับไฟล์">
+                  <strong>💾 นำ Flash Drive มาเองในวันรับไฟล์</strong>
+                </div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:5px;padding-left:22px;">
+                  แนะนำ: USB 2.0 ขึ้นไป ความจุ ≥ 4GB และไม่เป็นพาหะนำไวรัสคอมพิวเตอร์
+                </div>
+              </div>
+              <!-- Google Drive -->
+              <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:14px 16px;"
+                onclick="selectRadio('deliveryMethod','รับผ่านลิงก์ Google Drive',this);toggleGDriveEmail(true)">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <input type="radio" name="deliveryMethod" value="รับผ่านลิงก์ Google Drive">
+                  <strong>🔗 รับผ่านลิงก์ Google Drive</strong>
+                </div>
+                <!-- ช่องอีเมล + consent แสดงเฉพาะเมื่อเลือก -->
+                <div id="gdriveEmailSection" style="display:none;width:100%;margin-top:10px;padding-left:22px;">
+                  <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">อีเมลสำหรับจัดส่งลิงก์ <span class="required">*</span></label>
+                  <input type="email" id="gdriveEmail" name="gdriveEmail"
+                    placeholder="email@example.com"
+                    style="width:100%;max-width:360px;padding:8px 12px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size:13px;outline:none;">
+                  <p class="error-msg" id="gdriveEmailError" style="margin-top:4px;">กรุณากรอกอีเมลสำหรับรับลิงก์</p>
+                  <div style="background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:12px;color:#78350f;">
+                    <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-weight:400;">
+                      <input type="checkbox" id="gdriveConsent" name="gdriveConsent"
+                        style="margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:#d97706;">
+                      <span>
+                        <span style="color:#c0392b;font-weight:700;">* </span>ข้าพเจ้ารับทราบและยินยอมว่า จะต้องดาวน์โหลดไฟล์เก็บไว้ในอุปกรณ์ของตนเอง
+                        เนื่องจากระบบจะทำการ<strong>ลบไฟล์ออกจากลิงก์ภายใน 48 ชั่วโมง</strong>หลังจากการจัดส่งอีเมล
+                        เพื่อความปลอดภัยของข้อมูล
+
+                      </span>
+                    </label>
+                    <span id="gdriveConsentError" style="display:none;font-size:11px;color:#c0392b;margin-top:6px;padding:4px 8px;background:#fef2f2;border-radius:4px;border-left:3px solid #c0392b;">⚠️ กรุณายืนยันการรับทราบเงื่อนไขการรับไฟล์ก่อนส่ง</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="error-msg" id="deliveryMethodError">กรุณาเลือกช่องทางการรับไฟล์</p>
+          </div>
+
+        </div><!-- end fileSection -->
+      </div><!-- end section4Rest -->
     </div>
   </div>
 
@@ -636,6 +764,29 @@ function handleRequesterType() {
 }
 function showFileSection(show) { document.getElementById('fileSection').classList.toggle('show', show); }
 
+function toggleSection4Consent(checked) {
+  const rest = document.getElementById('section4Rest');
+  if (!rest) return;
+  rest.style.opacity = checked ? '1' : '0.4';
+  rest.style.pointerEvents = checked ? 'auto' : 'none';
+  // clear ถ้า uncheck
+  if (!checked) {
+    document.querySelectorAll('input[name="requestFile"]').forEach(r=>r.checked=false);
+    showFileSection(false);
+  }
+}
+
+function toggleGDriveEmail(show) {
+  const el = document.getElementById('gdriveEmailSection');
+  if (el) el.style.display = show ? 'block' : 'none';
+  if (!show) {
+    const em = document.getElementById('gdriveEmail');
+    if (em) em.value = '';
+    const gc = document.getElementById('gdriveConsent');
+    if (gc) gc.checked = false;
+  }
+}
+
 // Progress
 function updateProgress() {
   const required = ['fname','lname','requesterType','idCard','phone','dateStart','locations'];
@@ -671,8 +822,46 @@ function validate() {
   else document.getElementById('locationError').classList.remove('show');
   if(!document.querySelector('input[name="purpose"]:checked')){ document.getElementById('purposeError').classList.add('show'); valid=false; }
   else document.getElementById('purposeError').classList.remove('show');
-  if(!document.querySelector('input[name="requestFile"]:checked')){ document.getElementById('requestFileError').classList.add('show'); valid=false; }
-  else document.getElementById('requestFileError').classList.remove('show');
+  // 4.1 PDPA consent
+  const pcEl = document.getElementById('pdpaFileConsent');
+  const pcErr = document.getElementById('pdpaFileConsentError');
+  if(pcErr){ if(!pcEl||!pcEl.checked){pcErr.classList.add('show');valid=false;}else pcErr.classList.remove('show'); }
+
+  // 4.2 ความประสงค์
+  const rfEl = document.querySelector('input[name="requestFile"]:checked');
+  if(!rfEl){ document.getElementById('requestFileError').classList.add('show'); valid=false; }
+  else {
+    document.getElementById('requestFileError').classList.remove('show');
+    if(rfEl.value === 'ต้องการไฟล์') {
+      // 4.3 เหตุผล
+      const frEl = document.querySelector('input[name="fileReason"]:checked');
+      const frErr = document.getElementById('fileReasonError');
+      if(frErr){ if(!frEl){frErr.classList.add('show');valid=false;}else frErr.classList.remove('show'); }
+      // 4.5 ช่องทาง
+      const dmEl = document.querySelector('input[name="deliveryMethod"]:checked');
+      const dmErr = document.getElementById('deliveryMethodError');
+      if(dmErr){ if(!dmEl){dmErr.classList.add('show');valid=false;}else dmErr.classList.remove('show'); }
+      // ถ้าเลือก Google Drive → validate email + consent
+      if(dmEl && dmEl.value === 'รับผ่านลิงก์ Google Drive') {
+        const gEmail = document.getElementById('gdriveEmail');
+        const gEmailErr = document.getElementById('gdriveEmailError');
+        if(gEmailErr){ if(!gEmail||!gEmail.value.includes('@')){gEmailErr.classList.add('show');valid=false;}else gEmailErr.classList.remove('show'); }
+        const gc = document.getElementById('gdriveConsent');
+        const gcErr = document.getElementById('gdriveConsentError');
+        if(gcErr){
+          if(!gc||!gc.checked){
+            gcErr.style.display='inline-block';
+            // เขย่า checkbox เพื่อดึงความสนใจ
+            if(gc){ gc.style.outline='2px solid #c0392b'; gc.style.outlineOffset='2px'; }
+            valid=false;
+          } else {
+            gcErr.style.display='none';
+            if(gc){ gc.style.outline=''; }
+          }
+        }
+      }
+    }
+  }
   if(!document.querySelector('input[name="urgency"]:checked')){ document.getElementById('urgencyError').classList.add('show'); valid=false; }
   else document.getElementById('urgencyError').classList.remove('show');
   // officer validation
@@ -716,7 +905,13 @@ function collectData(refCode) {
     purposeDetail: get('purposeDetail'), evidenceTypes: getChecked('evidence'),
     dateStart: get('dateStart'), timeStart: get('timeStart'), dateEnd: get('dateEnd'), timeEnd: get('timeEnd'),
     locations: get('locations'), vehiclePlate: get('vehiclePlate'), vehicleDesc: get('vehicleDesc'),
-    requestFile: getRadio('requestFile'), fileReason: get('fileReason'), deliveryMethod: getRadio('deliveryMethod'),
+    requestFile: getRadio('requestFile'),
+    fileReason: getRadio('fileReason'),
+    deliveryMethod: getRadio('deliveryMethod'),
+    exportDocs: getChecked('exportDocs'),
+    gdriveEmail: get('gdriveEmail'),
+    pdpaFileConsent: document.getElementById('pdpaFileConsent')?.checked ? 'รับทราบและยินยอม' : '',
+    gdriveConsent: document.getElementById('gdriveConsent')?.checked ? 'รับทราบ-ลิงก์หมดอายุ48ชม' : '',
     docs: getChecked('docs') + (get('docsOther') ? ', อื่นๆ: '+get('docsOther') : ''),
     additionalNote: get('additionalNote'), urgency: getRadio('urgency'),
     attachedFiles: uploadedFiles.map(f=>f.name).join(', '),
