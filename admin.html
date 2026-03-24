@@ -531,8 +531,9 @@ async function loadData(){
   try {
     const res=await fetch(config.scriptUrl+'?action=getData');
     const json=await res.json();
-    allData=json.data||[];
-    console.log('Loaded '+allData.length+' records');
+    // กรองเฉพาะแถวที่มี refCode จริง ตัดแถวว่างออก
+    allData=(json.data||[]).filter(r=>r.refCode && String(r.refCode).trim()!=='');
+    console.log('Loaded '+allData.length+' valid records from Sheet');
   } catch(e){
     console.warn('loadData error:',e);
     allData=[];
