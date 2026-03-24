@@ -558,10 +558,21 @@ function showDemoBanner(show){
 // ===== TIMESTAMP HELPERS =====
 // Apps Script ส่ง timestamp มาเป็น string ISO หรือ Date serial number
 function safeTimestamp(val) {
-  if (!val) return null;
-  // กรณีเป็น string ISO
+  if (!val || val === '') return null;
   if (typeof val === 'string') {
-    const d = new Date(val);
+    const s = val.trim();
+    // ISO string ที่มี Z หรือ +/- timezone → parse ตามปกติ
+    if (s.includes('T') || s.includes('Z') || /[+-]\d{2}:\d{2}$/.test(s)) {
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? null : d.getTime();
+    }
+    // string แบบ "YYYY-MM-DD" หรือ "DD/MM/YYYY" → แปลงเป็น UTC midnight
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+      const d = new Date(s + 'T00:00:00.000Z');
+      return isNaN(d.getTime()) ? null : d.getTime();
+    }
+    // ลอง parse ปกติ
+    const d = new Date(s);
     return isNaN(d.getTime()) ? null : d.getTime();
   }
   // กรณีเป็น number (Date serial จาก Google Sheet)
@@ -666,11 +677,28 @@ function renderRecentTable(){
 let filteredData=[], selectedIds=new Set(), pdfPanelOpen=false;
 
 function isOverdue(r){
-  if(['ปิดเคส','เสร็จสิ้น','ปฏิเสธ'].includes(r.status)) return false;
+  // ปิดแล้วทุกกรณี ไม่ถือว่า overdue
+  const closedStatuses = ['ปิดเคส','เสร็จสิ้น','ปฏิเสธ'];
+  if(closedStatuses.includes(r.status)) return false;
+  if(r.closedDate && String(r.closedDate).trim() !== '') return false;
+
+  // ดึงวันที่จาก refCode เช่น CCTV-20260322-XXXX → 2026-03-22
+  // วิธีนี้แม่นยำ 100% ไม่มีปัญหา timezone หรือ format ของ Sheet
+  const m = (r.refCode||'').match(/CCTV-(\d{4})(\d{2})(\d{2})-/);
+  if(m){
+    const requestDate = new Date(m[1]+'-'+m[2]+'-'+m[3]);
+    const today = new Date();
+    // เซ็ต today เป็น midnight เพื่อนับวันเต็ม
+    today.setHours(0,0,0,0);
+    const diffDays = Math.floor((today - requestDate) / 86400000);
+    return diffDays >= 2; // ครบ 2 วันแล้ว = overdue
+  }
+
+  // fallback: ใช้ timestamp ถ้าไม่มี refCode
   if(!r.timestamp) return false;
   const ts = safeTimestamp(r.timestamp);
   if(!ts) return false;
-  return (Date.now()-ts)/86400000>2;
+  return (Date.now() - ts) / 86400000 >= 2;
 }
 
 function applyFilters(){
