@@ -859,7 +859,7 @@ function buildPdfPage(r) {
     <div class="pdf-section">
       <div class="pdf-section-title">[ 3 ] การขอรับข้อมูล / ไฟล์ภาพ</div>
       <table class="pdf-table">
-        ${row('ขอรับไฟล์ภาพ', r.requestFile)}
+        ${row('ขอรับไฟล์ภาพ', (r.requestFile||'')+(r.deliveryMethod?' ('+r.deliveryMethod+')':'')+(r.gdriveEmail?' — ส่งที่: '+r.gdriveEmail:''))}
         ${row('เหตุผลขอไฟล์', r.fileReason)}
         ${row('รูปแบบรับ', r.deliveryMethod)}
         ${row('เอกสารที่นำมา', r.docs)}
@@ -989,8 +989,25 @@ function openModal(idx){
       })()}</div></div>
       <div class="detail-item"><label>จุดที่ขอดูกล้อง</label><div class="val">${r.locations||'—'}</div></div>
       <div class="detail-item"><label>ยานพาหนะ</label><div class="val">${r.vehiclePlate||'—'} ${r.vehicleDesc||''}</div></div>
-      <div class="detail-item"><label>ขอรับไฟล์</label><div class="val">${r.requestFile||'—'}</div></div>
-      <div class="detail-item"><label>เอกสารที่นำมา</label><div class="val">${r.docs||'—'}</div></div>
+      <div class="detail-item detail-full">
+        <label>ขอรับไฟล์</label>
+        <div class="val">${(()=>{
+          const rf = r.requestFile||'';
+          if(rf==='ต้องการไฟล์') {
+            const dm = r.deliveryMethod||'';
+            const ge = r.gdriveEmail||'';
+            let badge = '<span style="background:rgba(231,76,60,0.15);color:#e74c3c;border:1.5px solid #e74c3c;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:800;letter-spacing:0.02em;">📁 ขอรับสำเนาไฟล์ภาพ</span>';
+            let extra = '';
+            if(dm) extra += '<span style="font-size:12px;color:var(--text-muted);margin-left:8px;">ช่องทาง: '+escHtml(dm)+'</span>';
+            if(ge) extra += '<div style="margin-top:8px;background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.4);border-radius:8px;padding:8px 12px;font-size:13px;">📧 <strong style="color:#3498db;">ส่งไฟล์ไปที่:</strong> <a href="mailto:'+escHtml(ge)+'" style="color:#c9a84c;font-weight:700;">'+escHtml(ge)+'</a></div>';
+            return badge + extra;
+          } else if(rf==='ดูอย่างเดียว') {
+            return '<span style="background:rgba(46,204,113,0.12);color:#2ecc71;border:1.5px solid #2ecc71;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:800;letter-spacing:0.02em;">👁️ ดูอย่างเดียว</span>';
+          }
+          return escHtml(rf)||'—';
+        })()}</div>
+      </div>
+      <div class="detail-item"><label>เอกสารที่นำมา</label><div class="val">${r.docs||r.exportDocs||'—'}</div></div>
       ${r.attachedFiles?`<div class="detail-item detail-full"><label>ไฟล์แนบ</label><div class="val">${formatFileLinks(r.attachedFiles)}</div></div>`:''}
       <div class="detail-item detail-full"><label>หมายเหตุ</label><div class="val">${r.additionalNote||'—'}</div></div>
     </div>
