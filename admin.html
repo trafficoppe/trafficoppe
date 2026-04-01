@@ -496,13 +496,18 @@ function doLogin() {
 }
 
 function applyRoleUI() {
-  if (currentRole === 'viewer' || currentRole === 'closer') {
-    // ซ่อนแท็บ analytics และ config
+  if (currentRole === 'closer') {
+    // admin01: ซ่อนแท็บ analytics และ config
     document.querySelectorAll('.tab').forEach((t,i) => {
       if (i >= 2) t.style.display = 'none';
     });
+  } else if (currentRole === 'admin') {
+    // admin/cctv: แสดงทุก tab
+    document.querySelectorAll('.tab').forEach(t => {
+      t.style.display = '';
+    });
   }
-  // แสดง badge ชื่อ user
+  // badge ชื่อ user
   const roleLabel = {'admin':'Admin','closer':'Admin01 (ปิดเคส)'};
   const badge = document.getElementById('userRoleBadge');
   if (badge) badge.textContent = roleLabel[currentRole] || currentRole;
@@ -557,6 +562,44 @@ function showDemoBanner(show){
 
 // ===== TIMESTAMP HELPERS =====
 // Apps Script ส่ง timestamp มาเป็น string ISO หรือ Date serial number
+function formatDateDisplay(val) {
+  if (!val || val === '' || val === '—') return '—';
+  const s = String(val).trim();
+  if (s.startsWith('1899-12-30')) return '—'; // Google Sheets time serial = ไม่ใช่วันที่
+  if (s.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(s)) {
+    const ts = safeTimestamp(s);
+    if (!ts) return '—';
+    return new Date(ts).toLocaleDateString('th-TH', {
+      day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok'
+    });
+  }
+  return s;
+}
+
+function formatTimeDisplay(val) {
+  if (!val || val === '' || val === '—') return '';
+  const s = String(val).trim();
+  // กรณีเป็น HH:MM:SS หรือ HH:MM ธรรมดา
+  if (/^\d{1,2}:\d{2}/.test(s)) {
+    return s.slice(0,5); // ตัดเหลือ HH:MM
+  }
+  // กรณีเป็น ISO จาก Google Sheet เช่น 1899-12-30T04:00:56.000Z หรือ 2026-03-31T17:00:00.000Z
+  if (s.includes('T')) {
+    if (s.startsWith('1899-12-30')) {
+      // เป็น time-only serial → ดึงแค่เวลา UTC
+      const d = new Date(s);
+      const hh = String(d.getUTCHours()).padStart(2,'0');
+      const mm = String(d.getUTCMinutes()).padStart(2,'0');
+      return hh + ':' + mm;
+    }
+    // ISO วันที่จริง → แปลงเป็นเวลาไทย
+    const d = new Date(s);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit', timeZone:'Asia/Bangkok'});
+  }
+  return '';
+}
+
 function safeTimestamp(val) {
   if (!val || val === '') return null;
   if (typeof val === 'string') {
@@ -805,7 +848,7 @@ function buildPdfPage(r) {
       <div class="pdf-section-title">[ 2 ] วัตถุประสงค์และรายละเอียดเหตุการณ์</div>
       <table class="pdf-table">
         ${row('วัตถุประสงค์', `<strong>${r.purpose||'-'}</strong>`)}
-        ${row('ช่วงเวลาเกิดเหตุ', `${r.dateStart||''} ${r.timeStart?'เวลา '+r.timeStart:''} ${r.dateEnd&&r.dateEnd!==r.dateStart?' ถึง '+r.dateEnd:''} ${r.timeEnd||''}`)}
+        ${row('ช่วงเวลาเกิดเหตุ', (()=>{const ds=formatDateDisplay(r.dateStart),ts=formatTimeDisplay(r.timeStart),de=formatDateDisplay(r.dateEnd||r.dateStart),te=formatTimeDisplay(r.timeEnd);return (ds+'  '+(ts?'เวลา '+ts:'')+' → '+de+'  '+(te?'เวลา '+te:'')).trim();})())}
         ${row('จุดที่ขอดูกล้อง', `<strong>${r.locations||'-'}</strong>`)}
         ${row('ยานพาหนะ', r.vehiclePlate?`${r.vehiclePlate} ${r.vehicleDesc||''}`:'—')}
         ${row('หลักฐานที่ต้องการ', r.evidenceTypes)}
@@ -935,7 +978,15 @@ function openModal(idx){
       <div class="detail-item"><label>ความเร่งด่วน</label><div class="val"><span class="badge ${urgencyBadge[r.urgency]||'badge-pending'}">${r.urgency||'ปกติ'}</span></div></div>
       <div class="detail-item detail-full"><label>วัตถุประสงค์</label><div class="val">${r.purpose||'—'}</div></div>
       <div class="detail-item detail-full"><label>รายละเอียดเหตุการณ์</label><div class="val" style="white-space:pre-wrap;background:var(--surface2);padding:10px;border-radius:8px;">${r.purposeDetail||'—'}</div></div>
-      <div class="detail-item"><label>ช่วงเวลา</label><div class="val">${r.dateStart||'—'} ${r.timeStart||''} → ${r.dateEnd||r.dateStart||''} ${r.timeEnd||''}</div></div>
+      <div class="detail-item"><label>ช่วงเวลา</label><div class="val">${(()=>{
+        const ds = formatDateDisplay(r.dateStart);
+        const ts = formatTimeDisplay(r.timeStart);
+        const de = formatDateDisplay(r.dateEnd||r.dateStart);
+        const te = formatTimeDisplay(r.timeEnd);
+        const start = ds + (ts ? ' เวลา ' + ts : '');
+        const end   = de + (te ? ' เวลา ' + te : '');
+        return (ds==='—'&&!ts) ? '—' : start + ' → ' + end;
+      })()}</div></div>
       <div class="detail-item"><label>จุดที่ขอดูกล้อง</label><div class="val">${r.locations||'—'}</div></div>
       <div class="detail-item"><label>ยานพาหนะ</label><div class="val">${r.vehiclePlate||'—'} ${r.vehicleDesc||''}</div></div>
       <div class="detail-item"><label>ขอรับไฟล์</label><div class="val">${r.requestFile||'—'}</div></div>
