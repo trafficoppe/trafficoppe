@@ -20,11 +20,16 @@
   body { font-family: 'IBM Plex Sans Thai','Sarabun',sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
 
   /* HEADER */
-  .header { background: linear-gradient(135deg,var(--mu-navy) 0%,var(--mu-blue) 60%,#1a4a8a 100%); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,0.25); }
-  .header-inner { max-width: 900px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
-  .header-logo { width: 52px; height: 52px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-  .header-text h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.3; }
-  .header-text p { font-size: 12px; opacity: 0.75; font-weight: 300; margin-top: 2px; }
+  .header { background: linear-gradient(135deg,var(--mu-navy) 0%,var(--mu-blue) 60%,#1a4a8a 100%); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,0.25); transition: all 0.3s ease; overflow: hidden; }
+  .header.collapsed { padding: 0; }
+  .header.collapsed .header-inner { padding: 6px 16px; }
+  .header.collapsed .header-logo { width: 32px; height: 32px; font-size: 15px; }
+  .header.collapsed .header-text h1 { font-size: 13px; }
+  .header.collapsed .header-text p { display: none; }
+  .header-inner { max-width: 900px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; gap: 16px; transition: padding 0.3s; }
+  .header-logo { width: 52px; height: 52px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: all 0.3s; }
+  .header-text h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.3; transition: font-size 0.3s; }
+  .header-text p { font-size: 12px; opacity: 0.75; font-weight: 300; margin-top: 2px; transition: all 0.3s; }
   .header-badge { margin-left: auto; background: var(--mu-gold); color: var(--mu-navy); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
   .progress-bar-wrap { background: rgba(255,255,255,0.15); height: 4px; }
   .progress-bar-fill { height: 100%; background: var(--mu-gold); transition: width 0.4s ease; }
@@ -101,6 +106,11 @@
 
   /* UPLOAD */
   .upload-area { border: 2px dashed var(--border); border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; margin-top: 8px; background: var(--surface2); }
+  .mini-upload { border: 1.5px dashed var(--mu-blue); border-radius: 8px; padding: 10px 14px; text-align: center; cursor: pointer; font-size: 13px; color: var(--mu-blue); background: #f0f4ff; transition: all 0.2s; margin-top:4px; }
+  .mini-upload:hover { background: #dce8ff; border-color: var(--mu-navy); }
+  .file-mini-list { margin-top: 6px; }
+  .file-mini-item { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 4px 8px; background: #e8f5e9; border-radius: 6px; margin-top: 4px; color: #2e7d32; }
+  .doc-upload-item { border-radius: 8px; }
   .upload-area:hover,.upload-area.dragover { border-color: var(--mu-blue); background: #eef2fb; }
   .upload-area input[type="file"] { display: none; }
   .upload-area .upload-icon { font-size: 28px; margin-bottom: 8px; }
@@ -184,6 +194,14 @@
   </div>
   <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
 </header>
+<script>
+(function(){
+  const hdr = document.querySelector('.header');
+  window.addEventListener('scroll',function(){
+    hdr.classList.toggle('collapsed', window.scrollY > 80);
+  },{passive:true});
+})();
+</script>
 
 <!-- Admin icon (bottom right) -->
 <a href="admin.html" class="admin-icon-btn" title="ผู้ดูแลระบบ">🔐</a>
@@ -369,6 +387,46 @@
     </div>
   </div>
 
+  <!-- URGENCY: ระดับความเร่งด่วน (ย้ายมาอยู่หลัง section 2) -->
+  <div class="card" id="urgencyCard">
+    <div class="card-header" style="background:linear-gradient(90deg,#8b1a1a,#c0392b);">
+      <div class="step-num" style="background:var(--mu-gold);">⚡</div>
+      <h2>ระดับความเร่งด่วน</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-group">
+        <label>กรุณาเลือกระดับความเร่งด่วน <span class="required">*</span></label>
+        <div class="radio-group" style="flex-direction:column;gap:10px;margin-top:8px;">
+          <div class="radio-item" style="padding:14px 18px;font-size:15px;font-weight:600;"
+            onclick="selectRadio('urgency','ปกติ',this);setEmergencyMode(false)">
+            <input type="radio" name="urgency" value="ปกติ">
+            🟢 ปกติ <span style="font-size:13px;font-weight:400;color:var(--text-muted);">(ภายใน 24–48 ชั่วโมง)</span>
+          </div>
+          <div class="radio-item" style="padding:14px 18px;font-size:15px;font-weight:600;"
+            onclick="selectRadio('urgency','เร่งด่วน',this);setEmergencyMode(false)">
+            <input type="radio" name="urgency" value="เร่งด่วน">
+            🟡 เร่งด่วน <span style="font-size:13px;font-weight:400;color:var(--text-muted);">(มีเหตุจำเป็น)</span>
+          </div>
+          <div class="radio-item" style="padding:14px 18px;font-size:15px;font-weight:700;border:2px solid rgba(231,76,60,0.5);background:rgba(231,76,60,0.05);"
+            onclick="selectRadio('urgency','ฉุกเฉิน',this);setEmergencyMode(true)">
+            <input type="radio" name="urgency" value="ฉุกเฉิน">
+            🔴 ฉุกเฉิน <span style="font-size:13px;font-weight:400;color:#c0392b;">(เกี่ยวกับชีวิต / อาชญากรรม)</span>
+          </div>
+        </div>
+        <p class="error-msg" id="urgencyError">กรุณาเลือกระดับความเร่งด่วน</p>
+      </div>
+      <!-- Emergency banner -->
+      <div id="emergencyBanner" style="display:none;margin-top:14px;background:#fef2f2;border:2px solid #e74c3c;border-radius:10px;padding:14px 16px;">
+        <div style="font-size:15px;font-weight:800;color:#c0392b;margin-bottom:6px;">🚨 โหมดฉุกเฉิน — กรอกเฉพาะข้อมูลจำเป็น</div>
+        <div style="font-size:13px;color:#7f1d1d;line-height:1.7;">
+          กรุณากรอกข้อมูลเท่าที่จำเป็น:<br>
+          ✅ ชื่อ + โทรศัพท์ &nbsp; ✅ วันเวลาสถานที่ &nbsp; ✅ ยืนยัน PDPA &nbsp; ✅ อัปโหลดสำเนาบัตร<br>
+          <span style="color:#c0392b;">ใบแจ้งความและเอกสารอื่นๆ สามารถยื่นเพิ่มเติมได้ในภายหลัง</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- SECTION 3: วันเวลา/สถานที่ -->
   <div class="card">
     <div class="card-header"><div class="step-num">3</div><h2>ช่วงเวลาและสถานที่ที่ต้องการดูย้อนหลัง</h2></div>
@@ -385,7 +443,7 @@
       </div>
       <hr class="section-divider">
       <div class="form-group" style="margin-bottom:12px;">
-        <label for="locationInput">จุดที่ต้องการดูกล้อง <span class="required">*</span></label>
+        <label for="locationInput">จุดที่ต้องการดูกล้อง <span class="required">*</span> <span style="font-size:12px;color:var(--mu-blue);font-weight:600;">(กรอกข้อมูลแล้วกดปุ่ม + เพิ่ม)</span></label>
         <div style="display:flex;gap:8px;">
           <input type="text" id="locationInput" placeholder="พิมพ์จุด/บริเวณที่ต้องการ" style="flex:1;">
           <button type="button" onclick="addLocation()" style="background:var(--mu-navy);color:white;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;white-space:nowrap;">+ เพิ่ม</button>
@@ -564,54 +622,126 @@
   </div>
 
   <!-- SECTION 5: เอกสารประกอบ -->
-  <div class="card">
-    <div class="card-header"><div class="step-num">5</div><h2>เอกสารประกอบคำขอ</h2></div>
+  <div class="card" id="section5Card">
+    <div class="card-header" id="section5Header">
+      <div class="step-num">5</div>
+      <h2 id="section5Title">เอกสารประกอบคำขอ</h2>
+    </div>
     <div class="card-body">
-      <div class="info-box">📎 เอกสารที่ควรนำมาแสดง: สำเนาบัตรประชาชน, บัตรนักศึกษา/พนักงาน และเอกสารอื่นที่เกี่ยวข้อง</div>
 
-      <div class="form-group" style="margin-bottom:20px;">
-        <label>เอกสารที่นำมาด้วย</label>
-        <div class="check-group">
-          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="docs" value="บัตรประชาชน"> 🪪 บัตรประชาชน</div>
-          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="docs" value="บัตรนักศึกษา/พนักงาน"> 🎓 บัตรนักศึกษา/พนักงาน</div>
-          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="docs" value="ใบแจ้งความ"> 📋 ใบแจ้งความ</div>
-          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="docs" value="หนังสือมอบอำนาจ"> 📜 หนังสือมอบอำนาจ</div>
-          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="docs" value="หนังสือราชการ"> 🏛️ หนังสือราชการ</div>
-          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="docs" value="คำสั่งศาล"> ⚖️ คำสั่งศาล</div>
-          <div class="check-item" onclick="toggleCheck(this);toggleOtherDoc(this)"><input type="checkbox" name="docs" value="อื่นๆ"> 📝 อื่นๆ</div>
-        </div>
-        <div class="conditional-section" id="otherDocSection" style="margin-top:10px;">
-          <input type="text" id="docsOther" name="docsOther" placeholder="ระบุเอกสารอื่นๆ..." style="max-width:400px;">
+      <!-- โหมด: ดูอย่างเดียว -->
+      <div id="s5ViewOnly">
+        <div class="info-box">📎 เอกสารที่ควรนำมาแสดง: สำเนาบัตรประชาชน, บัตรนักศึกษา/พนักงาน และเอกสารอื่นที่เกี่ยวข้อง</div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>เอกสารที่นำมาด้วย (เลือกและอัปโหลดไฟล์)</label>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+            <div class="doc-upload-item" data-doc="บัตรประชาชน">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-id')"><input type="checkbox" name="docs" value="บัตรประชาชน"> 🪪 บัตรประชาชน</div>
+              <div class="doc-upload-zone" id="upload-doc-id" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-id')">📎 อัปโหลดสำเนาบัตรประชาชน</div>
+                <input type="file" id="file-doc-id" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-id')">
+                <div class="file-mini-list" id="list-doc-id"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item" data-doc="บัตรนักศึกษา/พนักงาน">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-student')"><input type="checkbox" name="docs" value="บัตรนักศึกษา/พนักงาน"> 🎓 บัตรนักศึกษา/พนักงาน</div>
+              <div class="doc-upload-zone" id="upload-doc-student" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-student')">📎 อัปโหลดสำเนาบัตรนักศึกษา/พนักงาน</div>
+                <input type="file" id="file-doc-student" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-student')">
+                <div class="file-mini-list" id="list-doc-student"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item" data-doc="ใบแจ้งความ">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-police')"><input type="checkbox" name="docs" value="ใบแจ้งความ"> 📋 ใบแจ้งความ</div>
+              <div class="doc-upload-zone" id="upload-doc-police" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-police')">📎 อัปโหลดใบแจ้งความ</div>
+                <input type="file" id="file-doc-police" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-police')">
+                <div class="file-mini-list" id="list-doc-police"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item" data-doc="หนังสือมอบอำนาจ">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-poa')"><input type="checkbox" name="docs" value="หนังสือมอบอำนาจ"> 📜 หนังสือมอบอำนาจ</div>
+              <div class="doc-upload-zone" id="upload-doc-poa" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-poa')">📎 อัปโหลดหนังสือมอบอำนาจ</div>
+                <input type="file" id="file-doc-poa" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-poa')">
+                <div class="file-mini-list" id="list-doc-poa"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item" data-doc="หนังสือราชการ">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-official')"><input type="checkbox" name="docs" value="หนังสือราชการ"> 🏛️ หนังสือราชการ</div>
+              <div class="doc-upload-zone" id="upload-doc-official" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-official')">📎 อัปโหลดหนังสือราชการ</div>
+                <input type="file" id="file-doc-official" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-official')">
+                <div class="file-mini-list" id="list-doc-official"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item" data-doc="คำสั่งศาล">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-court')"><input type="checkbox" name="docs" value="คำสั่งศาล"> ⚖️ คำสั่งศาล</div>
+              <div class="doc-upload-zone" id="upload-doc-court" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-court')">📎 อัปโหลดคำสั่งศาล</div>
+                <input type="file" id="file-doc-court" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-court')">
+                <div class="file-mini-list" id="list-doc-court"></div>
+              </div>
+            </div>
+            <div class="check-item" onclick="toggleCheck(this);toggleOtherDoc(this)"><input type="checkbox" name="docs" value="อื่นๆ"> 📝 อื่นๆ</div>
+          </div>
+          <div class="conditional-section" id="otherDocSection" style="margin-top:10px;">
+            <input type="text" id="docsOther" name="docsOther" placeholder="ระบุเอกสารอื่นๆ..." style="max-width:400px;">
+          </div>
         </div>
       </div>
 
-      <!-- อัปโหลดไฟล์ -->
-      <div class="form-group" style="margin-bottom:20px;">
-        <label>อัปโหลดรูปภาพ / ไฟล์เอกสารประกอบ</label>
-        <span class="form-hint" style="margin-bottom:4px;">รองรับ JPG, PNG, PDF, DOC ขนาดไม่เกิน 10MB ต่อไฟล์ (สูงสุด 5 ไฟล์)</span>
-        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="this.classList.remove('dragover')">
-          <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" onchange="handleFileSelect(event)">
-          <div class="upload-icon">📎</div>
-          <p>คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</p>
-          <span>JPG, PNG, PDF, DOC — ไม่เกิน 10MB ต่อไฟล์</span>
+      <!-- โหมด: ขอรับสำเนาไฟล์ -->
+      <div id="s5Export" style="display:none;">
+        <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;color:#7f1d1d;margin-bottom:16px;">
+          ⚠️ <strong>เอกสารต้องครบถ้วนทุกรายการ</strong> มิฉะนั้นหน่วยงานขอสงวนสิทธิ์ในการปฏิเสธการให้ไฟล์ภาพ
         </div>
-        <div class="file-list" id="fileList"></div>
+
+        <!-- บัตรประชาชน — บังคับ -->
+        <div class="form-group" style="margin-bottom:16px;padding:14px;background:#f8faff;border-radius:10px;border:1px solid #dde3ee;">
+          <label style="font-size:14px;font-weight:700;">🪪 สำเนาบัตรประชาชน / บัตรนักศึกษา / บัตรพนักงาน
+            <span style="color:#c0392b;font-weight:800;"> *</span>
+          </label>
+          <div style="font-size:12px;color:#c0392b;font-weight:600;margin:4px 0 10px;">(พร้อมเซ็นรับรองสำเนาถูกต้องของผู้ขอดูกล้อง — จำเป็นต้องแนบไฟล์)</div>
+          <div class="mini-upload" onclick="triggerDocUpload('file-export-id')" id="uploadIdBtn">📎 คลิกเพื่ออัปโหลดสำเนาบัตร</div>
+          <input type="file" id="file-export-id" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-export-id');updateIdUploadBtn()">
+          <div class="file-mini-list" id="list-export-id"></div>
+          <p class="error-msg" id="exportIdError">กรุณาอัปโหลดสำเนาบัตรประชาชน / บัตรนักศึกษา / บัตรพนักงาน</p>
+        </div>
+
+        <!-- ใบแจ้งความ — บังคับ -->
+        <div class="form-group" style="margin-bottom:16px;padding:14px;background:#f8faff;border-radius:10px;border:1px solid #dde3ee;">
+          <label style="font-size:14px;font-weight:700;">📋 สำเนาบันทึกประจำวัน หรือ ใบแจ้งความ
+            <span style="color:#c0392b;font-weight:800;"> *</span>
+          </label>
+          <div style="font-size:12px;color:#c0392b;font-weight:600;margin:4px 0 10px;">(ระบุวันที่ เวลา และสถานที่เกิดเหตุชัดเจน — จำเป็นต้องแนบไฟล์)</div>
+          <div class="mini-upload" onclick="triggerDocUpload('file-export-police')">📎 คลิกเพื่ออัปโหลดใบแจ้งความ</div>
+          <input type="file" id="file-export-police" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-export-police')">
+          <div class="file-mini-list" id="list-export-police"></div>
+          <p class="error-msg" id="exportPoliceError">กรุณาอัปโหลดสำเนาบันทึกประจำวัน / ใบแจ้งความ</p>
+        </div>
+
+        <!-- หนังสือมอบอำนาจ — optional -->
+        <div class="form-group" style="margin-bottom:8px;padding:14px;background:#f8faff;border-radius:10px;border:1px solid #dde3ee;">
+          <div class="check-item" onclick="toggleDocUpload(this,'upload-export-poa')" style="margin-bottom:0;">
+            <input type="checkbox" name="exportDocs" value="หนังสือมอบอำนาจ">
+            📜 หนังสือมอบอำนาจ และสำเนาบัตรประชาชนของผู้มอบและผู้รับมอบ
+            <em style="color:#c0392b;font-weight:700;"> (เฉพาะกรณีรับแทน)</em>
+          </div>
+          <div id="upload-export-poa" style="display:none;margin-top:10px;">
+            <div class="mini-upload" onclick="triggerDocUpload('file-export-poa')">📎 คลิกเพื่ออัปโหลดหนังสือมอบอำนาจ</div>
+            <input type="file" id="file-export-poa" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-export-poa')">
+            <div class="file-mini-list" id="list-export-poa"></div>
+          </div>
+        </div>
       </div>
 
-      <div class="form-group" style="margin-bottom:20px;">
+      <!-- หมายเหตุ + upload ทั่วไป (ทุกโหมด) -->
+      <div class="form-group" style="margin-bottom:20px;margin-top:16px;">
         <label for="additionalNote">หมายเหตุเพิ่มเติม</label>
         <textarea id="additionalNote" name="additionalNote" style="min-height:70px;" placeholder="ข้อมูลเพิ่มเติมที่ต้องการแจ้งเจ้าหน้าที่..."></textarea>
       </div>
 
-      <div class="form-group">
-        <label>ระดับความเร่งด่วน <span class="required">*</span></label>
-        <div class="radio-group">
-          <div class="radio-item" onclick="selectRadio('urgency','ปกติ',this)"><input type="radio" name="urgency" value="ปกติ"> 🟢 ปกติ (ภายใน 24-48 ชม.)</div>
-          <div class="radio-item" onclick="selectRadio('urgency','เร่งด่วน',this)"><input type="radio" name="urgency" value="เร่งด่วน"> 🟡 เร่งด่วน (มีเหตุจำเป็น)</div>
-          <div class="radio-item" onclick="selectRadio('urgency','ฉุกเฉิน',this)"><input type="radio" name="urgency" value="ฉุกเฉิน"> 🔴 ฉุกเฉิน (เกี่ยวกับชีวิต/อาชญากรรม)</div>
-        </div>
-        <p class="error-msg" id="urgencyError">กรุณาเลือกระดับความเร่งด่วน</p>
-      </div>
     </div>
   </div>
 
@@ -699,6 +829,92 @@
 </main>
 
 <script>
+// ===== EMERGENCY MODE =====
+function setEmergencyMode(on) {
+  document.getElementById('emergencyBanner').style.display = on ? 'block' : 'none';
+  // ซ่อน/แสดง section ที่ไม่จำเป็นในโหมดฉุกเฉิน
+  const optionalFields = ['gender','muEmail','officialOrg','officialDoc','email','evidenceGroup'];
+  optionalFields.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) {
+      const wrap = el.closest('.form-group');
+      if(wrap) wrap.style.opacity = on ? '0.4' : '1';
+    }
+  });
+}
+
+// ===== SECTION 5 DYNAMIC =====
+function updateSection5(requestFileVal) {
+  const s5Title = document.getElementById('section5Title');
+  const s5ViewOnly = document.getElementById('s5ViewOnly');
+  const s5Export = document.getElementById('s5Export');
+  if (!s5Title) return;
+  if (requestFileVal === 'ต้องการไฟล์') {
+    s5Title.textContent = 'เอกสารประกอบคำขอ (กรณีรับสำเนาไฟล์ภาพ)';
+    if(s5ViewOnly) s5ViewOnly.style.display = 'none';
+    if(s5Export) s5Export.style.display = 'block';
+  } else {
+    s5Title.textContent = 'เอกสารประกอบคำขอ';
+    if(s5ViewOnly) s5ViewOnly.style.display = 'block';
+    if(s5Export) s5Export.style.display = 'none';
+  }
+}
+
+// ===== DOC UPLOAD HELPERS =====
+const docFiles = {}; // { 'file-doc-id': [File, ...] }
+
+function toggleDocUpload(checkEl, uploadId) {
+  // ถ้าเป็น check-item ทั่วไป ให้ toggle ปกติ
+  const cb = checkEl.querySelector('input[type=checkbox]');
+  if(cb) { cb.checked = !cb.checked; checkEl.classList.toggle('selected', cb.checked); }
+  const zone = document.getElementById(uploadId);
+  if(zone) zone.style.display = (cb && cb.checked) ? 'block' : 'none';
+}
+
+function triggerDocUpload(inputId) {
+  const el = document.getElementById(inputId);
+  if(el) el.click();
+}
+
+function handleDocFile(input, inputId) {
+  const files = Array.from(input.files);
+  if(!docFiles[inputId]) docFiles[inputId] = [];
+  files.forEach(f => {
+    if(f.size > 10*1024*1024){ alert('ไฟล์ "'+f.name+'" มีขนาดเกิน 10MB'); return; }
+    docFiles[inputId].push(f);
+  });
+  renderDocFileList(inputId);
+}
+
+function renderDocFileList(inputId) {
+  const listId = inputId.replace('file-','list-');
+  const el = document.getElementById(listId);
+  if(!el) return;
+  const files = docFiles[inputId] || [];
+  el.innerHTML = files.map((f,i) =>
+    `<div class="file-mini-item">✅ ${f.name} <span style="color:#666;">(${(f.size/1024).toFixed(0)} KB)</span>
+     <span onclick="removeDocFile('${inputId}',${i})" style="margin-left:auto;cursor:pointer;color:#c0392b;">✕</span></div>`
+  ).join('');
+}
+
+function removeDocFile(inputId, idx) {
+  if(docFiles[inputId]) { docFiles[inputId].splice(idx,1); renderDocFileList(inputId); }
+}
+
+function updateIdUploadBtn() {
+  // เช็คว่ามีไฟล์แล้วหรือยัง
+  const files = docFiles['file-export-id'] || [];
+  const btn = document.getElementById('uploadIdBtn');
+  if(btn) btn.style.borderColor = files.length > 0 ? '#27ae60' : '';
+}
+
+// รวม docFiles ทุกอันสำหรับ submit
+function getAllDocFiles() {
+  const all = [];
+  Object.values(docFiles).forEach(arr => arr.forEach(f => all.push(f)));
+  return all;
+}
+
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVfwqmg24QmG37NbdIpn5w90_TWzbilayADz2QdG29CY2qFH_fuD0FhZRinslAQL4I1Q/exec';
 
 // Load preset locations from localStorage (set by Admin)
@@ -767,7 +983,10 @@ function handleRequesterType() {
   document.getElementById('muSection').classList.toggle('show', ['นักศึกษา','บุคลากร'].includes(val));
   document.getElementById('officialSection').classList.toggle('show', val==='เจ้าหน้าที่ภายนอก');
 }
-function showFileSection(show) { document.getElementById('fileSection').classList.toggle('show', show); }
+function showFileSection(show) {
+  document.getElementById('fileSection').classList.toggle('show', show);
+  updateSection5(show ? 'ต้องการไฟล์' : 'ดูอย่างเดียว');
+}
 
 function toggleSection4Consent(checked) {
   const rest = document.getElementById('section4Rest');
@@ -805,91 +1024,169 @@ document.addEventListener('input', updateProgress);
 // Validate
 function validate() {
   let valid = true;
-  const checks = [
-    {id:'pdpaConsent', errId:'pdpaError', fn:()=>!document.getElementById('pdpaConsent').checked},
-    {id:'prefix', errId:'prefixError'},
-    {id:'fname', errId:'fnameError'},
-    {id:'lname', errId:'lnameError'},
-    {id:'gender', errId:'genderError'},
-    {id:'requesterType', errId:'requesterTypeError'},
-    {id:'idCard', errId:'idCardError'},
-    {id:'phone', errId:'phoneError'},
-    {id:'dateStart', errId:'dateError'},
-    {id:'purposeDetail', errId:'purposeDetailError'},
-  ];
-  checks.forEach(({id,errId,fn}) => {
-    const el=document.getElementById(id), errEl=document.getElementById(errId);
-    const invalid = fn ? fn() : !el.value.trim();
-    if(invalid){ if(el)el.classList.add('error'); if(errEl)errEl.classList.add('show'); valid=false; }
-    else { if(el)el.classList.remove('error'); if(errEl)errEl.classList.remove('show'); }
-  });
-  if(!locationList.length){ document.getElementById('locationError').classList.add('show'); valid=false; }
-  else document.getElementById('locationError').classList.remove('show');
-  if(!document.querySelector('input[name="purpose"]:checked')){ document.getElementById('purposeError').classList.add('show'); valid=false; }
-  else document.getElementById('purposeError').classList.remove('show');
-  // 4.1 PDPA consent
+  const errors = [];
+
+  if(!document.getElementById('pdpaConsent').checked){
+    document.getElementById('pdpaConsentError').classList.add('show');
+    errors.push('ยังไม่ได้ยืนยันการยินยอม PDPA');
+    valid = false;
+  } else document.getElementById('pdpaConsentError').classList.remove('show');
+
+  if(!document.getElementById('fname').value.trim()){
+    document.getElementById('fnameError').classList.add('show');
+    errors.push('กรุณากรอกชื่อจริง');
+    valid = false;
+  } else document.getElementById('fnameError').classList.remove('show');
+
+  if(!document.getElementById('lname').value.trim()){
+    document.getElementById('lnameError').classList.add('show');
+    errors.push('กรุณากรอกนามสกุล');
+    valid = false;
+  } else document.getElementById('lnameError').classList.remove('show');
+
+  if(!document.getElementById('requesterType').value){
+    document.getElementById('requesterTypeError').classList.add('show');
+    errors.push('กรุณาเลือกประเภทผู้ขอ');
+    valid = false;
+  } else document.getElementById('requesterTypeError').classList.remove('show');
+
+  if(!document.getElementById('idCard').value.trim()){
+    document.getElementById('idCardError').classList.add('show');
+    errors.push('กรุณากรอกเลขบัตรประชาชน / รหัส');
+    valid = false;
+  } else document.getElementById('idCardError').classList.remove('show');
+
+  if(!document.getElementById('phone').value.trim()){
+    document.getElementById('phoneError').classList.add('show');
+    errors.push('กรุณากรอกเบอร์โทรศัพท์');
+    valid = false;
+  } else document.getElementById('phoneError').classList.remove('show');
+
+  if(!document.querySelector('input[name="purpose"]:checked')){
+    document.getElementById('purposeError').classList.add('show');
+    errors.push('กรุณาเลือกวัตถุประสงค์');
+    valid = false;
+  } else document.getElementById('purposeError').classList.remove('show');
+
+  if(!document.querySelector('input[name="urgency"]:checked')){
+    document.getElementById('urgencyError').classList.add('show');
+    errors.push('กรุณาเลือกระดับความเร่งด่วน');
+    valid = false;
+  } else document.getElementById('urgencyError').classList.remove('show');
+
+  if(!document.getElementById('dateStart').value){
+    document.getElementById('dateError').classList.add('show');
+    errors.push('กรุณาระบุวันที่เกิดเหตุ');
+    valid = false;
+  } else document.getElementById('dateError').classList.remove('show');
+
+  if(!document.getElementById('locations').value){
+    document.getElementById('locationError').classList.add('show');
+    errors.push('กรุณาระบุจุดที่ต้องการดูกล้อง (พิมพ์แล้วกดปุ่ม "+ เพิ่ม")');
+    valid = false;
+  } else document.getElementById('locationError').classList.remove('show');
+
+  // 4.1 PDPA file consent
   const pcEl = document.getElementById('pdpaFileConsent');
   const pcErr = document.getElementById('pdpaFileConsentError');
-  if(pcErr){ if(!pcEl||!pcEl.checked){pcErr.classList.add('show');valid=false;}else pcErr.classList.remove('show'); }
+  if(pcErr){ if(!pcEl||!pcEl.checked){pcErr.classList.add('show');errors.push('กรุณายืนยัน PDPA ในส่วนที่ 4');valid=false;}else pcErr.classList.remove('show'); }
 
-  // 4.2 ความประสงค์
+  // 4.2 requestFile
   const rfEl = document.querySelector('input[name="requestFile"]:checked');
-  if(!rfEl){ document.getElementById('requestFileError').classList.add('show'); valid=false; }
+  if(!rfEl){ document.getElementById('requestFileError').classList.add('show'); errors.push('กรุณาเลือกความประสงค์ (ส่วนที่ 4)'); valid=false; }
   else {
     document.getElementById('requestFileError').classList.remove('show');
     if(rfEl.value === 'ต้องการไฟล์') {
-      // 4.3 เหตุผล
       const frEl = document.querySelector('input[name="fileReason"]:checked');
       const frErr = document.getElementById('fileReasonError');
-      if(frErr){ if(!frEl){frErr.classList.add('show');valid=false;}else frErr.classList.remove('show'); }
-      // 4.5 ช่องทาง
+      if(frErr){ if(!frEl){frErr.classList.add('show');errors.push('กรุณาเลือกเหตุผลในการขอรับสำเนา (ส่วนที่ 4.3)');valid=false;}else frErr.classList.remove('show'); }
       const dmEl = document.querySelector('input[name="deliveryMethod"]:checked');
       const dmErr = document.getElementById('deliveryMethodError');
-      if(dmErr){ if(!dmEl){dmErr.classList.add('show');valid=false;}else dmErr.classList.remove('show'); }
-      // ถ้าเลือก Google Drive → validate email + consent
+      if(dmErr){ if(!dmEl){dmErr.classList.add('show');errors.push('กรุณาเลือกช่องทางการรับไฟล์ (ส่วนที่ 4.5)');valid=false;}else dmErr.classList.remove('show'); }
       if(dmEl && dmEl.value === 'รับผ่านลิงก์ Google Drive') {
         const gEmail = document.getElementById('gdriveEmail');
         const gEmailErr = document.getElementById('gdriveEmailError');
-        if(gEmailErr){ if(!gEmail||!gEmail.value.includes('@')){gEmailErr.classList.add('show');valid=false;}else gEmailErr.classList.remove('show'); }
+        if(gEmailErr){ if(!gEmail||!gEmail.value.includes('@')){gEmailErr.classList.add('show');errors.push('กรุณากรอกอีเมลสำหรับรับลิงก์ Google Drive');valid=false;}else gEmailErr.classList.remove('show'); }
         const gc = document.getElementById('gdriveConsent');
         const gcErr = document.getElementById('gdriveConsentError');
-        if(gcErr){
-          if(!gc||!gc.checked){
-            gcErr.style.display='inline-block';
-            // เขย่า checkbox เพื่อดึงความสนใจ
-            if(gc){ gc.style.outline='2px solid #c0392b'; gc.style.outlineOffset='2px'; }
-            valid=false;
-          } else {
-            gcErr.style.display='none';
-            if(gc){ gc.style.outline=''; }
-          }
-        }
+        if(gcErr){ if(!gc||!gc.checked){gcErr.style.display='inline-block';if(gc){gc.style.outline='2px solid #c0392b';}errors.push('กรุณายืนยันเงื่อนไขการรับไฟล์ Google Drive');valid=false;}else{gcErr.style.display='none';if(gc)gc.style.outline='';} }
+      }
+      // ตรวจ section 5 export — บัตรประชาชน
+      const idFiles = docFiles['file-export-id'] || [];
+      const idErr = document.getElementById('exportIdError');
+      if(idErr){ if(idFiles.length===0){idErr.classList.add('show');errors.push('กรุณาอัปโหลดสำเนาบัตรประชาชน/บัตรนักศึกษา (ส่วนที่ 5)');valid=false;}else idErr.classList.remove('show'); }
+      // ตรวจใบแจ้งความ — บังคับเฉพาะกรณีไม่ฉุกเฉิน
+      const urgency = document.querySelector('input[name="urgency"]:checked')?.value || '';
+      if(urgency !== 'ฉุกเฉิน') {
+        const policeFiles = docFiles['file-export-police'] || [];
+        const policeErr = document.getElementById('exportPoliceError');
+        if(policeErr){ if(policeFiles.length===0){policeErr.classList.add('show');errors.push('กรุณาอัปโหลดสำเนาบันทึกประจำวัน/ใบแจ้งความ (ส่วนที่ 5)');valid=false;}else policeErr.classList.remove('show'); }
+      } else {
+        const policeErr = document.getElementById('exportPoliceError');
+        if(policeErr) policeErr.classList.remove('show');
       }
     }
   }
-  if(!document.querySelector('input[name="urgency"]:checked')){ document.getElementById('urgencyError').classList.add('show'); valid=false; }
-  else document.getElementById('urgencyError').classList.remove('show');
-  // officer validation
+
+  // officer
   const mode = currentOfficerMode;
   const modeEl = document.getElementById('officerModeError');
-  if (!mode) { modeEl.classList.add('show'); valid=false; }
+  if (!mode) { modeEl.classList.add('show'); errors.push('กรุณาเลือกเจ้าหน้าที่ผู้ให้บริการ (ส่วนที่ 6)'); valid=false; }
   else { modeEl.classList.remove('show'); }
   if (mode==='known') {
     const ov = document.getElementById('officerName').value;
     const oe = document.getElementById('officerNameError');
-    if (!ov) { document.getElementById('officerNameInput').classList.add('error'); oe.classList.add('show'); valid=false; }
+    if (!ov) { document.getElementById('officerNameInput').classList.add('error'); oe.classList.add('show'); errors.push('กรุณาเลือกชื่อเจ้าหน้าที่จากรายการ (ส่วนที่ 6)'); valid=false; }
     else { document.getElementById('officerNameInput').classList.remove('error'); oe.classList.remove('show'); }
   }
   if (mode==='other') {
     const on2 = document.getElementById('officerOtherName').value.trim();
-    const oe2 = document.getElementById('officerOtherEmail').value.trim();
-    if (!on2) { document.getElementById('officerOtherName').classList.add('error'); document.getElementById('officerOtherNameError').classList.add('show'); valid=false; }
-    else { document.getElementById('officerOtherName').classList.remove('error'); document.getElementById('officerOtherNameError').classList.remove('show'); }
-    if (!oe2) { document.getElementById('officerOtherEmail').classList.add('error'); document.getElementById('officerOtherEmailError').classList.add('show'); valid=false; }
-    else { document.getElementById('officerOtherEmail').classList.remove('error'); document.getElementById('officerOtherEmailError').classList.remove('show'); }
+    const oe2 = document.getElementById('officerOtherNameError');
+    if (!on2) { oe2.classList.add('show'); errors.push('กรุณากรอกชื่อเจ้าหน้าที่ (ส่วนที่ 6)'); valid=false; }
+    else oe2.classList.remove('show');
   }
+
+  // แสดง popup ถ้ามี error
+  if(!valid && errors.length > 0) {
+    showValidationPopup(errors);
+  }
+
   return valid;
 }
+
+function showValidationPopup(errors) {
+  // ลบ popup เก่า
+  const old = document.getElementById('validationPopup');
+  if(old) old.remove();
+
+  const popup = document.createElement('div');
+  popup.id = 'validationPopup';
+  popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:90vw;width:400px;max-height:80vh;overflow-y:auto;';
+  popup.innerHTML = `
+    <div style="background:#c0392b;color:white;padding:16px 20px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:22px;">⚠️</span>
+      <div>
+        <div style="font-size:15px;font-weight:800;">กรุณาตรวจสอบข้อมูล</div>
+        <div style="font-size:12px;opacity:0.85;">พบ ${errors.length} รายการที่ยังไม่ครบถ้วน</div>
+      </div>
+    </div>
+    <div style="padding:16px 20px;">
+      <ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;">
+        ${errors.map(e=>`<li style="font-size:13px;color:#1a2744;line-height:1.5;">${e}</li>`).join('')}
+      </ul>
+      <button onclick="document.getElementById('validationPopup').remove();document.querySelector('.error-msg.show')?.closest('.card, .form-group')?.scrollIntoView({behavior:'smooth',block:'center'});"
+        style="width:100%;margin-top:16px;padding:12px;background:#003087;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+        ✓ รับทราบ และไปแก้ไข
+      </button>
+    </div>`;
+
+  // overlay
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;';
+  overlay.onclick = () => { popup.remove(); overlay.remove(); };
+  document.body.append(overlay, popup);
+}
+
 
 function generateRefCode() {
   const date = new Date().toISOString().slice(0,10).replace(/-/g,'');
@@ -962,10 +1259,11 @@ document.getElementById('cctvForm').addEventListener('submit', async function(e)
 
     // 1. แปลงไฟล์ทั้งหมดเป็น base64 ก่อน
     const filesData = [];
-    for (let i = 0; i < uploadedFiles.length; i++) {
+    const allFiles4Upload = [...uploadedFiles, ...getAllDocFiles()];
+    for (let i = 0; i < allFiles4Upload.length; i++) {
       document.getElementById('loadingText').textContent =
-        'กำลังเตรียมไฟล์ ' + (i+1) + '/' + uploadedFiles.length + '...';
-      const file = uploadedFiles[i];
+        'กำลังเตรียมไฟล์ ' + (i+1) + '/' + allFiles4Upload.length + '...';
+      const file = allFiles4Upload[i];
       const base64 = await fileToBase64(file);
       filesData.push({
         fileName:   file.name,
