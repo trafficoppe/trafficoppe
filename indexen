@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCTV Footage Request Form | Traffic and Safety Unit, Mahidol University</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mu-navy: #1a2744; --mu-blue: #003087; --mu-gold: #c9a84c;
+    --bg: #f4f6fb; --surface: #ffffff; --surface2: #f8f9fc;
+    --border: #dde3ee; --text: #1a2744; --text-muted: #6b7a99;
+    --success: #1a7a4a; --success-bg: #e8f5ee;
+    --shadow: 0 2px 16px rgba(26,39,68,0.08);
+    --shadow-lg: 0 8px 40px rgba(26,39,68,0.14);
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'IBM Plex Sans Thai','Sarabun',sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
+
+  /* HEADER */
+  .header { background: linear-gradient(135deg,var(--mu-navy) 0%,var(--mu-blue) 60%,#1a4a8a 100%); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,0.25); transition: all 0.3s ease; overflow: hidden; }
+  .header.collapsed { padding: 0; }
+  .header.collapsed .header-inner { padding: 6px 16px; }
+  .header.collapsed .header-logo { width: 32px; height: 32px; font-size: 15px; }
+  .header.collapsed .header-text h1 { font-size: 13px; }
+  .header.collapsed .header-text p { display: none; }
+  .header-inner { max-width: 900px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; gap: 16px; transition: padding 0.3s; }
+  .header-logo { width: 52px; height: 52px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: all 0.3s; }
+  .header-text h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.3; transition: font-size 0.3s; }
+  .header-text p { font-size: 12px; opacity: 0.75; font-weight: 300; margin-top: 2px; transition: all 0.3s; }
+  .header-badge { margin-left: auto; background: var(--mu-gold); color: var(--mu-navy); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .progress-bar-wrap { background: rgba(255,255,255,0.15); height: 4px; }
+  .progress-bar-fill { height: 100%; background: var(--mu-gold); transition: width 0.4s ease; }
+
+  /* ADMIN ICON */
+  .admin-icon-btn { position: fixed; bottom: 24px; right: 24px; width: 44px; height: 44px; background: var(--mu-navy); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.25); z-index: 99; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; }
+  .admin-icon-btn:hover { opacity: 1; transform: scale(1.1); }
+
+  /* MAIN */
+  .main { max-width: 900px; margin: 0 auto; padding: 32px 16px 80px; }
+
+  /* PDPA */
+  .pdpa-notice { background: linear-gradient(135deg,#fff8e7,#fffdf4); border: 2px solid var(--mu-gold); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 28px; position: relative; overflow: hidden; }
+  .pdpa-notice::before { content:''; position: absolute; left:0; top:0; bottom:0; width:5px; background: var(--mu-gold); }
+  .pdpa-title { font-size: 14px; font-weight: 700; color: var(--mu-navy); display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .pdpa-body { font-size: 13px; color: #555; line-height: 1.7; }
+  .pdpa-consent { margin-top: 14px; display: flex; align-items: flex-start; gap: 10px; background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid #e0c87a; cursor: pointer; }
+  .pdpa-consent input[type="checkbox"] { width: 18px; height: 18px; margin-top: 1px; cursor: pointer; accent-color: var(--mu-blue); flex-shrink: 0; }
+  .pdpa-consent label { font-size: 13px; font-weight: 600; color: var(--mu-navy); cursor: pointer; line-height: 1.5; }
+
+  /* CARD */
+  .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 20px; overflow: visible; }
+  .card-header { background: linear-gradient(90deg,var(--mu-navy),#1e3a6e); color: white; padding: 14px 22px; display: flex; align-items: center; gap: 10px; border-radius: var(--radius) var(--radius) 0 0; }
+  .card-header .step-num { background: var(--mu-gold); color: var(--mu-navy); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+  .card-header h2 { font-size: 14px; font-weight: 700; }
+  .card-body { padding: 22px; }
+
+  /* FORM */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-row.single { grid-template-columns: 1fr; }
+  .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+  @media(max-width:600px){ .form-row,.form-row.triple { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label { font-size: 13px; font-weight: 600; color: var(--mu-navy); }
+  .required { color: #c0392b; }
+  .form-hint { font-size: 11px; color: var(--text-muted); }
+  input[type="text"],input[type="email"],input[type="tel"],input[type="date"],input[type="time"],textarea,select {
+    width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: inherit; font-size: 14px; color: var(--text); background: white;
+    transition: border-color 0.2s, box-shadow 0.2s; outline: none; appearance: none;
+  }
+  input:focus,textarea:focus,select:focus { border-color: var(--mu-blue); box-shadow: 0 0 0 3px rgba(0,48,135,0.1); }
+  input.error,textarea.error,select.error { border-color: #c0392b; box-shadow: 0 0 0 3px rgba(192,57,43,0.1); }
+  textarea { resize: vertical; min-height: 90px; }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231a2744' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; }
+
+  /* RADIO / CHECK */
+  .radio-group,.check-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .radio-item,.check-item { display: flex; align-items: center; gap: 7px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; transition: all 0.15s; font-size: 13px; font-weight: 500; }
+  .radio-item:hover,.check-item:hover { border-color: var(--mu-blue); background: #eef2fb; }
+  .radio-item input,.check-item input { accent-color: var(--mu-blue); }
+  .radio-item.selected,.check-item.selected { border-color: var(--mu-blue); background: #e8eef9; color: var(--mu-blue); }
+
+  /* DATETIME */
+  .datetime-range { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; }
+  .datetime-arrow { color: var(--text-muted); font-size: 20px; text-align: center; }
+
+  /* LOCATION TAGS */
+  .location-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .location-tag { background: var(--mu-navy); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .location-tag .remove { cursor: pointer; opacity: 0.7; font-size: 14px; }
+  .location-tag .remove:hover { opacity: 1; }
+
+  /* PRESET LOCATIONS */
+  .preset-locations { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .preset-btn { background: white; border: 1px dashed var(--border); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .preset-btn:hover { border-color: var(--mu-blue); color: var(--mu-blue); background: #eef2fb; }
+
+  /* INFO BOX */
+  .info-box { background: #eef2fb; border-left: 4px solid var(--mu-blue); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 13px; color: #344a7a; margin-bottom: 16px; }
+
+  /* UPLOAD */
+  .mini-upload { border: 1.5px dashed var(--mu-blue); border-radius: 8px; padding: 10px 14px; text-align: center; cursor: pointer; font-size: 13px; color: var(--mu-blue); background: #f0f4ff; transition: all 0.2s; margin-top:4px; }
+  .mini-upload:hover { background: #dce8ff; border-color: var(--mu-navy); }
+  .file-mini-list { margin-top: 6px; }
+  .file-mini-item { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 4px 8px; background: #e8f5e9; border-radius: 6px; margin-top: 4px; color: #2e7d32; }
+  .doc-upload-item { border-radius: 8px; }
+
+  /* SUBMIT */
+  .submit-area { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 24px 22px; text-align: center; }
+  .btn-submit { background: linear-gradient(135deg,var(--mu-blue),#1a4a8a); color: white; border: none; padding: 14px 48px; border-radius: 10px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(0,48,135,0.3); display: inline-flex; align-items: center; gap: 10px; }
+  .btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,48,135,0.4); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .submit-note { font-size: 13px; color: var(--text-muted); margin-top: 14px; line-height: 1.8; }
+  .submit-note strong { color: var(--mu-navy); }
+
+  /* SUCCESS */
+  .success-screen { display: none; text-align: center; padding: 60px 24px; }
+  .success-icon { width: 80px; height: 80px; background: var(--success-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 20px; animation: pop 0.4s ease; }
+  @keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.1)} 100%{transform:scale(1)} }
+  .success-screen h2 { font-size: 22px; color: var(--success); font-weight: 700; margin-bottom: 8px; }
+  .ref-code { background: var(--mu-navy); color: var(--mu-gold); display: inline-block; padding: 8px 24px; border-radius: 8px; font-size: 18px; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 24px; font-family: monospace; }
+  .btn-new { background: white; color: var(--mu-blue); border: 2px solid var(--mu-blue); padding: 10px 28px; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-new:hover { background: var(--mu-blue); color: white; }
+
+  /* LOADING */
+  .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(26,39,68,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .loading-card { background: white; border-radius: 16px; padding: 32px 40px; text-align: center; }
+  .spinner { width: 48px; height: 48px; border: 4px solid #dde3ee; border-top-color: var(--mu-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  /* MISC */
+  .section-divider { border: none; border-top: 1px dashed var(--border); margin: 16px 0; }
+  .conditional-section { display: none; margin-top: 0; }
+  .conditional-section.show { display: block; margin-top: 16px; }
+  .error-msg { font-size: 11px; color: #c0392b; margin-top: 3px; display: none; }
+  .error-msg.show { display: block; }
+
+  /* AUTOCOMPLETE */
+  .autocomplete-wrap { position: relative; overflow: visible; }
+  .autocomplete-dropdown { position: absolute; top: 100%; left: 0; right: 0; z-index: 9999; background: white; border: 1.5px solid var(--mu-blue); border-top: none; border-radius: 0 0 10px 10px; max-height: 220px; overflow-y: auto; box-shadow: 0 8px 24px rgba(26,39,68,0.13); display: none; }
+  .autocomplete-dropdown.show { display: block; }
+  .autocomplete-item { padding: 10px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid var(--border); color: var(--text); transition: background 0.12s; display: flex; align-items: center; gap: 8px; }
+  .autocomplete-item:last-child { border-bottom: none; }
+  .autocomplete-item:hover,.autocomplete-item.active { background: #eef2fb; color: var(--mu-blue); }
+  .autocomplete-item mark { background: #ffeaa0; border-radius: 3px; padding: 0 2px; font-style: normal; color: var(--mu-navy); font-weight: 700; }
+  .autocomplete-item .item-icon { font-size: 14px; flex-shrink: 0; }
+  .autocomplete-count { padding: 6px 14px; font-size: 11px; color: var(--text-muted); background: var(--surface2); border-top: 1px solid var(--border); }
+
+  /* DOC INFO BOX (section 4.4) */
+  .doc-required-box { background: linear-gradient(135deg,#fffbeb,#fef3c7); border: 2px solid #f59e0b; border-radius: 14px; padding: 20px 22px; margin-top: 8px; }
+  .doc-required-box .doc-title { font-size: 15px; font-weight: 800; color: #92400e; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .doc-required-item { display: flex; gap: 14px; align-items: flex-start; background: white; border-radius: 10px; padding: 14px 16px; border: 1px solid #fde68a; margin-bottom: 10px; }
+  .doc-required-item:last-child { margin-bottom: 0; }
+  .doc-required-item .doc-icon { font-size: 26px; flex-shrink: 0; margin-top: 1px; }
+  .doc-required-item .doc-label { font-size: 15px; font-weight: 700; color: #1a2744; line-height: 1.4; }
+  .doc-required-item .doc-sub { font-size: 12px; color: #6b7280; margin-top: 4px; }
+  .doc-required-item .doc-badge { display: inline-block; background: #fef2f2; color: #c0392b; border: 1px solid #fca5a5; border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 700; margin-top: 6px; }
+  .doc-upload-hint { margin-top: 14px; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: #1e40af; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo">🎓</div>
+    <div class="header-text">
+      <h1>CCTV Footage Request Form</h1>
+      <p>Traffic and Safety Unit | Buildings, Facilities and Environment Division, Mahidol University, Salaya Campus</p>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+      <div class="header-badge">CCTV Request</div>
+      <a href="index.html" style="font-size:11px;color:#c9a84c;text-decoration:none;display:flex;align-items:center;gap:4px;opacity:0.9;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
+        🇹🇭 ภาษาไทย
+      </a>
+    </div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+</header>
+<script>
+(function(){
+  const hdr = document.querySelector('.header');
+  window.addEventListener('scroll',function(){ hdr.classList.toggle('collapsed', window.scrollY > 80); },{passive:true});
+})();
+</script>
+
+<a href="admin.html" class="admin-icon-btn" title="Admin">🔐</a>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-card"><div class="spinner"></div><p id="loadingText" style="color:var(--text-muted);font-size:14px;">Submitting, please wait...</p></div>
+</div>
+
+<main class="main">
+<form id="cctvForm" novalidate>
+
+  <!-- PDPA -->
+  <div class="pdpa-notice">
+    <div class="pdpa-title"><span>🔒</span> Personal Data Protection Policy (PDPA) — Personal Data Protection Act B.E. 2562 (2019)</div>
+    <div class="pdpa-body">
+      Mahidol University collects your personal data solely for <strong>security purposes and CCTV footage review services</strong>.
+      Your data will be stored in the University's database and will not be disclosed to third parties except when required by law.
+      You have the right to access, correct, or delete your personal data under the PDPA.
+      <br><br>
+      CCTV footage is considered <strong>sensitive personal data</strong>. Access will be granted only when there is a legitimate legal basis.
+    </div>
+    <div class="pdpa-consent">
+      <input type="checkbox" id="pdpaConsent" required>
+      <label for="pdpaConsent">I consent to Mahidol University collecting and processing my personal data for the purpose of CCTV footage review, and acknowledge my rights under the Personal Data Protection Act B.E. 2562 (2019). <span class="required">*</span></label>
+    </div>
+    <p class="error-msg" id="pdpaConsentError">Please consent to data collection before proceeding.</p>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">1</div><h2>Requester Information</h2></div>
+    <div class="card-body">
+      <div class="info-box">📋 Please fill in information as shown on your national ID card or Mahidol University identification card.</div>
+
+      <div class="form-row triple" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label for="prefix">Title <span class="required">*</span></label>
+          <select id="prefix" name="prefix" required>
+            <option value="">-- Select --</option>
+            <option value="Mr.">Mr.</option>
+            <option value="Mrs.">Mrs.</option>
+            <option value="Miss">Miss</option>
+            <option value="Dr.">Dr.</option>
+            <option value="Assoc.Prof.">Assoc. Prof.</option>
+            <option value="Asst.Prof.">Asst. Prof.</option>
+            <option value="Prof.">Prof.</option>
+            <option value="Other">Other</option>
+          </select>
+          <p class="error-msg" id="prefixError">Please select a title.</p>
+        </div>
+        <div class="form-group">
+          <label for="fname">First Name <span class="required">*</span></label>
+          <input type="text" id="fname" name="fname" placeholder="First Name" required>
+          <p class="error-msg" id="fnameError">Please enter your first name.</p>
+        </div>
+        <div class="form-group">
+          <label for="lname">Last Name <span class="required">*</span></label>
+          <input type="text" id="lname" name="lname" placeholder="Last Name" required>
+          <p class="error-msg" id="lnameError">Please enter your last name.</p>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label for="gender">Gender <span class="required">*</span></label>
+          <select id="gender" name="gender" required>
+            <option value="">-- Select --</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Not specified">Not specified</option>
+          </select>
+          <p class="error-msg" id="genderError">Please select your gender.</p>
+        </div>
+        <div class="form-group">
+          <label for="requesterType">Requester Type <span class="required">*</span></label>
+          <select id="requesterType" name="requesterType" required onchange="handleRequesterType()">
+            <option value="">-- Select Type --</option>
+            <option value="Student">Student</option>
+            <option value="Staff / Personnel">Staff / Personnel / Lecturer</option>
+            <option value="External Officer">External Officer (Police / Government Agency)</option>
+            <option value="General Public">General Public / Guardian</option>
+            <option value="Private Organization">Private Organization</option>
+          </select>
+          <p class="error-msg" id="requesterTypeError">Please select requester type.</p>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label for="idCard">National ID / Student ID / Employee ID <span class="required">*</span></label>
+          <input type="text" id="idCard" name="idCard" placeholder="Enter ID number" required>
+          <span class="form-hint">Used for identity verification under PDPA only.</span>
+          <p class="error-msg" id="idCardError">Please enter your ID number.</p>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number <span class="required">*</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="0xx-xxx-xxxx" required>
+          <p class="error-msg" id="phoneError">Please enter your phone number.</p>
+        </div>
+      </div>
+
+      <!-- อีเมลติดต่อ — ใต้โทรศัพท์ ไม่บังคับ ใช้อีเมลไหนก็ได้ -->
+      <div class="form-row single" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label for="email">Contact Email</label>
+          <input type="email" id="email" name="email" placeholder="email@example.com">
+          <span class="form-hint">For receiving service updates — use any email you regularly check (not required to be a university email).</span>
+        </div>
+      </div>
+
+      <!-- MU section -->
+      <div class="conditional-section" id="muSection">
+        <div class="form-row single">
+          <div class="form-group">
+            <label for="faculty">Faculty / Department</label>
+            <div class="autocomplete-wrap">
+              <input type="text" id="faculty" name="faculty" placeholder="Type faculty or department name..." autocomplete="off"
+                oninput="acSearch(this,'facultyDrop')" onkeydown="acKeydown(event,'facultyDrop')" onfocus="acSearch(this,'facultyDrop')" onblur="setTimeout(()=>acHide('facultyDrop'),180)">
+              <div class="autocomplete-dropdown" id="facultyDrop"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Official section -->
+      <div class="conditional-section" id="officialSection">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="officialOrg">Organization / Agency</label>
+            <input type="text" id="officialOrg" name="officialOrg" placeholder="e.g., Sampran Police Station">
+          </div>
+          <div class="form-group">
+            <label for="officialDoc">Official Document Number</label>
+            <input type="text" id="officialDoc" name="officialDoc" placeholder="(if applicable)">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Purpose -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">2</div><h2>Purpose of Request</h2></div>
+    <div class="card-body">
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Main Purpose <span class="required">*</span></label>
+        <div class="radio-group" id="purposeGroup">
+          <div class="radio-item" onclick="selectRadio('purpose','Lost Property Tracking',this)"><input type="radio" name="purpose" value="Lost Property Tracking"> 🔍 Lost Property Tracking</div>
+          <div class="radio-item" onclick="selectRadio('purpose','Vehicle Tracking',this)"><input type="radio" name="purpose" value="Vehicle Tracking"> 🚗 Vehicle Tracking</div>
+          <div class="radio-item" onclick="selectRadio('purpose','Accident / Emergency',this)"><input type="radio" name="purpose" value="Accident / Emergency"> 🚨 Accident / Emergency</div>
+          <div class="radio-item" onclick="selectRadio('purpose','Criminal Investigation',this)"><input type="radio" name="purpose" value="Criminal Investigation"> ⚖️ Criminal Investigation</div>
+          <div class="radio-item" onclick="selectRadio('purpose','Complaint / Dispute',this)"><input type="radio" name="purpose" value="Complaint / Dispute"> 📢 Complaint / Dispute</div>
+          <div class="radio-item" onclick="selectRadio('purpose','Other',this);toggleOtherPurpose(true)"><input type="radio" name="purpose" value="Other"> 📝 Other (specify)</div>
+        </div>
+        <div class="conditional-section" id="otherPurposeSection" style="margin-top:10px;">
+          <input type="text" id="purposeOther" name="purposeOther" placeholder="Specify other purpose..." style="max-width:500px;">
+        </div>
+        <p class="error-msg" id="purposeError">Please select a purpose.</p>
+      </div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label for="purposeDetail">Incident Details <span class="required">*</span></label>
+        <textarea id="purposeDetail" name="purposeDetail" required placeholder="Please describe the incident in detail — what happened, where, when, and what was involved..."></textarea>
+        <p class="error-msg" id="purposeDetailError">Please provide incident details.</p>
+      </div>
+      <div class="form-group">
+        <label>Evidence Type Needed</label>
+        <div class="check-group">
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="Person Image"> 👤 Person Image</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="Vehicle Image"> 🚗 Vehicle Image</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="Direction of Movement"> 🗺️ Direction of Movement</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="Entry/Exit Timestamp"> ⏰ Entry / Exit Timestamp</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- URGENCY -->
+  <div class="card" id="urgencyCard">
+    <div class="card-header" style="background:linear-gradient(90deg,#8b1a1a,#c0392b);">
+      <div class="step-num" style="background:var(--mu-gold);">⚡</div>
+      <h2>Urgency Level</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-group">
+        <label>Please select urgency level <span class="required">*</span></label>
+        <div class="radio-group" style="flex-direction:column;gap:10px;margin-top:8px;">
+          <div class="radio-item" style="padding:14px 18px;font-size:15px;font-weight:600;"
+            onclick="selectRadio('urgency','Normal',this);setEmergencyMode(false)">
+            <input type="radio" name="urgency" value="Normal">
+            🟢 Normal <span style="font-size:13px;font-weight:400;color:var(--text-muted);">(Within 24–48 hours)</span>
+          </div>
+          <div class="radio-item" style="padding:14px 18px;font-size:15px;font-weight:600;"
+            onclick="selectRadio('urgency','Urgent',this);setEmergencyMode(false)">
+            <input type="radio" name="urgency" value="Urgent">
+            🟡 Urgent <span style="font-size:13px;font-weight:400;color:var(--text-muted);">(Special circumstance)</span>
+          </div>
+          <div class="radio-item" style="padding:14px 18px;font-size:15px;font-weight:700;border:2px solid rgba(231,76,60,0.5);background:rgba(231,76,60,0.05);"
+            onclick="selectRadio('urgency','Emergency',this);setEmergencyMode(true)">
+            <input type="radio" name="urgency" value="Emergency">
+            🔴 Emergency <span style="font-size:13px;font-weight:400;color:#c0392b;">(Life-threatening / Criminal)</span>
+          </div>
+        </div>
+        <p class="error-msg" id="urgencyError">Please select an urgency level.</p>
+      </div>
+      <div id="emergencyBanner" style="display:none;margin-top:14px;background:#fef2f2;border:2px solid #e74c3c;border-radius:10px;padding:14px 16px;">
+        <div style="font-size:15px;font-weight:800;color:#c0392b;margin-bottom:6px;">🚨 Emergency Mode — Fill in essential information only</div>
+        <div style="font-size:13px;color:#7f1d1d;line-height:1.7;">
+          Please fill in only what is necessary:<br>
+          ✅ Name + Phone &nbsp; ✅ Date, time & location &nbsp; ✅ Confirm PDPA &nbsp; ✅ Upload ID copy<br>
+          <span style="color:#c0392b;">Police report and other documents may be submitted afterwards.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Date / Location -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">3</div><h2>Date, Time &amp; Camera Location</h2></div>
+    <div class="card-body">
+      <div class="info-box">📅 CCTV footage retention varies per camera location. Please specify the time frame as accurately as possible.</div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Incident Date and Time (Approximate) <span class="required">*</span></label>
+        <div class="datetime-range">
+          <div><div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Start</div><input type="date" id="dateStart" name="dateStart" required><input type="time" id="timeStart" name="timeStart" style="margin-top:6px;"></div>
+          <div class="datetime-arrow">→</div>
+          <div><div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">End</div><input type="date" id="dateEnd" name="dateEnd"><input type="time" id="timeEnd" name="timeEnd" style="margin-top:6px;"></div>
+        </div>
+        <p class="error-msg" id="dateError">Please specify the incident date.</p>
+      </div>
+      <hr class="section-divider">
+      <div class="form-group" style="margin-bottom:12px;">
+        <label for="locationInput">Camera Location(s) <span class="required">*</span> <span style="font-size:12px;color:var(--mu-blue);font-weight:600;">(Type location then click "+ Add")</span></label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="locationInput" placeholder="Type location or area" style="flex:1;">
+          <button type="button" onclick="addLocation()" style="background:var(--mu-navy);color:white;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;white-space:nowrap;">+ Add</button>
+        </div>
+        <div id="presetWrap" style="margin-top:6px;"></div>
+        <div class="location-tags" id="locationTags"></div>
+        <input type="hidden" id="locations" name="locations">
+        <p class="error-msg" id="locationError">Please specify at least one camera location.</p>
+      </div>
+      <div class="form-group">
+        <label>Vehicle Information (if applicable)</label>
+        <div class="form-row" style="margin-bottom:0;">
+          <input type="text" id="vehiclePlate" name="vehiclePlate" placeholder="License Plate">
+          <input type="text" id="vehicleDesc" name="vehicleDesc" placeholder="Model / Color, e.g., Toyota Yaris White">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Data / Footage Request -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">4</div><h2>Data / Footage Request</h2></div>
+    <div class="card-body">
+
+      <!-- 4.1 PDPA consent -->
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>4.1 PDPA Acknowledgement and Consent <span class="required">*</span></label>
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px 16px;margin-top:6px;">
+          <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer;font-weight:400;">
+            <input type="checkbox" id="pdpaFileConsent" name="pdpaFileConsent"
+              style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:#16a34a;"
+              onchange="toggleSection4Consent(this.checked)">
+            <span style="font-size:13px;line-height:1.8;color:#14532d;">
+              I acknowledge and confirm that this request is solely for the stated purpose.
+              I <strong>will not distribute, publish, or share</strong> any CCTV images or footage on public platforms, social media,
+              or in any manner that violates others' personal data rights, in accordance with the Personal Data Protection Act B.E. 2562 (2019).
+              If I violate this agreement, I accept full civil and criminal liability.
+            </span>
+          </label>
+        </div>
+        <p class="error-msg" id="pdpaFileConsentError">Please confirm PDPA acknowledgement before proceeding.</p>
+      </div>
+
+      <!-- 4.2–4.4 locked until 4.1 checked -->
+      <div id="section4Rest" style="opacity:0.4;pointer-events:none;transition:all 0.3s;">
+
+        <!-- 4.2 Request type -->
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>4.2 Purpose of Data Request <span class="required">*</span></label>
+          <div class="radio-group" style="flex-direction:column;gap:10px;">
+            <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:14px 16px;"
+              onclick="selectRadio('requestFile','View Only',this);showFileSection(false)">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="radio" name="requestFile" value="View Only">
+                <strong>👁️ View Only (No Copy)</strong>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:5px;padding-left:22px;">
+                No police report required — viewing on officer's monitor only. Screenshots are not permitted.
+              </div>
+            </div>
+            <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:14px 16px;"
+              onclick="selectRadio('requestFile','Request Footage Copy',this);showFileSection(true)">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="radio" name="requestFile" value="Request Footage Copy">
+                <strong>📁 Request Footage Copy (Export File)</strong>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:5px;padding-left:22px;">
+                A police report or daily record is required — processing takes 3–5 business days.
+              </div>
+            </div>
+          </div>
+          <p class="error-msg" id="requestFileError">Please select your request type.</p>
+        </div>
+
+        <!-- 4.3–4.4 shown only for Export -->
+        <div class="conditional-section" id="fileSection">
+
+          <!-- 4.3 Reason -->
+          <div class="form-group" style="margin-bottom:20px;">
+            <label>4.3 Reason for Requesting a Copy <span class="required">*</span></label>
+            <div class="radio-group" style="flex-direction:column;gap:8px;">
+              <div class="radio-item" onclick="selectRadio('fileReason','Evidence for legal proceedings / police complaint',this)">
+                <input type="radio" name="fileReason" value="Evidence for legal proceedings / police complaint">
+                ⚖️ Evidence for legal proceedings / police complaint
+              </div>
+              <div class="radio-item" onclick="selectRadio('fileReason','Police investigation / government agency inquiry',this)">
+                <input type="radio" name="fileReason" value="Police investigation / government agency inquiry">
+                🏛️ Police investigation / government agency inquiry
+              </div>
+              <div class="radio-item" onclick="selectRadio('fileReason','Insurance claim compensation',this)">
+                <input type="radio" name="fileReason" value="Insurance claim compensation">
+                🛡️ Insurance claim compensation
+              </div>
+            </div>
+            <p class="error-msg" id="fileReasonError">Please select a reason.</p>
+          </div>
+
+          <!-- 4.4 Required Documents — info display (NOT checkbox) -->
+          <div class="form-group" style="margin-bottom:0;">
+            <label style="font-size:15px;font-weight:800;color:var(--mu-navy);">4.4 Required Documents</label>
+            <div class="doc-required-box">
+              <div class="doc-title">
+                <span>⚠️</span> Please prepare the following documents before submitting your request.
+              </div>
+
+              <div class="doc-required-item">
+                <span class="doc-icon">🪪</span>
+                <div>
+                  <div class="doc-label">1. Copy / Photo of National ID Card, Student ID, or Employee ID</div>
+                  <div class="doc-sub">With signed certification "certified true copy" by the requester.</div>
+                  <span class="doc-badge">Required</span>
+                </div>
+              </div>
+
+              <div class="doc-required-item">
+                <span class="doc-icon">📋</span>
+                <div>
+                  <div class="doc-label">2. Copy / Photo of Police Daily Record or Police Report</div>
+                  <div class="doc-sub">Must clearly state the date, time, and location of the incident.</div>
+                  <span class="doc-badge">Required <span id="emergencyExcept" style="display:none;font-weight:400;color:#7f1d1d;">(Emergency mode: may be submitted later)</span></span>
+                </div>
+              </div>
+
+              <div class="doc-upload-hint">
+                <span style="font-size:20px;">📎</span>
+                <span>Please upload all required documents in Section 5 below.</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- end fileSection -->
+      </div><!-- end section4Rest -->
+    </div>
+  </div>
+
+  <!-- SECTION 5: Supporting Documents -->
+  <div class="card" id="section5Card">
+    <div class="card-header" id="section5Header">
+      <div class="step-num">5</div>
+      <h2 id="section5Title">Supporting Documents</h2>
+    </div>
+    <div class="card-body">
+
+      <!-- View Only mode -->
+      <div id="s5ViewOnly">
+        <div class="info-box">📎 Documents to bring: national ID card, student/employee ID card, and any other relevant documents.</div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>Documents You Have (select and upload)</label>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+            <div class="doc-upload-item">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-id')"><input type="checkbox" name="docs" value="National ID Card"> 🪪 National ID Card</div>
+              <div class="doc-upload-zone" id="upload-doc-id" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-id')">📎 Upload National ID Card copy</div>
+                <input type="file" id="file-doc-id" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-id')">
+                <div class="file-mini-list" id="list-doc-id"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-student')"><input type="checkbox" name="docs" value="Student / Employee ID"> 🎓 Student / Employee ID</div>
+              <div class="doc-upload-zone" id="upload-doc-student" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-student')">📎 Upload Student / Employee ID copy</div>
+                <input type="file" id="file-doc-student" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-student')">
+                <div class="file-mini-list" id="list-doc-student"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-police')"><input type="checkbox" name="docs" value="Police Report"> 📋 Police Report</div>
+              <div class="doc-upload-zone" id="upload-doc-police" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-police')">📎 Upload Police Report</div>
+                <input type="file" id="file-doc-police" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-police')">
+                <div class="file-mini-list" id="list-doc-police"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-poa')"><input type="checkbox" name="docs" value="Power of Attorney"> 📜 Power of Attorney</div>
+              <div class="doc-upload-zone" id="upload-doc-poa" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-poa')">📎 Upload Power of Attorney</div>
+                <input type="file" id="file-doc-poa" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-poa')">
+                <div class="file-mini-list" id="list-doc-poa"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-official')"><input type="checkbox" name="docs" value="Official Government Letter"> 🏛️ Official Government Letter</div>
+              <div class="doc-upload-zone" id="upload-doc-official" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-official')">📎 Upload Official Letter</div>
+                <input type="file" id="file-doc-official" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-official')">
+                <div class="file-mini-list" id="list-doc-official"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-court')"><input type="checkbox" name="docs" value="Court Order"> ⚖️ Court Order</div>
+              <div class="doc-upload-zone" id="upload-doc-court" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-court')">📎 Upload Court Order</div>
+                <input type="file" id="file-doc-court" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-court')">
+                <div class="file-mini-list" id="list-doc-court"></div>
+              </div>
+            </div>
+            <div class="check-item" onclick="toggleCheck(this);toggleOtherDoc(this)"><input type="checkbox" name="docs" value="Other"> 📝 Other</div>
+          </div>
+          <div class="conditional-section" id="otherDocSection" style="margin-top:10px;">
+            <input type="text" id="docsOther" name="docsOther" placeholder="Specify other documents..." style="max-width:400px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Export File mode -->
+      <div id="s5Export" style="display:none;">
+        <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;color:#7f1d1d;margin-bottom:16px;">
+          ⚠️ <strong>All required documents must be complete.</strong> Incomplete submissions may result in the request being denied.
+        </div>
+
+        <!-- ID Card — required -->
+        <div class="form-group" style="margin-bottom:16px;padding:14px;background:#f8faff;border-radius:10px;border:1px solid #dde3ee;">
+          <label style="font-size:14px;font-weight:700;">🪪 Copy of National ID Card / Student ID / Employee ID <span style="color:#c0392b;font-weight:800;"> *</span></label>
+          <div style="font-size:12px;color:#c0392b;font-weight:600;margin:4px 0 10px;">(With signed certification by the requester — file upload required)</div>
+          <div class="mini-upload" onclick="triggerDocUpload('file-export-id')" id="uploadIdBtn">📎 Click to upload ID copy</div>
+          <input type="file" id="file-export-id" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-export-id');updateIdUploadBtn()">
+          <div class="file-mini-list" id="list-export-id"></div>
+          <p class="error-msg" id="exportIdError">Please upload a copy of your ID card.</p>
+        </div>
+
+        <!-- Police Report — required (except emergency) -->
+        <div class="form-group" style="margin-bottom:16px;padding:14px;background:#f8faff;border-radius:10px;border:1px solid #dde3ee;">
+          <label style="font-size:14px;font-weight:700;">📋 Copy of Police Daily Record or Police Report
+            <span style="color:#c0392b;font-weight:800;"> *</span>
+            <span id="policeDocEmergencyNote" style="display:none;color:#c0392b;font-size:12px;font-weight:400;"> (Emergency mode: may be submitted later)</span>
+          </label>
+          <div style="font-size:12px;color:#c0392b;font-weight:600;margin:4px 0 10px;">(Must clearly state date, time, and location of incident — file upload required)</div>
+          <div class="mini-upload" onclick="triggerDocUpload('file-export-police')">📎 Click to upload Police Report</div>
+          <input type="file" id="file-export-police" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-export-police')">
+          <div class="file-mini-list" id="list-export-police"></div>
+          <p class="error-msg" id="exportPoliceError">Please upload a copy of the police report / daily record.</p>
+        </div>
+
+        <!-- Power of Attorney — optional -->
+        <div class="form-group" style="margin-bottom:8px;padding:14px;background:#f8faff;border-radius:10px;border:1px solid #dde3ee;">
+          <div class="check-item" onclick="toggleDocUpload(this,'upload-export-poa')" style="margin-bottom:0;">
+            <input type="checkbox" name="exportDocs" value="Power of Attorney">
+            📜 Power of Attorney and copies of both parties' ID cards
+            <em style="color:#c0392b;font-weight:700;"> (For authorized representatives only)</em>
+          </div>
+          <div id="upload-export-poa" style="display:none;margin-top:10px;">
+            <div class="mini-upload" onclick="triggerDocUpload('file-export-poa')">📎 Click to upload Power of Attorney</div>
+            <input type="file" id="file-export-poa" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-export-poa')">
+            <div class="file-mini-list" id="list-export-poa"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional note (all modes) -->
+      <div class="form-group" style="margin-top:16px;">
+        <label for="additionalNote">Additional Remarks</label>
+        <textarea id="additionalNote" name="additionalNote" style="min-height:70px;" placeholder="Any additional information for the officer..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5.5: Footage Delivery Method -->
+  <div class="card" id="section45Card" style="display:none;">
+    <div class="card-header" style="background:linear-gradient(90deg,#1a5276,#2471a3);">
+      <div class="step-num" style="background:var(--mu-gold);color:var(--mu-navy);">5.5</div>
+      <h2>Footage Delivery Method</h2>
+    </div>
+    <div class="card-body">
+      <div class="info-box">📦 Please select how you would like to receive the CCTV footage file after processing is complete.</div>
+      <div class="form-group">
+        <label>Select preferred delivery method <span class="required">*</span></label>
+        <div class="radio-group" style="flex-direction:column;gap:10px;margin-top:8px;">
+          <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:16px 18px;"
+            onclick="selectRadio('deliveryMethod','Bring Flash Drive on pickup day',this);toggleGDriveEmail(false)">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <input type="radio" name="deliveryMethod" value="Bring Flash Drive on pickup day">
+              <strong style="font-size:15px;">💾 Bring your own Flash Drive on pickup day</strong>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:6px;padding-left:24px;">
+              Recommended: USB 2.0 or higher, ≥4GB capacity, virus-free
+            </div>
+          </div>
+          <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:16px 18px;"
+            onclick="selectRadio('deliveryMethod','Receive via Google Drive Link',this);toggleGDriveEmail(true)">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <input type="radio" name="deliveryMethod" value="Receive via Google Drive Link">
+              <strong style="font-size:15px;">🔗 Receive via Google Drive Link</strong>
+            </div>
+            <div id="gdriveEmailSection" style="display:none;width:100%;margin-top:12px;padding-left:24px;">
+              <label style="font-size:13px;color:var(--text-muted);display:block;margin-bottom:6px;">Email address for link delivery <span class="required">*</span></label>
+              <input type="email" id="gdriveEmail" name="gdriveEmail" placeholder="email@example.com"
+                style="width:100%;max-width:380px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size:13px;outline:none;">
+              <p class="error-msg" id="gdriveEmailError" style="margin-top:6px;">Please enter email address for link delivery.</p>
+              <div style="background:#fffbeb;border:1px solid #f59e0b;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:13px;color:#78350f;">
+                <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-weight:400;">
+                  <input type="checkbox" id="gdriveConsent" name="gdriveConsent"
+                    style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:#d97706;">
+                  <span>
+                    I acknowledge that I must download the file to my own device, as the system will
+                    <strong>delete the link within 48 hours</strong> after email delivery for data security purposes.
+                  </span>
+                </label>
+                <span id="gdriveConsentError" style="display:none;font-size:12px;color:#c0392b;margin-top:6px;display:block;">⚠️ Please confirm acknowledgement of file delivery terms before submitting.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="error-msg" id="deliveryMethodError">Please select a delivery method.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Officer -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">6</div><h2>Assigned CCTV Officer</h2></div>
+    <div class="card-body">
+      <div class="info-box">👮 Please specify the CCTV officer serving you today.</div>
+      <div class="form-row" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label>Serving Officer <span class="required">*</span></label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+            <div class="radio-item" id="officerKnownBtn" onclick="selectOfficerMode('known')" style="flex:1;min-width:160px;">
+              <input type="radio" name="officerMode" value="known"> 👮 Select from database
+            </div>
+            <div class="radio-item" id="officerOtherBtn" onclick="selectOfficerMode('other')" style="flex:1;min-width:160px;">
+              <input type="radio" name="officerMode" value="other"> 📝 Other (not in database)
+            </div>
+          </div>
+          <p class="error-msg" id="officerModeError">Please select officer type.</p>
+        </div>
+      </div>
+
+      <div class="conditional-section" id="officerKnownSection">
+        <div class="form-group">
+          <label for="officerNameInput">Search Officer Name <span class="required">*</span></label>
+          <div class="autocomplete-wrap">
+            <input type="text" id="officerNameInput" name="officerNameInput"
+              placeholder="Type officer's name..." autocomplete="off"
+              oninput="officerSearch(this)" onkeydown="officerKeydown(event)"
+              onfocus="officerSearch(this)" onblur="setTimeout(()=>acHide('officerDrop'),180)">
+            <div class="autocomplete-dropdown" id="officerDrop"></div>
+          </div>
+          <input type="hidden" id="officerName" name="officerName">
+          <input type="hidden" id="officerEmail" name="officerEmail">
+          <span class="form-hint" id="officerSelectedHint" style="color:var(--success);display:none;margin-top:4px;">✓ Selected: <strong id="officerSelectedName"></strong></span>
+          <p class="error-msg" id="officerNameError">Please select an officer from the list.</p>
+        </div>
+      </div>
+
+      <div class="conditional-section" id="officerOtherSection">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="officerOtherName">Officer Full Name <span class="required">*</span></label>
+            <input type="text" id="officerOtherName" name="officerOtherName" placeholder="Officer's full name">
+            <p class="error-msg" id="officerOtherNameError">Please enter officer's full name.</p>
+          </div>
+          <div class="form-group">
+            <label for="officerOtherEmail">Officer Email <span class="required">*</span></label>
+            <input type="email" id="officerOtherEmail" name="officerOtherEmail" placeholder="officer@example.com">
+            <p class="error-msg" id="officerOtherEmailError">Please enter officer's email.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-area">
+    <button type="submit" class="btn-submit" id="submitBtn"><span>📤</span> Submit CCTV Request</button>
+    <div class="submit-note">
+      Once submitted, the officer will be notified immediately and will respond within 24–48 hours.
+      <br><br>
+      For inquiries, please contact <strong>Traffic and Safety Unit</strong><br>
+      Tel: <strong>02-4414400 ext. 0</strong> &nbsp;|&nbsp; Email: <strong>Traffic.oppe@gmail.com</strong>
+    </div>
+  </div>
+
+</form>
+
+<!-- SUCCESS -->
+<div class="success-screen" id="successScreen">
+  <div class="success-icon">✅</div>
+  <h2>Request Submitted Successfully!</h2>
+  <p style="color:var(--text-muted);font-size:14px;max-width:400px;margin:0 auto 16px;line-height:1.7;">Your request has been recorded. The officer will review and respond within 24–48 hours.</p>
+  <p style="font-size:13px;color:var(--text-muted);">Reference Number:</p>
+  <div class="ref-code" id="refCode">CCTV-XXXXXXXX</div>
+  <p style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">A notification has been sent to the assigned officer.</p>
+  <button class="btn-new" onclick="resetForm()">+ Submit New Request</button>
+</div>
+</main>
+
+<script>
+// ===== EMERGENCY MODE =====
+function setEmergencyMode(on) {
+  document.getElementById('emergencyBanner').style.display = on ? 'block' : 'none';
+  const excepts = document.querySelectorAll('#emergencyExcept, #policeDocEmergencyNote');
+  excepts.forEach(el => { if(el) el.style.display = on ? 'inline' : 'none'; });
+}
+
+// ===== SECTION 5 DYNAMIC =====
+function updateSection5(requestFileVal) {
+  const s5Title = document.getElementById('section5Title');
+  const s5ViewOnly = document.getElementById('s5ViewOnly');
+  const s5Export = document.getElementById('s5Export');
+  if (!s5Title) return;
+  if (requestFileVal === 'Request Footage Copy') {
+    s5Title.textContent = 'Supporting Documents (Footage Copy Request)';
+    if(s5ViewOnly) s5ViewOnly.style.display = 'none';
+    if(s5Export) s5Export.style.display = 'block';
+  } else {
+    s5Title.textContent = 'Supporting Documents';
+    if(s5ViewOnly) s5ViewOnly.style.display = 'block';
+    if(s5Export) s5Export.style.display = 'none';
+  }
+}
+
+// ===== DOC UPLOAD HELPERS =====
+const docFiles = {};
+
+function toggleDocUpload(checkEl, uploadId) {
+  const cb = checkEl.querySelector('input[type=checkbox]');
+  if(cb) { cb.checked = !cb.checked; checkEl.classList.toggle('selected', cb.checked); }
+  const zone = document.getElementById(uploadId);
+  if(zone) zone.style.display = (cb && cb.checked) ? 'block' : 'none';
+}
+function triggerDocUpload(inputId) { const el = document.getElementById(inputId); if(el) el.click(); }
+function handleDocFile(input, inputId) {
+  const files = Array.from(input.files);
+  if(!docFiles[inputId]) docFiles[inputId] = [];
+  files.forEach(f => {
+    if(f.size > 10*1024*1024){ alert('File "'+f.name+'" exceeds 10MB limit.'); return; }
+    docFiles[inputId].push(f);
+  });
+  renderDocFileList(inputId);
+}
+function renderDocFileList(inputId) {
+  const listId = inputId.replace('file-','list-');
+  const el = document.getElementById(listId);
+  if(!el) return;
+  const files = docFiles[inputId] || [];
+  el.innerHTML = files.map((f,i) =>
+    `<div class="file-mini-item">✅ ${f.name} <span style="color:#666;">(${(f.size/1024).toFixed(0)} KB)</span>
+     <span onclick="removeDocFile('${inputId}',${i})" style="margin-left:auto;cursor:pointer;color:#c0392b;">✕</span></div>`
+  ).join('');
+}
+function removeDocFile(inputId, idx) { if(docFiles[inputId]) { docFiles[inputId].splice(idx,1); renderDocFileList(inputId); } }
+function updateIdUploadBtn() {
+  const files = docFiles['file-export-id'] || [];
+  const btn = document.getElementById('uploadIdBtn');
+  if(btn) btn.style.borderColor = files.length > 0 ? '#27ae60' : '';
+}
+function getAllDocFiles() {
+  const all = [];
+  Object.values(docFiles).forEach(arr => arr.forEach(f => all.push(f)));
+  return all;
+}
+
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVfwqmg24QmG37NbdIpn5w90_TWzbilayADz2QdG29CY2qFH_fuD0FhZRinslAQL4I1Q/exec';
+
+function loadPresets() {
+  const presets = JSON.parse(localStorage.getItem('cctv_preset_locations') || '[]');
+  const wrap = document.getElementById('presetWrap');
+  if (!presets.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Common Locations:</div><div class="preset-locations">' +
+    presets.map(p => `<button type="button" class="preset-btn" onclick="addPreset('${p}')">${p}</button>`).join('') + '</div>';
+}
+function addPreset(name) { document.getElementById('locationInput').value = name; addLocation(); }
+
+let locationList = [];
+function addLocation() {
+  const input = document.getElementById('locationInput');
+  const val = input.value.trim();
+  if (!val || locationList.includes(val)) { input.value=''; return; }
+  locationList.push(val);
+  renderLocationTags();
+  input.value = '';
+  document.getElementById('locations').value = locationList.join(', ');
+}
+document.getElementById('locationInput').addEventListener('keydown', e => { if(e.key==='Enter'){e.preventDefault();addLocation();} });
+function removeLocation(idx) { locationList.splice(idx,1); renderLocationTags(); document.getElementById('locations').value = locationList.join(', '); }
+function renderLocationTags() {
+  document.getElementById('locationTags').innerHTML = locationList.map((loc,i) =>
+    `<div class="location-tag">📍 ${loc} <span class="remove" onclick="removeLocation(${i})">✕</span></div>`).join('');
+}
+
+let uploadedFiles = [];
+function getAllDocFilesLegacy() { return []; }
+
+function selectRadio(name, value, el) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.parentElement.classList.remove('selected'));
+  el.classList.add('selected'); el.querySelector('input').checked = true;
+  if (name === 'purpose') toggleOtherPurpose(value === 'Other');
+}
+function toggleCheck(el) { el.classList.toggle('selected'); el.querySelector('input').checked = el.classList.contains('selected'); }
+
+function handleRequesterType() {
+  const val = document.getElementById('requesterType').value;
+  document.getElementById('muSection').classList.toggle('show', ['Student','Staff / Personnel'].includes(val));
+  document.getElementById('officialSection').classList.toggle('show', val==='External Officer');
+}
+
+function showFileSection(show) {
+  document.getElementById('fileSection').classList.toggle('show', show);
+  updateSection5(show ? 'Request Footage Copy' : 'View Only');
+  const s45 = document.getElementById('section45Card');
+  if(s45) s45.style.display = show ? 'block' : 'none';
+}
+
+function toggleSection4Consent(checked) {
+  const rest = document.getElementById('section4Rest');
+  if (!rest) return;
+  rest.style.opacity = checked ? '1' : '0.4';
+  rest.style.pointerEvents = checked ? 'auto' : 'none';
+  if (!checked) {
+    document.querySelectorAll('input[name="requestFile"]').forEach(r=>r.checked=false);
+    showFileSection(false);
+  }
+}
+
+function toggleGDriveEmail(show) {
+  const el = document.getElementById('gdriveEmailSection');
+  if (el) el.style.display = show ? 'block' : 'none';
+  if (!show) {
+    const em = document.getElementById('gdriveEmail'); if (em) em.value = '';
+    const gc = document.getElementById('gdriveConsent'); if (gc) gc.checked = false;
+  }
+}
+
+function updateProgress() {
+  const required = ['fname','lname','requesterType','idCard','phone','dateStart','locations'];
+  const filled = required.filter(id => { const el=document.getElementById(id); return el&&el.value.trim(); }).length;
+  const extras = (document.querySelector('input[name="purpose"]:checked')?1:0) + (document.querySelector('input[name="urgency"]:checked')?1:0) + (document.getElementById('pdpaConsent').checked?1:0);
+  document.getElementById('progressBar').style.width = Math.round(((filled+extras)/10)*100)+'%';
+}
+document.addEventListener('change', updateProgress);
+document.addEventListener('input', updateProgress);
+
+// ===== VALIDATE + POPUP =====
+function validate() {
+  let valid = true;
+  const errors = [];
+
+  function check(condition, errorId, msg) {
+    const el = document.getElementById(errorId);
+    if (!condition) { if(el) el.classList.add('show'); errors.push(msg); valid = false; }
+    else { if(el) el.classList.remove('show'); }
+  }
+
+  check(document.getElementById('pdpaConsent').checked, 'pdpaConsentError', 'Please consent to PDPA data collection (top section).');
+  check(!!document.getElementById('fname').value.trim(), 'fnameError', 'Please enter your first name.');
+  check(!!document.getElementById('lname').value.trim(), 'lnameError', 'Please enter your last name.');
+  check(!!document.getElementById('requesterType').value, 'requesterTypeError', 'Please select requester type.');
+  check(!!document.getElementById('idCard').value.trim(), 'idCardError', 'Please enter your ID number.');
+  check(!!document.getElementById('phone').value.trim(), 'phoneError', 'Please enter your phone number.');
+  check(!!document.querySelector('input[name="purpose"]:checked'), 'purposeError', 'Please select a purpose (Section 2).');
+  check(!!document.getElementById('purposeDetail').value.trim(), 'purposeDetailError', 'Please provide incident details (Section 2).');
+  check(!!document.querySelector('input[name="urgency"]:checked'), 'urgencyError', 'Please select an urgency level.');
+  check(!!document.getElementById('dateStart').value, 'dateError', 'Please specify the incident date (Section 3).');
+  check(!!document.getElementById('locations').value, 'locationError', 'Please specify at least one camera location and click "+ Add" (Section 3).');
+  check(document.getElementById('pdpaFileConsent').checked, 'pdpaFileConsentError', 'Please confirm PDPA acknowledgement in Section 4.1.');
+
+  const rfEl = document.querySelector('input[name="requestFile"]:checked');
+  check(!!rfEl, 'requestFileError', 'Please select your request type (Section 4.2).');
+
+  if (rfEl && rfEl.value === 'Request Footage Copy') {
+    check(!!document.querySelector('input[name="fileReason"]:checked'), 'fileReasonError', 'Please select a reason for requesting a copy (Section 4.3).');
+
+    const idFiles = docFiles['file-export-id'] || [];
+    check(idFiles.length > 0, 'exportIdError', 'Please upload a copy of your ID card (Section 5).');
+
+    const urgency = document.querySelector('input[name="urgency"]:checked')?.value || '';
+    if (urgency !== 'Emergency') {
+      const policeFiles = docFiles['file-export-police'] || [];
+      check(policeFiles.length > 0, 'exportPoliceError', 'Please upload a police report / daily record (Section 5).');
+    } else {
+      const policeErr = document.getElementById('exportPoliceError');
+      if(policeErr) policeErr.classList.remove('show');
+    }
+
+    const dmEl = document.querySelector('input[name="deliveryMethod"]:checked');
+    check(!!dmEl, 'deliveryMethodError', 'Please select a delivery method (Section 5.5).');
+
+    if (dmEl && dmEl.value === 'Receive via Google Drive Link') {
+      const gEmail = document.getElementById('gdriveEmail');
+      check(!!(gEmail && gEmail.value.includes('@')), 'gdriveEmailError', 'Please enter a valid email for Google Drive link (Section 5.5).');
+      const gc = document.getElementById('gdriveConsent');
+      const gcErr = document.getElementById('gdriveConsentError');
+      if (!gc || !gc.checked) {
+        if(gcErr) gcErr.style.display = 'block';
+        if(gc) gc.style.outline = '2px solid #c0392b';
+        errors.push('Please confirm file delivery terms for Google Drive (Section 5.5).');
+        valid = false;
+      } else {
+        if(gcErr) gcErr.style.display = 'none';
+        if(gc) gc.style.outline = '';
+      }
+    }
+  }
+
+  const mode = currentOfficerMode;
+  check(!!mode, 'officerModeError', 'Please select the serving officer type (Section 6).');
+  if (mode === 'known') {
+    const ov = document.getElementById('officerName').value;
+    if (!ov) {
+      document.getElementById('officerNameInput').classList.add('error');
+      document.getElementById('officerNameError').classList.add('show');
+      errors.push('Please select an officer from the list (Section 6).');
+      valid = false;
+    } else {
+      document.getElementById('officerNameInput').classList.remove('error');
+      document.getElementById('officerNameError').classList.remove('show');
+    }
+  }
+  if (mode === 'other') {
+    check(!!document.getElementById('officerOtherName').value.trim(), 'officerOtherNameError', "Please enter the officer's full name (Section 6).");
+    check(!!document.getElementById('officerOtherEmail').value.trim(), 'officerOtherEmailError', "Please enter the officer's email (Section 6).");
+  }
+
+  if (!valid && errors.length > 0) showValidationPopup(errors);
+  return valid;
+}
+
+function showValidationPopup(errors) {
+  document.getElementById('validationPopup')?.remove();
+  document.getElementById('validationOverlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'validationOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9998;backdrop-filter:blur(2px);';
+
+  const popup = document.createElement('div');
+  popup.id = 'validationPopup';
+  popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:92vw;width:440px;max-height:80vh;overflow-y:auto;';
+
+  popup.innerHTML = `
+    <div style="background:linear-gradient(135deg,#c0392b,#e74c3c);color:white;padding:18px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:1;">
+      <span style="font-size:26px;flex-shrink:0;">⚠️</span>
+      <div>
+        <div style="font-size:15px;font-weight:800;">Please check your information</div>
+        <div style="font-size:12px;opacity:0.88;margin-top:2px;">${errors.length} item(s) require attention</div>
+      </div>
+    </div>
+    <div style="padding:18px 22px 22px;">
+      <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;">
+        ${errors.map((e,i) => `
+          <li style="display:flex;gap:10px;align-items:flex-start;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;">
+            <span style="background:#c0392b;color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px;">${i+1}</span>
+            <span style="font-size:13px;color:#1a2744;line-height:1.55;">${e}</span>
+          </li>`).join('')}
+      </ul>
+      <button id="popupCloseBtn"
+        style="width:100%;margin-top:18px;padding:13px;background:linear-gradient(135deg,#003087,#1a4a8a);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+        ✓ Acknowledged — Go back to fix
+      </button>
+    </div>`;
+
+  document.body.append(overlay, popup);
+
+  function closePopup() {
+    popup.remove(); overlay.remove();
+    setTimeout(() => {
+      const first = document.querySelector('.error-msg.show');
+      if (first) { (first.closest('.card,.pdpa-notice') || first).scrollIntoView({ behavior:'smooth', block:'center' }); }
+    }, 100);
+  }
+  document.getElementById('popupCloseBtn').addEventListener('click', closePopup);
+  overlay.addEventListener('click', closePopup);
+}
+
+function generateRefCode() {
+  const date = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  return `CCTV-${date}-${Math.random().toString(36).substr(2,4).toUpperCase()}`;
+}
+
+function collectData(refCode) {
+  const get = id => (document.getElementById(id)||{}).value||'';
+  const getChecked = name => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(e=>e.value).join(', ');
+  const getRadio = name => { const el=document.querySelector(`input[name="${name}"]:checked`); return el?el.value:''; };
+  return {
+    refCode, timestamp: new Date().toISOString(), pdpaConsent:'Consented',
+    prefix: get('prefix'), fname: get('fname'), lname: get('lname'),
+    gender: get('gender'), requesterType: get('requesterType'), idCard: get('idCard'),
+    faculty: get('faculty'), officialOrg: get('officialOrg'), officialDoc: get('officialDoc'),
+    phone: get('phone'), email: get('email'),
+    purpose: getRadio('purpose')==='Other' ? ('Other: '+get('purposeOther')) : getRadio('purpose'),
+    purposeDetail: get('purposeDetail'), evidenceTypes: getChecked('evidence'),
+    dateStart: get('dateStart'), timeStart: get('timeStart'), dateEnd: get('dateEnd'), timeEnd: get('timeEnd'),
+    locations: get('locations'), vehiclePlate: get('vehiclePlate'), vehicleDesc: get('vehicleDesc'),
+    requestFile: getRadio('requestFile'), fileReason: getRadio('fileReason'),
+    deliveryMethod: getRadio('deliveryMethod'), exportDocs: getChecked('exportDocs'),
+    gdriveEmail: get('gdriveEmail'),
+    pdpaFileConsent: document.getElementById('pdpaFileConsent')?.checked ? 'Acknowledged and Consented' : '',
+    gdriveConsent: document.getElementById('gdriveConsent')?.checked ? 'Acknowledged-link-expires-48hrs' : '',
+    docs: getChecked('docs') + (get('docsOther') ? ', Other: '+get('docsOther') : ''),
+    additionalNote: get('additionalNote'), urgency: getRadio('urgency'),
+    attachedFiles: '',
+    serviceOfficerName: currentOfficerMode==='known' ? (document.getElementById('officerName').value||'') : (document.getElementById('officerOtherName').value||''),
+    serviceOfficerEmail: currentOfficerMode==='known' ? (document.getElementById('officerEmail').value||'') : (document.getElementById('officerOtherEmail').value||''),
+    officerMode: currentOfficerMode,
+    officerName:'', cctvResult:'', footageFound:'', fileGiven:'', actionTaken:'', closedDate:'', satisfactionScore:'', officerNote:'', status:''
+  };
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = () => reject(new Error('Cannot read file: ' + file.name));
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById('cctvForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if(!validate()) return;
+
+  const refCode = generateRefCode();
+  document.getElementById('loadingOverlay').style.display='flex';
+  document.getElementById('submitBtn').disabled=true;
+
+  try {
+    document.getElementById('loadingText').textContent = 'Preparing data...';
+    const filesData = [];
+    const allFiles4Upload = getAllDocFiles();
+    for (let i = 0; i < allFiles4Upload.length; i++) {
+      document.getElementById('loadingText').textContent = 'Preparing file ' + (i+1) + '/' + allFiles4Upload.length + '...';
+      const file = allFiles4Upload[i];
+      const base64 = await fileToBase64(file);
+      filesData.push({ fileName: file.name, mimeType: file.type || 'application/octet-stream', base64Data: base64 });
+    }
+
+    const data = collectData(refCode);
+    if (filesData.length > 0) {
+      data.filesToUpload = filesData;
+      data.attachedFiles = filesData.map((f,i) => {
+        const ext = f.fileName.includes('.') ? '.' + f.fileName.split('.').pop() : '';
+        return i === 0 ? refCode + ext : refCode + '_' + (i+1) + ext;
+      }).join(', ');
+    }
+
+    document.getElementById('loadingText').textContent = 'Submitting...';
+    fetch(APPS_SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(data) });
+    showSuccess(refCode);
+
+  } catch(err) {
+    document.getElementById('loadingOverlay').style.display='none';
+    document.getElementById('submitBtn').disabled=false;
+    alert('An error occurred. Please try again.');
+    console.error(err);
+  }
+});
+
+function showSuccess(refCode) {
+  document.getElementById('loadingOverlay').style.display='none';
+  document.getElementById('cctvForm').style.display='none';
+  document.getElementById('refCode').textContent=refCode;
+  document.getElementById('successScreen').style.display='block';
+  document.getElementById('progressBar').style.width='100%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function resetForm() {
+  document.getElementById('cctvForm').reset();
+  document.getElementById('cctvForm').style.display='block';
+  document.getElementById('successScreen').style.display='none';
+  locationList=[]; uploadedFiles=[]; renderLocationTags();
+  document.querySelectorAll('.radio-item,.check-item').forEach(el=>el.classList.remove('selected'));
+  document.querySelectorAll('.conditional-section').forEach(el=>el.classList.remove('show'));
+  document.getElementById('submitBtn').disabled=false;
+  document.getElementById('progressBar').style.width='0%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleOtherPurpose(show) {
+  document.getElementById('otherPurposeSection').classList.toggle('show', show);
+  if (!show) document.getElementById('purposeOther').value = '';
+}
+function toggleOtherDoc(el) {
+  const checked = el.classList.contains('selected');
+  document.getElementById('otherDocSection').classList.toggle('show', checked);
+  if (!checked) document.getElementById('docsOther').value = '';
+}
+
+loadPresets();
+
+// ===== OFFICER DATABASE =====
+const OFFICER_DB = [
+  {name:'Mr. Kraison Kochamit',       email:'kaison.noum@gmail.com'},
+  {name:'Mr. Chanasorn Niamsupap',    email:'chanasorn.nem@mahidol.ac.th'},
+  {name:'Mr. Chaiyathep Jiamveerabanyong', email:'chaiyathep.jia@mahidol.ac.th'},
+  {name:'Mr. Tawan Saparborom',       email:'tawan.sap@mahidol.ac.th'},
+  {name:'Mr. Songklod Sudta',         email:'songklod.sud@mahidol.ac.th'},
+  {name:'Mr. Noppakorn Muangkaew',    email:'noppakorn.mua@mahidol.ac.th'},
+  {name:'Mr. Narudet Wetbun',         email:'wetbun1063@gmail.com'},
+  {name:'Mr. Bancha Fakfueang',       email:'bancha.fak@mahidol.ac.th'},
+  {name:'Mr. Bunrit Sailunam',        email:'klaoklao195@gmail.com'},
+  {name:'Mr. Piyanan Srichumphung',   email:'piyanan.sri@mahidol.ac.th'},
+  {name:'Miss Piyaporn Malai',        email:'traffic.oppe@gmail.com'},
+  {name:'Mr. Pachara Sathorn',        email:'pup2441@gmail.com'},
+  {name:'Mr. Pornchai Phosaiy',       email:'phrchayphothichi@gmail.com'},
+  {name:'Miss Pichaya Donmin',        email:'pichaya.don@mahidol.ac.th'},
+  {name:'Mr. Yuttapoom Yanphoem',     email:'yuthapoom.yan@mahidol.ac.th'},
+  {name:'Mr. Rawee Chamniean',        email:'rawee.jum@mahidol.ac.th'},
+  {name:'Mr. Withun Suwannakij',      email:'withun.suw@mahidol.ac.th'},
+  {name:'Mr. Saknarin Khantap',       email:'saknarin.kha@mahidol.ac.th'},
+  {name:'Mr. Suphachai Rueangphet',   email:'suphachai.rue@mahidol.ac.th'},
+  {name:'Mr. Sathaphon Jamjai',       email:'sathaphon1051@gmail.com'},
+  {name:'Mr. Surachai Suwannarat',    email:'suwannarat1472@gmail.com'},
+  {name:'Miss Sopana Chanthawinut',   email:'sopanachanthawinut52@gmail.com'},
+  {name:'Mr. Anin Nakwatchara',       email:'anin.nak@mahidol.ac.th'},
+  {name:'Mr. Amnart Maenprom',        email:'amnartmaen90@gmail.com'}
+];
+
+let currentOfficerMode = '';
+
+function selectOfficerMode(mode) {
+  currentOfficerMode = mode;
+  document.getElementById('officerKnownSection').classList.toggle('show', mode==='known');
+  document.getElementById('officerOtherSection').classList.toggle('show', mode==='other');
+  document.getElementById('officerKnownBtn').classList.toggle('selected', mode==='known');
+  document.getElementById('officerOtherBtn').classList.toggle('selected', mode==='other');
+  document.querySelector(`input[name="officerMode"][value="${mode}"]`).checked = true;
+  if (mode==='known') { document.getElementById('officerOtherName').value=''; document.getElementById('officerOtherEmail').value=''; }
+  else { document.getElementById('officerName').value=''; document.getElementById('officerEmail').value=''; document.getElementById('officerNameInput').value=''; document.getElementById('officerSelectedHint').style.display='none'; }
+}
+
+function officerKeydown(e) {
+  const drop = document.getElementById('officerDrop');
+  const items = drop.querySelectorAll('.autocomplete-item');
+  if (!drop.classList.contains('show') || !items.length) return;
+  if (e.key==='ArrowDown'){ e.preventDefault(); acActiveIdx=Math.min(acActiveIdx+1,items.length-1); items.forEach((el,i)=>el.classList.toggle('active',i===acActiveIdx)); items[acActiveIdx]?.scrollIntoView({block:'nearest'}); }
+  else if (e.key==='ArrowUp'){ e.preventDefault(); acActiveIdx=Math.max(acActiveIdx-1,0); items.forEach((el,i)=>el.classList.toggle('active',i===acActiveIdx)); items[acActiveIdx]?.scrollIntoView({block:'nearest'}); }
+  else if (e.key==='Enter'&&acActiveIdx>=0){ e.preventDefault(); const item=items[acActiveIdx]; selectOfficer(item.dataset.name,item.dataset.email); }
+  else if (e.key==='Escape') acHide('officerDrop');
+}
+
+function officerSearch(input) {
+  const q = input.value.trim().toLowerCase();
+  const drop = document.getElementById('officerDrop');
+  acActiveIdx = -1;
+  const results = q.length===0 ? OFFICER_DB.slice(0,8) : OFFICER_DB.filter(o=>o.name.toLowerCase().includes(q)).slice(0,10);
+  if (!results.length) { drop.classList.remove('show'); return; }
+  drop.innerHTML = results.map(o =>
+    `<div class="autocomplete-item" data-name="${o.name}" data-email="${o.email}" onmousedown="selectOfficer('${o.name.replace(/'/g,"\\'")}','${o.email}')">
+      <span class="item-icon">👮</span>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <span style="font-weight:600;">${highlightMatch(o.name, input.value.trim())}</span>
+        <span style="font-size:11px;color:var(--text-muted);">${o.email}</span>
+      </div>
+    </div>`).join('');
+  drop.classList.add('show');
+}
+
+function selectOfficer(name, email) {
+  document.getElementById('officerNameInput').value = name;
+  document.getElementById('officerName').value = name;
+  document.getElementById('officerEmail').value = email;
+  document.getElementById('officerDrop').classList.remove('show');
+  document.getElementById('officerSelectedHint').style.display='block';
+  document.getElementById('officerSelectedName').textContent = name + ' (' + email + ')';
+}
+
+// ===== AUTOCOMPLETE: MU Faculties =====
+const MU_ORGS = [
+  'Faculty of Information and Communication Technology','Faculty of Medical Technology','Faculty of Pharmacy',
+  'Faculty of Tropical Medicine','Faculty of Medicine Ramathibodi Hospital','Faculty of Medicine Siriraj Hospital',
+  'Faculty of Physical Therapy','Faculty of Dentistry','Faculty of Nursing','Faculty of Science',
+  'Faculty of Engineering','Faculty of Liberal Arts','Faculty of Social Sciences and Humanities',
+  'Faculty of Veterinary Science','Faculty of Public Health','Faculty of Environment and Resource Studies',
+  'Graduate Studies','Kanchanaburi Campus','College of Management','College of Music',
+  'Mahidol University International College','College of Sports Science and Technology',
+  'College of Religious Studies','Chakri Naruebodindra Medical Institute',
+  'Center for Contemplative Education','Division of Information Technology','Division of Planning',
+  'Division of Legal Affairs','Buildings, Facilities and Environment Division',
+  'Division of Student Affairs','Division of Finance','Division of Human Resources',
+  'Division of Educational Administration','Division of General Administration',
+  'Division of Research Administration','Division of Quality Development','Division of International Relations',
+  'Institute for Population and Social Research','Institute of Molecular Biosciences',
+  'Institute for Innovative Learning','National Institute for Child and Family Development',
+  'Institute of Nutrition','Institute of Health Systems Research (ASEAN)',
+  'Library and Knowledge Center, Mahidol University'
+];
+
+function getOrgIcon(name) { return '🏛️'; }
+
+function highlightMatch(text, query) {
+  if (!query) return text;
+  const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+  return text.replace(re, '<mark>$1</mark>');
+}
+
+let acActiveIdx = -1;
+
+function acSearch(input, dropId) {
+  const q = input.value.trim();
+  const drop = document.getElementById(dropId);
+  acActiveIdx = -1;
+  const results = q.length===0 ? MU_ORGS.slice(0,8) : MU_ORGS.filter(o=>o.toLowerCase().includes(q.toLowerCase())).slice(0,10);
+  if (!results.length) { drop.classList.remove('show'); return; }
+  drop.innerHTML = results.map(r =>
+    `<div class="autocomplete-item" data-val="${r}" onmousedown="acSelect('${dropId}','${r.replace(/'/g,"\\'")}')">
+      <span class="item-icon">${getOrgIcon(r)}</span>
+      <span>${highlightMatch(r, q)}</span>
+    </div>`).join('') + (results.length>=10 ? `<div class="autocomplete-count">Showing 10 of ${MU_ORGS.filter(o=>o.toLowerCase().includes(q.toLowerCase())).length} results</div>` : '');
+  drop.classList.add('show');
+}
+
+function acSelect(dropId, val) {
+  const drop = document.getElementById(dropId);
+  const input = drop.previousElementSibling;
+  input.value = val;
+  drop.classList.remove('show');
+  acActiveIdx = -1;
+}
+
+function acHide(dropId) {
+  const el = document.getElementById(dropId);
+  if(el) el.classList.remove('show');
+  acActiveIdx = -1;
+}
+
+function acKeydown(e, dropId) {
+  const drop = document.getElementById(dropId);
+  const items = drop.querySelectorAll('.autocomplete-item');
+  if (!drop.classList.contains('show') || !items.length) return;
+  if (e.key==='ArrowDown'){ e.preventDefault(); acActiveIdx=Math.min(acActiveIdx+1,items.length-1); items.forEach((el,i)=>el.classList.toggle('active',i===acActiveIdx)); items[acActiveIdx]?.scrollIntoView({block:'nearest'}); }
+  else if (e.key==='ArrowUp'){ e.preventDefault(); acActiveIdx=Math.max(acActiveIdx-1,0); items.forEach((el,i)=>el.classList.toggle('active',i===acActiveIdx)); items[acActiveIdx]?.scrollIntoView({block:'nearest'}); }
+  else if (e.key==='Enter'&&acActiveIdx>=0){ e.preventDefault(); acSelect(dropId, items[acActiveIdx].dataset.val); }
+  else if (e.key==='Escape') acHide(dropId);
+}
+</script>
+</body>
+</html>
