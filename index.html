@@ -37,7 +37,6 @@
   /* ADMIN ICON */
   .admin-icon-btn { position: fixed; bottom: 24px; right: 24px; width: 44px; height: 44px; background: var(--mu-navy); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.25); z-index: 99; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; }
   .admin-icon-btn:hover { opacity: 1; transform: scale(1.1); }
-  .admin-icon-btn title { display: none; }
 
   /* MAIN */
   .main { max-width: 900px; margin: 0 auto; padding: 32px 16px 80px; }
@@ -173,6 +172,39 @@
   .autocomplete-item mark { background: #ffeaa0; border-radius: 3px; padding: 0 2px; font-style: normal; color: var(--mu-navy); font-weight: 700; }
   .autocomplete-item .item-icon { font-size: 14px; flex-shrink: 0; }
   .autocomplete-count { padding: 6px 14px; font-size: 11px; color: var(--text-muted); background: var(--surface2); border-top: 1px solid var(--border); }
+
+  /* DOC INFO BOX (section 4.4) */
+  .doc-required-box {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border: 2px solid #f59e0b;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-top: 8px;
+  }
+  .doc-required-box .doc-title {
+    font-size: 15px; font-weight: 800; color: #92400e;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+  }
+  .doc-required-item {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: white; border-radius: 10px; padding: 14px 16px;
+    border: 1px solid #fde68a; margin-bottom: 10px;
+  }
+  .doc-required-item:last-child { margin-bottom: 0; }
+  .doc-required-item .doc-icon { font-size: 26px; flex-shrink: 0; margin-top: 1px; }
+  .doc-required-item .doc-label { font-size: 15px; font-weight: 700; color: #1a2744; line-height: 1.4; }
+  .doc-required-item .doc-sub { font-size: 12px; color: #6b7280; margin-top: 4px; }
+  .doc-required-item .doc-badge {
+    display: inline-block; background: #fef2f2; color: #c0392b;
+    border: 1px solid #fca5a5; border-radius: 20px;
+    padding: 2px 10px; font-size: 11px; font-weight: 700; margin-top: 6px;
+  }
+  .doc-upload-hint {
+    margin-top: 14px; background: #eff6ff; border: 1.5px solid #93c5fd;
+    border-radius: 10px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 600; color: #1e40af;
+  }
 </style>
 </head>
 <body>
@@ -227,7 +259,7 @@
       <input type="checkbox" id="pdpaConsent" required>
       <label for="pdpaConsent">ข้าพเจ้ายินยอมให้มหาวิทยาลัยมหิดลเก็บรวบรวมและประมวลผลข้อมูลส่วนบุคคลของข้าพเจ้า เพื่อวัตถุประสงค์ในการขอดูกล้องวงจรปิดย้อนหลัง และรับทราบสิทธิ์ของข้าพเจ้าตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 <span class="required">*</span></label>
     </div>
-    <p class="error-msg" id="pdpaError">กรุณายินยอมให้เก็บข้อมูลส่วนบุคคลก่อนดำเนินการ</p>
+    <p class="error-msg" id="pdpaConsentError">กรุณายินยอมให้เก็บข้อมูลส่วนบุคคลก่อนดำเนินการ</p>
   </div>
 
   <!-- SECTION 1: ข้อมูลผู้ขอ -->
@@ -295,6 +327,7 @@
         </div>
       </div>
 
+      <!-- เลขบัตร + โทรศัพท์ -->
       <div class="form-row" style="margin-bottom:16px;">
         <div class="form-group">
           <label for="idCard">เลขบัตรประชาชน / รหัสนักศึกษา / รหัสพนักงาน <span class="required">*</span></label>
@@ -309,9 +342,18 @@
         </div>
       </div>
 
+      <!-- อีเมลติดต่อ — ย้ายมาอยู่หลังโทรศัพท์ ลบ muEmail ออกแล้ว -->
+      <div class="form-row single" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label for="email">อีเมลติดต่อ</label>
+          <input type="email" id="email" name="email" placeholder="email@example.com">
+          <span class="form-hint">สำหรับรับแจ้งผลการดำเนินการ — กรอกอีเมลที่ใช้งานประจำ (ไม่จำเป็นต้องเป็นอีเมลมหาวิทยาลัย)</span>
+        </div>
+      </div>
+
       <!-- MU section -->
       <div class="conditional-section" id="muSection">
-        <div class="form-row">
+        <div class="form-row single">
           <div class="form-group">
             <label for="faculty">คณะ / หน่วยงาน</label>
             <div class="autocomplete-wrap">
@@ -319,10 +361,6 @@
                 oninput="acSearch(this,'facultyDrop')" onkeydown="acKeydown(event,'facultyDrop')" onfocus="acSearch(this,'facultyDrop')" onblur="setTimeout(()=>acHide('facultyDrop'),180)">
               <div class="autocomplete-dropdown" id="facultyDrop"></div>
             </div>
-          </div>
-          <div class="form-group">
-            <label for="muEmail">อีเมลมหาวิทยาลัย</label>
-            <input type="email" id="muEmail" name="muEmail" placeholder="@student.mahidol.ac.th หรือ @mahidol.ac.th">
           </div>
         </div>
       </div>
@@ -338,14 +376,6 @@
             <label for="officialDoc">เลขที่หนังสือราชการ</label>
             <input type="text" id="officialDoc" name="officialDoc" placeholder="(ถ้ามี)">
           </div>
-        </div>
-      </div>
-
-      <div class="form-row single">
-        <div class="form-group">
-          <label for="email">อีเมลติดต่อ</label>
-          <input type="email" id="email" name="email" placeholder="email@example.com">
-          <span class="form-hint">สำหรับรับแจ้งผลการดำเนินการ</span>
         </div>
       </div>
     </div>
@@ -387,7 +417,7 @@
     </div>
   </div>
 
-  <!-- URGENCY: ระดับความเร่งด่วน (ย้ายมาอยู่หลัง section 2) -->
+  <!-- URGENCY: ระดับความเร่งด่วน -->
   <div class="card" id="urgencyCard">
     <div class="card-header" style="background:linear-gradient(90deg,#8b1a1a,#c0392b);">
       <div class="step-num" style="background:var(--mu-gold);">⚡</div>
@@ -448,7 +478,6 @@
           <input type="text" id="locationInput" placeholder="พิมพ์จุด/บริเวณที่ต้องการ" style="flex:1;">
           <button type="button" onclick="addLocation()" style="background:var(--mu-navy);color:white;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;white-space:nowrap;">+ เพิ่ม</button>
         </div>
-        <!-- Preset locations จาก Admin -->
         <div id="presetWrap" style="margin-top:6px;"></div>
         <div class="location-tags" id="locationTags"></div>
         <input type="hidden" id="locations" name="locations">
@@ -488,15 +517,12 @@
         <p class="error-msg" id="pdpaFileConsentError">กรุณายืนยันการรับทราบ PDPA ก่อนดำเนินการต่อ</p>
       </div>
 
-      <!-- 4.2–4.5 ล็อคไว้จนกว่าจะติ๊ก 4.1 -->
+      <!-- 4.2–4.4 ล็อคไว้จนกว่าจะติ๊ก 4.1 -->
       <div id="section4Rest" style="opacity:0.4;pointer-events:none;transition:all 0.3s;">
 
         <!-- 4.2 ความประสงค์ -->
         <div class="form-group" style="margin-bottom:16px;">
           <label>4.2 ความประสงค์ในการขอรับข้อมูล <span class="required">*</span></label>
-          <div style="background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;font-size:12px;color:#78350f;margin-bottom:10px;">
-            📌 ตาม พ.ร.บ. PDPA การขอรับสำเนาไฟล์ภาพที่มีบุคคลอื่นปรากฏอยู่ ต้องใช้เวลาดำเนินการเพื่อปกปิดข้อมูลบุคคลที่สาม และจำเป็นต้องมีเอกสารทางกฎหมายประกอบ
-          </div>
           <div class="radio-group" style="flex-direction:column;gap:10px;">
             <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:14px 16px;"
               onclick="selectRadio('requestFile','ดูอย่างเดียว',this);showFileSection(false)">
@@ -522,11 +548,11 @@
           <p class="error-msg" id="requestFileError">กรุณาเลือกความประสงค์</p>
         </div>
 
-        <!-- 4.3–4.5 แสดงเฉพาะเมื่อเลือก "ขอรับสำเนา" -->
+        <!-- 4.3–4.4 แสดงเฉพาะเมื่อเลือก "ขอรับสำเนา" -->
         <div class="conditional-section" id="fileSection">
 
           <!-- 4.3 เหตุผล -->
-          <div class="form-group" style="margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:20px;">
             <label>4.3 เหตุผลความจำเป็นในการขอรับสำเนา <span class="required">*</span></label>
             <div class="radio-group" style="flex-direction:column;gap:8px;">
               <div class="radio-item" onclick="selectRadio('fileReason','ใช้เป็นหลักฐานประกอบคดีความ/แจ้งความร้องทุกข์',this)">
@@ -545,75 +571,37 @@
             <p class="error-msg" id="fileReasonError">กรุณาเลือกเหตุผล</p>
           </div>
 
-          <!-- 4.4 เอกสาร -->
-          <div class="form-group" style="margin-bottom:16px;">
-            <label>4.4 เอกสารที่ต้องแนบ / นำมาแสดง <span class="required">*</span></label>
-            <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;color:#7f1d1d;margin-bottom:10px;">
-              ⚠️ <strong>ต้องครบถ้วนทุกรายการ</strong> มิฉะนั้นหน่วยงานขอสงวนสิทธิ์ในการปฏิเสธการให้ไฟล์ภาพ
-            </div>
-            <div class="check-group" style="flex-direction:column;gap:8px;">
-              <div class="check-item" onclick="toggleCheck(this)">
-                <input type="checkbox" name="exportDocs" value="สำเนาบัตรประชาชน/บัตรนักศึกษา/บัตรพนักงาน">
-                🪪 สำเนาบัตรประชาชน / บัตรนักศึกษา / บัตรพนักงาน (พร้อมเซ็นรับรองสำเนาถูกต้องของผู้ขอดูกล้อง)
+          <!-- 4.4 เอกสารที่จำเป็น — info display (ไม่ใช่ checkbox) -->
+          <div class="form-group" style="margin-bottom:0;">
+            <label style="font-size:15px;font-weight:800;color:var(--mu-navy);">4.4 เอกสารที่จำเป็น</label>
+            <div class="doc-required-box">
+              <div class="doc-title">
+                <span>⚠️</span> กรุณาเตรียมเอกสารต่อไปนี้ให้พร้อมก่อนส่งคำขอ
               </div>
-              <div class="check-item" onclick="toggleCheck(this)">
-                <input type="checkbox" name="exportDocs" value="สำเนาบันทึกประจำวันหรือใบแจ้งความ">
-                📋 สำเนาบันทึกประจำวัน หรือ ใบแจ้งความจากเจ้าหน้าที่ตำรวจ (ระบุวันที่ เวลา และสถานที่เกิดเหตุชัดเจน)
-              </div>
-              <div class="check-item" onclick="toggleCheck(this)">
-                <input type="checkbox" name="exportDocs" value="หนังสือมอบอำนาจ (กรณีรับแทน)">
-                📜 หนังสือมอบอำนาจ และสำเนาบัตรประชาชนของผู้มอบและผู้รับมอบ <em style="color:var(--text-muted);">(เฉพาะกรณีรับแทน)</em>
-              </div>
-            </div>
-            <p class="error-msg" id="exportDocsError">กรุณายืนยันเอกสารที่นำมา</p>
-          </div>
 
-          <!-- 4.5 ช่องทางรับไฟล์ -->
-          <div class="form-group" style="margin-bottom:8px;">
-            <label>4.5 ช่องทางการรับไฟล์ภาพ <span class="required">*</span></label>
-            <div class="radio-group" style="flex-direction:column;gap:10px;">
-              <!-- Flash Drive -->
-              <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:14px 16px;"
-                onclick="selectRadio('deliveryMethod','นำ Flash Drive มาเองในวันรับไฟล์',this);toggleGDriveEmail(false)">
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <input type="radio" name="deliveryMethod" value="นำ Flash Drive มาเองในวันรับไฟล์">
-                  <strong>💾 นำ Flash Drive มาเองในวันรับไฟล์</strong>
-                </div>
-                <div style="font-size:12px;color:var(--text-muted);margin-top:5px;padding-left:22px;">
-                  แนะนำ: USB 2.0 ขึ้นไป ความจุ ≥ 4GB และไม่เป็นพาหะนำไวรัสคอมพิวเตอร์
+              <div class="doc-required-item">
+                <span class="doc-icon">🪪</span>
+                <div>
+                  <div class="doc-label">1. ไฟล์สำเนา / ภาพบัตรประชาชน, บัตรนักศึกษา หรือบัตรพนักงาน</div>
+                  <div class="doc-sub">พร้อมเซ็นรับรองสำเนาถูกต้องของผู้ขอดูกล้อง</div>
+                  <span class="doc-badge">จำเป็นต้องแนบ</span>
                 </div>
               </div>
-              <!-- Google Drive -->
-              <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:14px 16px;"
-                onclick="selectRadio('deliveryMethod','รับผ่านลิงก์ Google Drive',this);toggleGDriveEmail(true)">
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <input type="radio" name="deliveryMethod" value="รับผ่านลิงก์ Google Drive">
-                  <strong>🔗 รับผ่านลิงก์ Google Drive</strong>
-                </div>
-                <!-- ช่องอีเมล + consent แสดงเฉพาะเมื่อเลือก -->
-                <div id="gdriveEmailSection" style="display:none;width:100%;margin-top:10px;padding-left:22px;">
-                  <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">อีเมลสำหรับจัดส่งลิงก์ <span class="required">*</span></label>
-                  <input type="email" id="gdriveEmail" name="gdriveEmail"
-                    placeholder="email@example.com"
-                    style="width:100%;max-width:360px;padding:8px 12px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size:13px;outline:none;">
-                  <p class="error-msg" id="gdriveEmailError" style="margin-top:4px;">กรุณากรอกอีเมลสำหรับรับลิงก์</p>
-                  <div style="background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:12px;color:#78350f;">
-                    <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-weight:400;">
-                      <input type="checkbox" id="gdriveConsent" name="gdriveConsent"
-                        style="margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:#d97706;">
-                      <span>
-                        <span style="color:#c0392b;font-weight:700;">* </span>ข้าพเจ้ารับทราบและยินยอมว่า จะต้องดาวน์โหลดไฟล์เก็บไว้ในอุปกรณ์ของตนเอง
-                        เนื่องจากระบบจะทำการ<strong>ลบไฟล์ออกจากลิงก์ภายใน 48 ชั่วโมง</strong>หลังจากการจัดส่งอีเมล
-                        เพื่อความปลอดภัยของข้อมูล
 
-                      </span>
-                    </label>
-                    <span id="gdriveConsentError" style="display:none;font-size:11px;color:#c0392b;margin-top:6px;padding:4px 8px;background:#fef2f2;border-radius:4px;border-left:3px solid #c0392b;">⚠️ กรุณายืนยันการรับทราบเงื่อนไขการรับไฟล์ก่อนส่ง</span>
-                  </div>
+              <div class="doc-required-item">
+                <span class="doc-icon">📋</span>
+                <div>
+                  <div class="doc-label">2. ไฟล์สำเนา / ภาพสำเนาบันทึกประจำวัน หรือใบแจ้งความจากเจ้าหน้าที่ตำรวจ</div>
+                  <div class="doc-sub">ต้องระบุวันที่ เวลา และสถานที่เกิดเหตุชัดเจน</div>
+                  <span class="doc-badge">จำเป็นต้องแนบ <span id="emergencyExcept" style="display:none;font-weight:400;color:#7f1d1d;">(ยกเว้นกรณีฉุกเฉิน — ยื่นเพิ่มเติมได้ภายหลัง)</span></span>
                 </div>
+              </div>
+
+              <div class="doc-upload-hint">
+                <span style="font-size:20px;">📎</span>
+                <span>กรุณาอัปโหลดไฟล์เอกสารทั้งหมดในส่วนที่ 5 ด้านล่าง</span>
               </div>
             </div>
-            <p class="error-msg" id="deliveryMethodError">กรุณาเลือกช่องทางการรับไฟล์</p>
           </div>
 
         </div><!-- end fileSection -->
@@ -709,10 +697,11 @@
           <p class="error-msg" id="exportIdError">กรุณาอัปโหลดสำเนาบัตรประชาชน / บัตรนักศึกษา / บัตรพนักงาน</p>
         </div>
 
-        <!-- ใบแจ้งความ — บังคับ -->
-        <div class="form-group" style="margin-bottom:16px;padding:14px;background:#f8faff;border-radius:10px;border:1px solid #dde3ee;">
+        <!-- ใบแจ้งความ — บังคับ (ยกเว้นฉุกเฉิน) -->
+        <div class="form-group" style="margin-bottom:16px;padding:14px;background:#f8faff;border-radius:10px;border:1px solid #dde3ee;" id="policeDocBox">
           <label style="font-size:14px;font-weight:700;">📋 สำเนาบันทึกประจำวัน หรือ ใบแจ้งความ
             <span style="color:#c0392b;font-weight:800;"> *</span>
+            <span id="policeDocEmergencyNote" style="display:none;color:#c0392b;font-size:12px;font-weight:400;"> (โหมดฉุกเฉิน: ยื่นเพิ่มเติมได้ภายหลัง)</span>
           </label>
           <div style="font-size:12px;color:#c0392b;font-weight:600;margin:4px 0 10px;">(ระบุวันที่ เวลา และสถานที่เกิดเหตุชัดเจน — จำเป็นต้องแนบไฟล์)</div>
           <div class="mini-upload" onclick="triggerDocUpload('file-export-police')">📎 คลิกเพื่ออัปโหลดใบแจ้งความ</div>
@@ -736,12 +725,64 @@
         </div>
       </div>
 
-      <!-- หมายเหตุ + upload ทั่วไป (ทุกโหมด) -->
-      <div class="form-group" style="margin-bottom:20px;margin-top:16px;">
+      <!-- หมายเหตุ (ทุกโหมด) -->
+      <div class="form-group" style="margin-top:16px;">
         <label for="additionalNote">หมายเหตุเพิ่มเติม</label>
         <textarea id="additionalNote" name="additionalNote" style="min-height:70px;" placeholder="ข้อมูลเพิ่มเติมที่ต้องการแจ้งเจ้าหน้าที่..."></textarea>
       </div>
 
+    </div>
+  </div>
+
+  <!-- SECTION 5.5: ช่องทางการรับไฟล์ภาพ — แยกออกมาต่างหาก แสดงเฉพาะกรณีขอสำเนา -->
+  <div class="card" id="section45Card" style="display:none;">
+    <div class="card-header" style="background:linear-gradient(90deg,#1a5276,#2471a3);">
+      <div class="step-num" style="background:var(--mu-gold);color:var(--mu-navy);">5.5</div>
+      <h2>ช่องทางการรับไฟล์ภาพ</h2>
+    </div>
+    <div class="card-body">
+      <div class="info-box">📦 กรุณาเลือกช่องทางที่ต้องการรับไฟล์ภาพ CCTV หลังจากที่เจ้าหน้าที่ดำเนินการแล้วเสร็จ</div>
+      <div class="form-group">
+        <label>เลือกช่องทางที่ต้องการรับไฟล์ <span class="required">*</span></label>
+        <div class="radio-group" style="flex-direction:column;gap:10px;margin-top:8px;">
+          <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:16px 18px;"
+            onclick="selectRadio('deliveryMethod','นำ Flash Drive มาเองในวันรับไฟล์',this);toggleGDriveEmail(false)">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <input type="radio" name="deliveryMethod" value="นำ Flash Drive มาเองในวันรับไฟล์">
+              <strong style="font-size:15px;">💾 นำ Flash Drive มาเองในวันรับไฟล์</strong>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:6px;padding-left:24px;">
+              แนะนำ: USB 2.0 ขึ้นไป ความจุ ≥ 4GB และไม่เป็นพาหะนำไวรัสคอมพิวเตอร์
+            </div>
+          </div>
+          <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:16px 18px;"
+            onclick="selectRadio('deliveryMethod','รับผ่านลิงก์ Google Drive',this);toggleGDriveEmail(true)">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <input type="radio" name="deliveryMethod" value="รับผ่านลิงก์ Google Drive">
+              <strong style="font-size:15px;">🔗 รับผ่านลิงก์ Google Drive</strong>
+            </div>
+            <div id="gdriveEmailSection" style="display:none;width:100%;margin-top:12px;padding-left:24px;">
+              <label style="font-size:13px;color:var(--text-muted);display:block;margin-bottom:6px;">อีเมลสำหรับจัดส่งลิงก์ <span class="required">*</span></label>
+              <input type="email" id="gdriveEmail" name="gdriveEmail" placeholder="email@example.com"
+                style="width:100%;max-width:380px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size:13px;outline:none;">
+              <p class="error-msg" id="gdriveEmailError" style="margin-top:6px;">กรุณากรอกอีเมลสำหรับรับลิงก์</p>
+              <div style="background:#fffbeb;border:1px solid #f59e0b;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:13px;color:#78350f;">
+                <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-weight:400;">
+                  <input type="checkbox" id="gdriveConsent" name="gdriveConsent"
+                    style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:#d97706;">
+                  <span>
+                    ข้าพเจ้ารับทราบและยินยอมว่า จะต้องดาวน์โหลดไฟล์เก็บไว้ในอุปกรณ์ของตนเอง
+                    เนื่องจากระบบจะทำการ<strong>ลบไฟล์ออกจากลิงก์ภายใน 48 ชั่วโมง</strong>หลังจากการจัดส่งอีเมล
+                    เพื่อความปลอดภัยของข้อมูล
+                  </span>
+                </label>
+                <span id="gdriveConsentError" style="display:none;font-size:12px;color:#c0392b;margin-top:6px;display:block;">⚠️ กรุณายืนยันการรับทราบเงื่อนไขการรับไฟล์ก่อนส่ง</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="error-msg" id="deliveryMethodError">กรุณาเลือกช่องทางการรับไฟล์</p>
+      </div>
     </div>
   </div>
 
@@ -832,15 +873,9 @@
 // ===== EMERGENCY MODE =====
 function setEmergencyMode(on) {
   document.getElementById('emergencyBanner').style.display = on ? 'block' : 'none';
-  // ซ่อน/แสดง section ที่ไม่จำเป็นในโหมดฉุกเฉิน
-  const optionalFields = ['gender','muEmail','officialOrg','officialDoc','email','evidenceGroup'];
-  optionalFields.forEach(id => {
-    const el = document.getElementById(id);
-    if(el) {
-      const wrap = el.closest('.form-group');
-      if(wrap) wrap.style.opacity = on ? '0.4' : '1';
-    }
-  });
+  // แสดง/ซ่อน note ฉุกเฉินในส่วน 4.4 และ section 5
+  const excepts = document.querySelectorAll('#emergencyExcept, #policeDocEmergencyNote');
+  excepts.forEach(el => { if(el) el.style.display = on ? 'inline' : 'none'; });
 }
 
 // ===== SECTION 5 DYNAMIC =====
@@ -861,10 +896,9 @@ function updateSection5(requestFileVal) {
 }
 
 // ===== DOC UPLOAD HELPERS =====
-const docFiles = {}; // { 'file-doc-id': [File, ...] }
+const docFiles = {};
 
 function toggleDocUpload(checkEl, uploadId) {
-  // ถ้าเป็น check-item ทั่วไป ให้ toggle ปกติ
   const cb = checkEl.querySelector('input[type=checkbox]');
   if(cb) { cb.checked = !cb.checked; checkEl.classList.toggle('selected', cb.checked); }
   const zone = document.getElementById(uploadId);
@@ -902,13 +936,11 @@ function removeDocFile(inputId, idx) {
 }
 
 function updateIdUploadBtn() {
-  // เช็คว่ามีไฟล์แล้วหรือยัง
   const files = docFiles['file-export-id'] || [];
   const btn = document.getElementById('uploadIdBtn');
   if(btn) btn.style.borderColor = files.length > 0 ? '#27ae60' : '';
 }
 
-// รวม docFiles ทุกอันสำหรับ submit
 function getAllDocFiles() {
   const all = [];
   Object.values(docFiles).forEach(arr => arr.forEach(f => all.push(f)));
@@ -917,7 +949,6 @@ function getAllDocFiles() {
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVfwqmg24QmG37NbdIpn5w90_TWzbilayADz2QdG29CY2qFH_fuD0FhZRinslAQL4I1Q/exec';
 
-// Load preset locations from localStorage (set by Admin)
 function loadPresets() {
   const presets = JSON.parse(localStorage.getItem('cctv_preset_locations') || '[]');
   const wrap = document.getElementById('presetWrap');
@@ -930,7 +961,6 @@ function addPreset(name) {
   addLocation();
 }
 
-// Location tags
 let locationList = [];
 function addLocation() {
   const input = document.getElementById('locationInput');
@@ -948,26 +978,18 @@ function renderLocationTags() {
     `<div class="location-tag">📍 ${loc} <span class="remove" onclick="removeLocation(${i})">✕</span></div>`).join('');
 }
 
-// File upload
 let uploadedFiles = [];
 function handleFileSelect(e) { addFiles(Array.from(e.target.files)); }
-function handleDragOver(e) { e.preventDefault(); document.getElementById('uploadArea').classList.add('dragover'); }
-function handleDrop(e) { e.preventDefault(); document.getElementById('uploadArea').classList.remove('dragover'); addFiles(Array.from(e.dataTransfer.files)); }
+function handleDragOver(e) { e.preventDefault(); }
+function handleDrop(e) { e.preventDefault(); addFiles(Array.from(e.dataTransfer.files)); }
 function addFiles(files) {
   files.forEach(f => {
     if (uploadedFiles.length >= 5) { alert('อัปโหลดได้สูงสุด 5 ไฟล์ค่ะ'); return; }
     if (f.size > 10*1024*1024) { alert(`ไฟล์ "${f.name}" มีขนาดเกิน 10MB`); return; }
     if (!uploadedFiles.find(x => x.name===f.name)) uploadedFiles.push(f);
   });
-  renderFileList();
 }
-function removeFile(idx) { uploadedFiles.splice(idx,1); renderFileList(); }
-function renderFileList() {
-  const ext = f => f.name.split('.').pop().toLowerCase();
-  const icon = f => ({jpg:'🖼️',jpeg:'🖼️',png:'🖼️',pdf:'📄',doc:'📝',docx:'📝'}[ext(f)]||'📎');
-  document.getElementById('fileList').innerHTML = uploadedFiles.map((f,i) =>
-    `<div class="file-item">${icon(f)} <span class="file-name">${f.name}</span> <span style="font-size:11px;color:var(--text-muted)">${(f.size/1024).toFixed(0)} KB</span> <span class="file-remove" onclick="removeFile(${i})">✕</span></div>`).join('');
-}
+function removeFile(idx) { uploadedFiles.splice(idx,1); }
 
 // Radio / checkbox
 function selectRadio(name, value, el) {
@@ -983,9 +1005,12 @@ function handleRequesterType() {
   document.getElementById('muSection').classList.toggle('show', ['นักศึกษา','บุคลากร'].includes(val));
   document.getElementById('officialSection').classList.toggle('show', val==='เจ้าหน้าที่ภายนอก');
 }
+
 function showFileSection(show) {
   document.getElementById('fileSection').classList.toggle('show', show);
   updateSection5(show ? 'ต้องการไฟล์' : 'ดูอย่างเดียว');
+  const s45 = document.getElementById('section45Card');
+  if(s45) s45.style.display = show ? 'block' : 'none';
 }
 
 function toggleSection4Consent(checked) {
@@ -993,7 +1018,6 @@ function toggleSection4Consent(checked) {
   if (!rest) return;
   rest.style.opacity = checked ? '1' : '0.4';
   rest.style.pointerEvents = checked ? 'auto' : 'none';
-  // clear ถ้า uncheck
   if (!checked) {
     document.querySelectorAll('input[name="requestFile"]').forEach(r=>r.checked=false);
     showFileSection(false);
@@ -1021,133 +1045,105 @@ function updateProgress() {
 document.addEventListener('change', updateProgress);
 document.addEventListener('input', updateProgress);
 
-// Validate
+// ===== VALIDATE + POPUP =====
 function validate() {
   let valid = true;
   const errors = [];
 
-  if(!document.getElementById('pdpaConsent').checked){
-    document.getElementById('pdpaConsentError').classList.add('show');
-    errors.push('ยังไม่ได้ยืนยันการยินยอม PDPA');
-    valid = false;
-  } else document.getElementById('pdpaConsentError').classList.remove('show');
+  // Helper: เช็คและเพิ่ม error
+  function check(condition, errorId, msg) {
+    const el = document.getElementById(errorId);
+    if (!condition) {
+      if(el) el.classList.add('show');
+      errors.push(msg);
+      valid = false;
+    } else {
+      if(el) el.classList.remove('show');
+    }
+  }
 
-  if(!document.getElementById('fname').value.trim()){
-    document.getElementById('fnameError').classList.add('show');
-    errors.push('กรุณากรอกชื่อจริง');
-    valid = false;
-  } else document.getElementById('fnameError').classList.remove('show');
-
-  if(!document.getElementById('lname').value.trim()){
-    document.getElementById('lnameError').classList.add('show');
-    errors.push('กรุณากรอกนามสกุล');
-    valid = false;
-  } else document.getElementById('lnameError').classList.remove('show');
-
-  if(!document.getElementById('requesterType').value){
-    document.getElementById('requesterTypeError').classList.add('show');
-    errors.push('กรุณาเลือกประเภทผู้ขอ');
-    valid = false;
-  } else document.getElementById('requesterTypeError').classList.remove('show');
-
-  if(!document.getElementById('idCard').value.trim()){
-    document.getElementById('idCardError').classList.add('show');
-    errors.push('กรุณากรอกเลขบัตรประชาชน / รหัส');
-    valid = false;
-  } else document.getElementById('idCardError').classList.remove('show');
-
-  if(!document.getElementById('phone').value.trim()){
-    document.getElementById('phoneError').classList.add('show');
-    errors.push('กรุณากรอกเบอร์โทรศัพท์');
-    valid = false;
-  } else document.getElementById('phoneError').classList.remove('show');
-
-  if(!document.querySelector('input[name="purpose"]:checked')){
-    document.getElementById('purposeError').classList.add('show');
-    errors.push('กรุณาเลือกวัตถุประสงค์');
-    valid = false;
-  } else document.getElementById('purposeError').classList.remove('show');
-
-  if(!document.querySelector('input[name="urgency"]:checked')){
-    document.getElementById('urgencyError').classList.add('show');
-    errors.push('กรุณาเลือกระดับความเร่งด่วน');
-    valid = false;
-  } else document.getElementById('urgencyError').classList.remove('show');
-
-  if(!document.getElementById('dateStart').value){
-    document.getElementById('dateError').classList.add('show');
-    errors.push('กรุณาระบุวันที่เกิดเหตุ');
-    valid = false;
-  } else document.getElementById('dateError').classList.remove('show');
-
-  if(!document.getElementById('locations').value){
-    document.getElementById('locationError').classList.add('show');
-    errors.push('กรุณาระบุจุดที่ต้องการดูกล้อง (พิมพ์แล้วกดปุ่ม "+ เพิ่ม")');
-    valid = false;
-  } else document.getElementById('locationError').classList.remove('show');
+  // PDPA หลัก
+  check(document.getElementById('pdpaConsent').checked, 'pdpaConsentError', 'กรุณายินยอม PDPA ก่อนดำเนินการ (ส่วนบนสุด)');
+  check(!!document.getElementById('fname').value.trim(), 'fnameError', 'กรุณากรอกชื่อจริง');
+  check(!!document.getElementById('lname').value.trim(), 'lnameError', 'กรุณากรอกนามสกุล');
+  check(!!document.getElementById('requesterType').value, 'requesterTypeError', 'กรุณาเลือกประเภทผู้ขอ');
+  check(!!document.getElementById('idCard').value.trim(), 'idCardError', 'กรุณากรอกเลขบัตรประชาชน / รหัส');
+  check(!!document.getElementById('phone').value.trim(), 'phoneError', 'กรุณากรอกเบอร์โทรศัพท์');
+  check(!!document.querySelector('input[name="purpose"]:checked'), 'purposeError', 'กรุณาเลือกวัตถุประสงค์ (ส่วนที่ 2)');
+  check(!!document.getElementById('purposeDetail').value.trim(), 'purposeDetailError', 'กรุณากรอกรายละเอียดเหตุการณ์ (ส่วนที่ 2)');
+  check(!!document.querySelector('input[name="urgency"]:checked'), 'urgencyError', 'กรุณาเลือกระดับความเร่งด่วน');
+  check(!!document.getElementById('dateStart').value, 'dateError', 'กรุณาระบุวันที่เกิดเหตุ (ส่วนที่ 3)');
+  check(!!document.getElementById('locations').value, 'locationError', 'กรุณาระบุจุดที่ต้องการดูกล้อง แล้วกด "+ เพิ่ม" (ส่วนที่ 3)');
 
   // 4.1 PDPA file consent
-  const pcEl = document.getElementById('pdpaFileConsent');
-  const pcErr = document.getElementById('pdpaFileConsentError');
-  if(pcErr){ if(!pcEl||!pcEl.checked){pcErr.classList.add('show');errors.push('กรุณายืนยัน PDPA ในส่วนที่ 4');valid=false;}else pcErr.classList.remove('show'); }
+  check(document.getElementById('pdpaFileConsent').checked, 'pdpaFileConsentError', 'กรุณายืนยัน PDPA ในส่วนที่ 4.1');
 
   // 4.2 requestFile
   const rfEl = document.querySelector('input[name="requestFile"]:checked');
-  if(!rfEl){ document.getElementById('requestFileError').classList.add('show'); errors.push('กรุณาเลือกความประสงค์ (ส่วนที่ 4)'); valid=false; }
-  else {
-    document.getElementById('requestFileError').classList.remove('show');
-    if(rfEl.value === 'ต้องการไฟล์') {
-      const frEl = document.querySelector('input[name="fileReason"]:checked');
-      const frErr = document.getElementById('fileReasonError');
-      if(frErr){ if(!frEl){frErr.classList.add('show');errors.push('กรุณาเลือกเหตุผลในการขอรับสำเนา (ส่วนที่ 4.3)');valid=false;}else frErr.classList.remove('show'); }
-      const dmEl = document.querySelector('input[name="deliveryMethod"]:checked');
-      const dmErr = document.getElementById('deliveryMethodError');
-      if(dmErr){ if(!dmEl){dmErr.classList.add('show');errors.push('กรุณาเลือกช่องทางการรับไฟล์ (ส่วนที่ 4.5)');valid=false;}else dmErr.classList.remove('show'); }
-      if(dmEl && dmEl.value === 'รับผ่านลิงก์ Google Drive') {
-        const gEmail = document.getElementById('gdriveEmail');
-        const gEmailErr = document.getElementById('gdriveEmailError');
-        if(gEmailErr){ if(!gEmail||!gEmail.value.includes('@')){gEmailErr.classList.add('show');errors.push('กรุณากรอกอีเมลสำหรับรับลิงก์ Google Drive');valid=false;}else gEmailErr.classList.remove('show'); }
-        const gc = document.getElementById('gdriveConsent');
-        const gcErr = document.getElementById('gdriveConsentError');
-        if(gcErr){ if(!gc||!gc.checked){gcErr.style.display='inline-block';if(gc){gc.style.outline='2px solid #c0392b';}errors.push('กรุณายืนยันเงื่อนไขการรับไฟล์ Google Drive');valid=false;}else{gcErr.style.display='none';if(gc)gc.style.outline='';} }
-      }
-      // ตรวจ section 5 export — บัตรประชาชน
-      const idFiles = docFiles['file-export-id'] || [];
-      const idErr = document.getElementById('exportIdError');
-      if(idErr){ if(idFiles.length===0){idErr.classList.add('show');errors.push('กรุณาอัปโหลดสำเนาบัตรประชาชน/บัตรนักศึกษา (ส่วนที่ 5)');valid=false;}else idErr.classList.remove('show'); }
-      // ตรวจใบแจ้งความ — บังคับเฉพาะกรณีไม่ฉุกเฉิน
-      const urgency = document.querySelector('input[name="urgency"]:checked')?.value || '';
-      if(urgency !== 'ฉุกเฉิน') {
-        const policeFiles = docFiles['file-export-police'] || [];
-        const policeErr = document.getElementById('exportPoliceError');
-        if(policeErr){ if(policeFiles.length===0){policeErr.classList.add('show');errors.push('กรุณาอัปโหลดสำเนาบันทึกประจำวัน/ใบแจ้งความ (ส่วนที่ 5)');valid=false;}else policeErr.classList.remove('show'); }
+  check(!!rfEl, 'requestFileError', 'กรุณาเลือกความประสงค์การขอรับข้อมูล (ส่วนที่ 4.2)');
+
+  if (rfEl && rfEl.value === 'ต้องการไฟล์') {
+    // 4.3 fileReason
+    check(!!document.querySelector('input[name="fileReason"]:checked'), 'fileReasonError', 'กรุณาเลือกเหตุผลในการขอรับสำเนา (ส่วนที่ 4.3)');
+
+    // Section 5: บัตรประชาชน — บังคับเสมอ
+    const idFiles = docFiles['file-export-id'] || [];
+    check(idFiles.length > 0, 'exportIdError', 'กรุณาอัปโหลดสำเนาบัตรประชาชน / บัตรนักศึกษา (ส่วนที่ 5)');
+
+    // Section 5: ใบแจ้งความ — บังคับเฉพาะกรณีไม่ฉุกเฉิน
+    const urgency = document.querySelector('input[name="urgency"]:checked')?.value || '';
+    if (urgency !== 'ฉุกเฉิน') {
+      const policeFiles = docFiles['file-export-police'] || [];
+      check(policeFiles.length > 0, 'exportPoliceError', 'กรุณาอัปโหลดสำเนาบันทึกประจำวัน / ใบแจ้งความ (ส่วนที่ 5)');
+    } else {
+      const policeErr = document.getElementById('exportPoliceError');
+      if(policeErr) policeErr.classList.remove('show');
+    }
+
+    // 5.5 ช่องทางรับไฟล์
+    const dmEl = document.querySelector('input[name="deliveryMethod"]:checked');
+    check(!!dmEl, 'deliveryMethodError', 'กรุณาเลือกช่องทางการรับไฟล์ (ส่วนที่ 5.5)');
+
+    if (dmEl && dmEl.value === 'รับผ่านลิงก์ Google Drive') {
+      const gEmail = document.getElementById('gdriveEmail');
+      check(!!(gEmail && gEmail.value.includes('@')), 'gdriveEmailError', 'กรุณากรอกอีเมลสำหรับรับลิงก์ Google Drive');
+
+      const gc = document.getElementById('gdriveConsent');
+      const gcErr = document.getElementById('gdriveConsentError');
+      if (!gc || !gc.checked) {
+        if(gcErr) { gcErr.style.display = 'block'; }
+        if(gc) gc.style.outline = '2px solid #c0392b';
+        errors.push('กรุณายืนยันเงื่อนไขการรับไฟล์ Google Drive (ส่วนที่ 5.5)');
+        valid = false;
       } else {
-        const policeErr = document.getElementById('exportPoliceError');
-        if(policeErr) policeErr.classList.remove('show');
+        if(gcErr) gcErr.style.display = 'none';
+        if(gc) gc.style.outline = '';
       }
     }
   }
 
-  // officer
+  // Section 6: เจ้าหน้าที่
   const mode = currentOfficerMode;
-  const modeEl = document.getElementById('officerModeError');
-  if (!mode) { modeEl.classList.add('show'); errors.push('กรุณาเลือกเจ้าหน้าที่ผู้ให้บริการ (ส่วนที่ 6)'); valid=false; }
-  else { modeEl.classList.remove('show'); }
-  if (mode==='known') {
+  check(!!mode, 'officerModeError', 'กรุณาเลือกเจ้าหน้าที่ผู้ให้บริการ (ส่วนที่ 6)');
+
+  if (mode === 'known') {
     const ov = document.getElementById('officerName').value;
-    const oe = document.getElementById('officerNameError');
-    if (!ov) { document.getElementById('officerNameInput').classList.add('error'); oe.classList.add('show'); errors.push('กรุณาเลือกชื่อเจ้าหน้าที่จากรายการ (ส่วนที่ 6)'); valid=false; }
-    else { document.getElementById('officerNameInput').classList.remove('error'); oe.classList.remove('show'); }
+    if (!ov) {
+      document.getElementById('officerNameInput').classList.add('error');
+      document.getElementById('officerNameError').classList.add('show');
+      errors.push('กรุณาเลือกชื่อเจ้าหน้าที่จากรายการ (ส่วนที่ 6)');
+      valid = false;
+    } else {
+      document.getElementById('officerNameInput').classList.remove('error');
+      document.getElementById('officerNameError').classList.remove('show');
+    }
   }
-  if (mode==='other') {
-    const on2 = document.getElementById('officerOtherName').value.trim();
-    const oe2 = document.getElementById('officerOtherNameError');
-    if (!on2) { oe2.classList.add('show'); errors.push('กรุณากรอกชื่อเจ้าหน้าที่ (ส่วนที่ 6)'); valid=false; }
-    else oe2.classList.remove('show');
+  if (mode === 'other') {
+    check(!!document.getElementById('officerOtherName').value.trim(), 'officerOtherNameError', 'กรุณากรอกชื่อเจ้าหน้าที่ (ส่วนที่ 6)');
+    check(!!document.getElementById('officerOtherEmail').value.trim(), 'officerOtherEmailError', 'กรุณากรอกอีเมลเจ้าหน้าที่ (ส่วนที่ 6)');
   }
 
-  // แสดง popup ถ้ามี error
-  if(!valid && errors.length > 0) {
+  if (!valid && errors.length > 0) {
     showValidationPopup(errors);
   }
 
@@ -1156,37 +1152,61 @@ function validate() {
 
 function showValidationPopup(errors) {
   // ลบ popup เก่า
-  const old = document.getElementById('validationPopup');
-  if(old) old.remove();
+  document.getElementById('validationPopup')?.remove();
+  document.getElementById('validationOverlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'validationOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9998;backdrop-filter:blur(2px);';
 
   const popup = document.createElement('div');
   popup.id = 'validationPopup';
-  popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:90vw;width:400px;max-height:80vh;overflow-y:auto;';
+  popup.style.cssText = [
+    'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;',
+    'background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);',
+    'max-width:92vw;width:420px;max-height:80vh;overflow-y:auto;'
+  ].join('');
+
   popup.innerHTML = `
-    <div style="background:#c0392b;color:white;padding:16px 20px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:10px;">
-      <span style="font-size:22px;">⚠️</span>
+    <div style="background:linear-gradient(135deg,#c0392b,#e74c3c);color:white;padding:18px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:1;">
+      <span style="font-size:26px;flex-shrink:0;">⚠️</span>
       <div>
-        <div style="font-size:15px;font-weight:800;">กรุณาตรวจสอบข้อมูล</div>
-        <div style="font-size:12px;opacity:0.85;">พบ ${errors.length} รายการที่ยังไม่ครบถ้วน</div>
+        <div style="font-size:15px;font-weight:800;letter-spacing:0.01em;">กรุณาตรวจสอบข้อมูล</div>
+        <div style="font-size:12px;opacity:0.88;margin-top:2px;">พบ ${errors.length} รายการที่ยังไม่ครบถ้วน</div>
       </div>
     </div>
-    <div style="padding:16px 20px;">
-      <ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;">
-        ${errors.map(e=>`<li style="font-size:13px;color:#1a2744;line-height:1.5;">${e}</li>`).join('')}
+    <div style="padding:18px 22px 22px;">
+      <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;">
+        ${errors.map((e,i) => `
+          <li style="display:flex;gap:10px;align-items:flex-start;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;">
+            <span style="background:#c0392b;color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px;">${i+1}</span>
+            <span style="font-size:13px;color:#1a2744;line-height:1.55;">${e}</span>
+          </li>`).join('')}
       </ul>
-      <button onclick="document.getElementById('validationPopup').remove();document.querySelector('.error-msg.show')?.closest('.card, .form-group')?.scrollIntoView({behavior:'smooth',block:'center'});"
-        style="width:100%;margin-top:16px;padding:12px;background:#003087;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
-        ✓ รับทราบ และไปแก้ไข
+      <button id="popupCloseBtn"
+        style="width:100%;margin-top:18px;padding:13px;background:linear-gradient(135deg,var(--mu-blue,#003087),#1a4a8a);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.02em;box-shadow:0 4px 12px rgba(0,48,135,0.25);">
+        ✓ รับทราบ — ไปแก้ไขข้อมูล
       </button>
     </div>`;
 
-  // overlay
-  const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;';
-  overlay.onclick = () => { popup.remove(); overlay.remove(); };
   document.body.append(overlay, popup);
-}
 
+  // ปิด popup + scroll ไปหา error แรก
+  function closePopup() {
+    popup.remove();
+    overlay.remove();
+    setTimeout(() => {
+      const first = document.querySelector('.error-msg.show');
+      if (first) {
+        const target = first.closest('.card, .pdpa-notice') || first;
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  }
+
+  document.getElementById('popupCloseBtn').addEventListener('click', closePopup);
+  overlay.addEventListener('click', closePopup);
+}
 
 function generateRefCode() {
   const date = new Date().toISOString().slice(0,10).replace(/-/g,'');
@@ -1201,7 +1221,7 @@ function collectData(refCode) {
     refCode, timestamp: new Date().toISOString(), pdpaConsent:'ยินยอม',
     prefix: get('prefix'), fname: get('fname'), lname: get('lname'),
     gender: get('gender'), requesterType: get('requesterType'), idCard: get('idCard'),
-    faculty: get('faculty'), muEmail: get('muEmail'), officialOrg: get('officialOrg'), officialDoc: get('officialDoc'),
+    faculty: get('faculty'), officialOrg: get('officialOrg'), officialDoc: get('officialDoc'),
     phone: get('phone'), email: get('email'),
     purpose: getRadio('purpose')==='อื่นๆ' ? ('อื่นๆ: '+get('purposeOther')) : getRadio('purpose'),
     purposeDetail: get('purposeDetail'), evidenceTypes: getChecked('evidence'),
@@ -1228,8 +1248,6 @@ function collectData(refCode) {
   };
 }
 
-// Upload files to Google Drive via Apps Script
-// แปลงไฟล์เป็น base64
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -1241,10 +1259,8 @@ function fileToBase64(file) {
 
 document.getElementById('cctvForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-  if(!validate()){
-    document.querySelector('.error-msg.show')?.closest('.card')?.scrollIntoView({behavior:'smooth',block:'center'});
-    return;
-  }
+  if(!validate()) return;
+
   const refCode = generateRefCode();
   document.getElementById('loadingOverlay').style.display='flex';
   document.getElementById('submitBtn').disabled=true;
@@ -1256,26 +1272,16 @@ document.getElementById('cctvForm').addEventListener('submit', async function(e)
 
   try {
     document.getElementById('loadingText').textContent = 'กำลังเตรียมข้อมูล...';
-
-    // 1. แปลงไฟล์ทั้งหมดเป็น base64 ก่อน
     const filesData = [];
     const allFiles4Upload = [...uploadedFiles, ...getAllDocFiles()];
     for (let i = 0; i < allFiles4Upload.length; i++) {
-      document.getElementById('loadingText').textContent =
-        'กำลังเตรียมไฟล์ ' + (i+1) + '/' + allFiles4Upload.length + '...';
+      document.getElementById('loadingText').textContent = 'กำลังเตรียมไฟล์ ' + (i+1) + '/' + allFiles4Upload.length + '...';
       const file = allFiles4Upload[i];
       const base64 = await fileToBase64(file);
-      filesData.push({
-        fileName:   file.name,
-        mimeType:   file.type || 'application/octet-stream',
-        base64Data: base64
-      });
+      filesData.push({ fileName: file.name, mimeType: file.type || 'application/octet-stream', base64Data: base64 });
     }
 
-    // 2. Collect ข้อมูลฟอร์ม
     const data = collectData(refCode);
-    // แนบ files ไปพร้อมกันใน payload เดียว
-    // Apps Script จะ upload → ได้ link → บันทึก Sheet → ส่งอีเมลพร้อม link
     if (filesData.length > 0) {
       data.filesToUpload = filesData;
       data.attachedFiles = filesData.map((f,i) => {
@@ -1284,16 +1290,8 @@ document.getElementById('cctvForm').addEventListener('submit', async function(e)
       }).join(', ');
     }
 
-    // 3. ส่งทุกอย่างพร้อมกันแบบ no-cors (ไม่มี CORS error แน่นอน)
     document.getElementById('loadingText').textContent = 'กำลังส่งข้อมูล...';
-    fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode:   'no-cors',
-      headers:{ 'Content-Type': 'text/plain' },
-      body:   JSON.stringify(data)
-    });
-
-    // 4. showSuccess ทันที
+    fetch(APPS_SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(data) });
     showSuccess(refCode);
 
   } catch(err) {
@@ -1317,7 +1315,7 @@ function resetForm() {
   document.getElementById('cctvForm').reset();
   document.getElementById('cctvForm').style.display='block';
   document.getElementById('successScreen').style.display='none';
-  locationList=[]; uploadedFiles=[]; renderLocationTags(); renderFileList();
+  locationList=[]; uploadedFiles=[]; renderLocationTags();
   document.querySelectorAll('.radio-item,.check-item').forEach(el=>el.classList.remove('selected'));
   document.querySelectorAll('.conditional-section').forEach(el=>el.classList.remove('show'));
   document.getElementById('submitBtn').disabled=false;
@@ -1325,7 +1323,6 @@ function resetForm() {
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// Toggle other purpose/docs
 function toggleOtherPurpose(show) {
   document.getElementById('otherPurposeSection').classList.toggle('show', show);
   if (!show) document.getElementById('purposeOther').value = '';
@@ -1336,11 +1333,7 @@ function toggleOtherDoc(el) {
   if (!checked) document.getElementById('docsOther').value = '';
 }
 
-// Override selectRadio to handle purpose other
-const _origSelectRadio = selectRadio;
-
 loadPresets();
-
 
 // ===== ฐานข้อมูลเจ้าหน้าที่งานจราจรฯ =====
 const OFFICER_DB = [
@@ -1443,75 +1436,37 @@ function selectOfficer(name, email) {
   document.getElementById('officerSelectedName').textContent = name + ' (' + email + ')';
 }
 
-// ===== AUTOCOMPLETE: รายชื่อคณะ/หน่วยงาน มหาวิทยาลัยมหิดล =====
+// ===== AUTOCOMPLETE: รายชื่อคณะ/หน่วยงาน =====
 const MU_ORGS = [
-  'โครงการจัดตั้งวิทยาเขตนครสวรรค์',
-  'โครงการจัดตั้งวิทยาเขตอำนาจเจริญ',
+  'โครงการจัดตั้งวิทยาเขตนครสวรรค์','โครงการจัดตั้งวิทยาเขตอำนาจเจริญ',
   'โครงการจัดตั้งศูนย์พัฒนาอุตสาหกรรมชีวภาพ มหาวิทยาลัยมหิดล',
   'โครงการจัดตั้งสถาบันสิทธิมนุษยชนและสันติศึกษา',
   'โครงการจัดตั้งสถาบันอุทยานธรรมชาติวิทยาสิรีรุกขชาติ',
-  'โรงเรียนสาธิตนานาชาติ',
-  'กองเทคโนโลยีสารสนเทศ',
-  'กองแผนงาน',
-  'กองกฎหมาย',
-  'กองกายภาพและสิ่งแวดล้อม',
-  'กองกิจการนักศึกษา',
-  'กองคลัง',
-  'กองทรัพยากรบุคคล',
-  'กองบริหารการศึกษา',
-  'กองบริหารงานทั่วไป',
-  'กองบริหารงานวิจัย',
-  'กองพัฒนาคุณภาพ',
-  'กองวิเทศสัมพันธ์',
-  'คณะเทคโนโลยีสารสนเทศและการสื่อสาร',
-  'คณะเทคนิคการแพทย์',
-  'คณะเภสัชศาสตร์',
-  'คณะเวชศาสตร์เขตร้อน',
-  'คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี',
-  'คณะแพทยศาสตร์ศิริราชพยาบาล',
-  'คณะกายภาพบำบัด',
-  'คณะทันตแพทยศาสตร์',
-  'คณะพยาบาลศาสตร์',
-  'คณะวิทยาศาสตร์',
-  'คณะวิศวกรรมศาสตร์',
-  'คณะศิลปศาสตร์',
-  'คณะสังคมศาสตร์และมนุษยศาสตร์',
-  'คณะสัตวแพทยศาสตร์',
-  'คณะสาธารณสุขศาสตร์',
-  'คณะสิ่งแวดล้อมและทรัพยากรศาสตร์',
-  'บัณฑิตวิทยาลัย',
-  'วิทยาเขตกาญจนบุรี',
-  'วิทยาลัยการจัดการ',
-  'วิทยาลัยดุริยางคศิลป์',
-  'วิทยาลัยนานาชาติ',
-  'วิทยาลัยวิทยาศาสตร์และเทคโนโลยีการกีฬา',
-  'วิทยาลัยศาสนศึกษา',
-  'ศูนย์การแพทย์กาญจนาภิเษก',
-  'ศูนย์จิตตปัญญาศึกษา',
-  'ศูนย์ธรรมาภิบาลข้อมูลและยุทธศาสตร์อัจฉริยะ',
+  'โรงเรียนสาธิตนานาชาติ','กองเทคโนโลยีสารสนเทศ','กองแผนงาน','กองกฎหมาย',
+  'กองกายภาพและสิ่งแวดล้อม','กองกิจการนักศึกษา','กองคลัง','กองทรัพยากรบุคคล',
+  'กองบริหารการศึกษา','กองบริหารงานทั่วไป','กองบริหารงานวิจัย','กองพัฒนาคุณภาพ','กองวิเทศสัมพันธ์',
+  'คณะเทคโนโลยีสารสนเทศและการสื่อสาร','คณะเทคนิคการแพทย์','คณะเภสัชศาสตร์',
+  'คณะเวชศาสตร์เขตร้อน','คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี','คณะแพทยศาสตร์ศิริราชพยาบาล',
+  'คณะกายภาพบำบัด','คณะทันตแพทยศาสตร์','คณะพยาบาลศาสตร์','คณะวิทยาศาสตร์',
+  'คณะวิศวกรรมศาสตร์','คณะศิลปศาสตร์','คณะสังคมศาสตร์และมนุษยศาสตร์',
+  'คณะสัตวแพทยศาสตร์','คณะสาธารณสุขศาสตร์','คณะสิ่งแวดล้อมและทรัพยากรศาสตร์',
+  'บัณฑิตวิทยาลัย','วิทยาเขตกาญจนบุรี','วิทยาลัยการจัดการ','วิทยาลัยดุริยางคศิลป์',
+  'วิทยาลัยนานาชาติ','วิทยาลัยวิทยาศาสตร์และเทคโนโลยีการกีฬา','วิทยาลัยศาสนศึกษา',
+  'ศูนย์การแพทย์กาญจนาภิเษก','ศูนย์จิตตปัญญาศึกษา','ศูนย์ธรรมาภิบาลข้อมูลและยุทธศาสตร์อัจฉริยะ',
   'ศูนย์บริหารความปลอดภัย อาชีวอนามัยและสภาพแวดล้อมในการทำงาน',
-  'ศูนย์บริหารจัดการความเสี่ยง',
-  'ศูนย์บริหารสินทรัพย์',
-  'ศูนย์ส่งเสริมการเรียนรู้แบบบูรณาการชีวิต',
-  'ศูนย์ส่งเสริมจริยธรรมการวิจัย',
-  'ศูนย์สัตว์ทดลองแห่งชาติ',
-  'ศูนย์อำนวยการด้านข้อมูลส่วนบุคคลมหาวิทยาลัยมหิดล',
-  'สถาบันแห่งชาติเพื่อการพัฒนาเด็กและครอบครัว',
-  'สถาบันโภชนาการ',
-  'สถาบันชีววิทยาศาสตร์โมเลกุล',
-  'สถาบันนวัตกรรมการเรียนรู้',
-  'สถาบันบริหารจัดการเทคโนโลยีและนวัตกรรม',
-  'สถาบันพัฒนาสุขภาพอาเซียน',
+  'ศูนย์บริหารจัดการความเสี่ยง','ศูนย์บริหารสินทรัพย์',
+  'ศูนย์ส่งเสริมการเรียนรู้แบบบูรณาการชีวิต','ศูนย์ส่งเสริมจริยธรรมการวิจัย',
+  'ศูนย์สัตว์ทดลองแห่งชาติ','ศูนย์อำนวยการด้านข้อมูลส่วนบุคคลมหาวิทยาลัยมหิดล',
+  'สถาบันแห่งชาติเพื่อการพัฒนาเด็กและครอบครัว','สถาบันโภชนาการ',
+  'สถาบันชีววิทยาศาสตร์โมเลกุล','สถาบันนวัตกรรมการเรียนรู้',
+  'สถาบันบริหารจัดการเทคโนโลยีและนวัตกรรม','สถาบันพัฒนาสุขภาพอาเซียน',
   'สถาบันราชสุดา คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี',
-  'สถาบันวิจัยประชากรและสังคม',
-  'สถาบันวิจัยภาษาและวัฒนธรรมเอเชีย',
+  'สถาบันวิจัยประชากรและสังคม','สถาบันวิจัยภาษาและวัฒนธรรมเอเชีย',
   'สถาบันวิทยาศาสตร์การวิเคราะห์และตรวจสารในการกีฬา',
   'สำนักงานคณะกรรมการตรวจสอบการบริหารงานประจำมหาวิทยาลัย',
-  'สำนักงานสภามหาวิทยาลัยมหิดล',
-  'หอสมุดและคลังความรู้มหาวิทยาลัยมหิดล'
+  'สำนักงานสภามหาวิทยาลัยมหิดล','หอสมุดและคลังความรู้มหาวิทยาลัยมหิดล'
 ];
 
-// ไอคอนตามประเภทหน่วยงาน
 function getOrgIcon(name) {
   if (name.startsWith('คณะ')) return '🏛️';
   if (name.startsWith('กอง')) return '🏢';
@@ -1523,7 +1478,6 @@ function getOrgIcon(name) {
   return '🏫';
 }
 
-// Highlight ตัวที่ match
 function highlightMatch(text, query) {
   if (!query) return text;
   const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
@@ -1536,14 +1490,11 @@ function acSearch(input, dropId) {
   const q = input.value.trim();
   const drop = document.getElementById(dropId);
   acActiveIdx = -1;
-
   const results = q.length === 0
-    ? MU_ORGS.slice(0, 8)  // แสดง 8 รายการแรกถ้ายังไม่พิมพ์
+    ? MU_ORGS.slice(0, 8)
     : MU_ORGS.filter(o => o.toLowerCase().includes(q.toLowerCase())).slice(0, 10);
-
   if (!results.length) { drop.classList.remove('show'); return; }
-
-  drop.innerHTML = results.map((r, i) =>
+  drop.innerHTML = results.map((r) =>
     `<div class="autocomplete-item" data-val="${r}" onmousedown="acSelect('${dropId}','${r.replace(/'/g,"\\'")}')">
       <span class="item-icon">${getOrgIcon(r)}</span>
       <span>${highlightMatch(r, q)}</span>
@@ -1553,7 +1504,6 @@ function acSearch(input, dropId) {
 }
 
 function acSelect(dropId, val) {
-  // หา input ที่ drop นี้สังกัด
   const drop = document.getElementById(dropId);
   const input = drop.previousElementSibling;
   input.value = val;
@@ -1562,7 +1512,8 @@ function acSelect(dropId, val) {
 }
 
 function acHide(dropId) {
-  document.getElementById(dropId).classList.remove('show');
+  const el = document.getElementById(dropId);
+  if(el) el.classList.remove('show');
   acActiveIdx = -1;
 }
 
