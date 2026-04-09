@@ -792,7 +792,7 @@
       Once submitted, the officer will be notified immediately and will respond within 24–48 hours.
       <br><br>
       For inquiries, please contact <strong>Traffic and Safety Unit</strong><br>
-      Tel: <strong>02-4414400 ext. 0</strong> &nbsp;|&nbsp; Email: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6e3a1c0f0808070d40011e1e0b2e09030f0702400d0103">[email&#160;protected]</a></strong>
+      Tel: <strong>02-4414400 ext. 0</strong> &nbsp;|&nbsp; Email: <strong>Traffic&#46;oppe&#64;gmail&#46;com</strong>
     </div>
   </div>
 
@@ -1462,4 +1462,10 @@ function acKeydown(e, dropId) {
   const items = drop.querySelectorAll('.autocomplete-item');
   if (!drop.classList.contains('show') || !items.length) return;
   if (e.key==='ArrowDown'){ e.preventDefault(); acActiveIdx=Math.min(acActiveIdx+1,items.length-1); items.forEach((el,i)=>el.classList.toggle('active',i===acActiveIdx)); items[acActiveIdx]?.scrollIntoView({block:'nearest'}); }
-  else if (e.key==='ArrowUp'){ e.preventDefault(); acActiveIdx=Math.max(acActiveIdx-1,0); items.forEach((el,i)=>el.classList.toggle('active',i===acActiveIdx)); items[acActive
+  else if (e.key==='ArrowUp'){ e.preventDefault(); acActiveIdx=Math.max(acActiveIdx-1,0); items.forEach((el,i)=>el.classList.toggle('active',i===acActiveIdx)); items[acActiveIdx]?.scrollIntoView({block:'nearest'}); }
+  else if (e.key==='Enter'&&acActiveIdx>=0){ e.preventDefault(); acSelect(dropId, items[acActiveIdx].dataset.val); }
+  else if (e.key==='Escape') acHide(dropId);
+}
+</script>
+</body>
+</html>
