@@ -1666,4 +1666,14 @@ function acKeydown(e, dropId) {
     acActiveIdx = Math.max(acActiveIdx - 1, 0);
     items.forEach((el, i) => el.classList.toggle('active', i === acActiveIdx));
     items[acActiveIdx]?.scrollIntoView({block:'nearest'});
-  } els
+      } else if (e.key === 'Enter' && acActiveIdx >= 0) {
+      e.preventDefault();
+      const val = items[acActiveIdx].dataset.val;
+      acSelect(dropId, val);
+    } else if (e.key === 'Escape') {
+      acHide(dropId);
+    }
+  }
+</script>
+</body>
+</html>
