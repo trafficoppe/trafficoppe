@@ -855,7 +855,7 @@
       <br><br>
       หากมีข้อสงสัยหรือต้องการสอบถามข้อมูลเพิ่มเติม
       <br>
-      โปรดติดต่อ <strong>งานจราจรและความปลอดภัย</strong> โทร <strong>02-4414400 กด 0</strong> &nbsp;|&nbsp; อีเมล <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8cd8feedeaeae5efa2e3fcfce9ccebe1ede5e0a2efe3e1">[email&#160;protected]</a></strong>
+      โปรดติดต่อ <strong>งานจราจรและความปลอดภัย</strong> โทร <strong>02-4414400 กด 0</strong> &nbsp;|&nbsp; อีเมล <strong>Traffic&#46;oppe&#64;gmail&#46;com</strong>
     </div>
   </div>
 
@@ -1666,14 +1666,14 @@ function acKeydown(e, dropId) {
     acActiveIdx = Math.max(acActiveIdx - 1, 0);
     items.forEach((el, i) => el.classList.toggle('active', i === acActiveIdx));
     items[acActiveIdx]?.scrollIntoView({block:'nearest'});
-      } else if (e.key === 'Enter' && acActiveIdx >= 0) {
-      e.preventDefault();
-      const val = items[acActiveIdx].dataset.val;
-      acSelect(dropId, val);
-    } else if (e.key === 'Escape') {
-      acHide(dropId);
-    }
+  } else if (e.key === 'Enter' && acActiveIdx >= 0) {
+    e.preventDefault();
+    const val = items[acActiveIdx].dataset.val;
+    acSelect(dropId, val);
+  } else if (e.key === 'Escape') {
+    acHide(dropId);
   }
+}
 </script>
 </body>
 </html>
