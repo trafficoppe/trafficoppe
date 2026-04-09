@@ -473,12 +473,16 @@
       </div>
       <hr class="section-divider">
       <div class="form-group" style="margin-bottom:12px;">
-        <label for="locationInput">จุดที่ต้องการดูกล้อง <span class="required">*</span> <span style="font-size:12px;color:var(--mu-blue);font-weight:600;">(กรอกข้อมูลแล้วกดปุ่ม + เพิ่ม)</span></label>
-        <div style="display:flex;gap:8px;">
-          <input type="text" id="locationInput" placeholder="พิมพ์จุด/บริเวณที่ต้องการ" style="flex:1;">
-          <button type="button" onclick="addLocation()" style="background:var(--mu-navy);color:white;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;white-space:nowrap;">+ เพิ่ม</button>
+        <label for="locationInput">จุดที่ต้องการดูกล้อง <span class="required">*</span></label>
+        <div style="display:flex;gap:8px;position:relative;align-items:flex-start;">
+          <div style="flex:1;position:relative;">
+            <input type="text" id="locationInput" placeholder="🔍 พิมพ์ชื่อสถานที่ เช่น ประตู, หอพัก, คณะ..." style="width:100%;"
+              oninput="locationSearch(this)" onkeydown="locationKeydown(event)" onfocus="locationSearch(this)" onblur="setTimeout(()=>locationHide(),200)">
+            <div id="locationDrop" style="position:absolute;top:100%;left:0;right:0;z-index:9999;background:white;border:1.5px solid var(--mu-blue);border-top:none;border-radius:0 0 10px 10px;max-height:240px;overflow-y:auto;box-shadow:0 8px 24px rgba(26,39,68,0.13);display:none;"></div>
+          </div>
+          <button type="button" onclick="addLocation()" style="background:var(--mu-navy);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;white-space:nowrap;flex-shrink:0;">+ เพิ่ม</button>
+          <div style="background:#fff0f0;border:1.5px solid #e74c3c;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;color:#c0392b;white-space:nowrap;align-self:center;flex-shrink:0;">⬅️ กดเพื่อเพิ่ม</div>
         </div>
-        <div id="presetWrap" style="margin-top:6px;"></div>
         <div class="location-tags" id="locationTags"></div>
         <input type="hidden" id="locations" name="locations">
         <p class="error-msg" id="locationError">กรุณาระบุจุดที่ต้องการดูกล้องอย่างน้อย 1 จุด</p>
@@ -851,7 +855,7 @@
       <br><br>
       หากมีข้อสงสัยหรือต้องการสอบถามข้อมูลเพิ่มเติม
       <br>
-      โปรดติดต่อ <strong>งานจราจรและความปลอดภัย</strong> โทร <strong>02-4414400 กด 0</strong> &nbsp;|&nbsp; อีเมล <strong>Traffic.oppe@gmail.com</strong>
+      โปรดติดต่อ <strong>งานจราจรและความปลอดภัย</strong> โทร <strong>02-4414400 กด 0</strong> &nbsp;|&nbsp; อีเมล <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8cd8feedeaeae5efa2e3fcfce9ccebe1ede5e0a2efe3e1">[email&#160;protected]</a></strong>
     </div>
   </div>
 
@@ -869,7 +873,7 @@
 </div>
 </main>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ===== EMERGENCY MODE =====
 function setEmergencyMode(on) {
   document.getElementById('emergencyBanner').style.display = on ? 'block' : 'none';
@@ -949,11 +953,141 @@ function getAllDocFiles() {
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVfwqmg24QmG37NbdIpn5w90_TWzbilayADz2QdG29CY2qFH_fuD0FhZRinslAQL4I1Q/exec';
 
+// ===== LOCATION DATABASE =====
+const LOCATION_DB = [
+  'กองกฎหมาย','กองกิจการนักศึกษา','กองกายภาพและสิ่งแวดล้อม','กองคลัง',
+  'กองทรัพยากรบุคคล','กองเทคโนโลยีสารสนเทศ','กองบริหารการศึกษา',
+  'กองบริหารงานทั่วไป','กองบริหารงานวิจัย','กองแผนงาน','กองพัฒนาคุณภาพ','กองวิเทศสัมพันธ์',
+  'คณะกายภาพบำบัด','คณะทันตแพทยศาสตร์','คณะเทคนิคการแพทย์',
+  'คณะเทคโนโลยีสารสนเทศและการสื่อสาร','คณะพยาบาลศาสตร์','คณะเภสัชศาสตร์',
+  'คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี','คณะแพทยศาสตร์ศิริราชพยาบาล',
+  'คณะวิทยาศาสตร์','คณะวิศวกรรมศาสตร์','คณะเวชศาสตร์เขตร้อน',
+  'คณะศิลปศาสตร์','คณะสังคมศาสตร์และมนุษยศาสตร์','คณะสัตวแพทยศาสตร์',
+  'คณะสาธารณสุขศาสตร์','คณะสิ่งแวดล้อมและทรัพยากรศาสตร์',
+  'งานจราจรและความปลอดภัย',
+  'ถนนกันภัยมหิดล','ถนนการุณยมิตร','ถนนจิตตสมาน','ถนนชนนีประทาน',
+  'ถนนถิ่นวิทยาการ','ถนนดำรงวิจัย','ถนนเทิดจักรี','ถนนปัญญาแผ่นดิน',
+  'ถนนผสานเทศไทย','ถนนพูนผลประชา','ถนนมานะมั่นคง','ถนนวิชาชื่นชน',
+  'ถนนวิถีปัญญา','ถนนสานสัตยา','ถนนส่องไทยทัศน์','ถนนสาย D',
+  'ทางเข้าเรือนไทย','ทางเข้าอาคารเตรียมอุดมดนตรี',
+  'บัณฑิตวิทยาลัย',
+  'ประตู 1','ประตู 2','ประตู 3','ประตู 4','ประตู 5',
+  'ประตู 6','ประตู 7','ประตู 8',
+  'ประตูคณะพยาบาลศาสตร์','ประตูวิทยาลัยดุริยางคศิลป์',
+  'โรงเรียนสาธิตนานาชาติ','เรือนเพาะชำ',
+  'วิทยาเขตกาญจนบุรี','วิทยาลัยการจัดการ','วิทยาลัยดุริยางคศิลป์',
+  'วิทยาลัยนานาชาติ','วิทยาลัยวิทยาศาสตร์และเทคโนโลยีการกีฬา','วิทยาลัยศาสนศึกษา',
+  'ศูนย์การแพทย์กาญจนาภิเษก','ศูนย์จิตตปัญญาศึกษา',
+  'ศูนย์ธรรมาภิบาลข้อมูลและยุทธศาสตร์อัจฉริยะ',
+  'ศูนย์บริหารความปลอดภัย อาชีวอนามัยและสภาพแวดล้อมในการทำงาน',
+  'ศูนย์บริหารจัดการความเสี่ยง','ศูนย์บริหารสินทรัพย์',
+  'ศูนย์ส่งเสริมการเรียนรู้แบบบูรณาการชีวิต','ศูนย์ส่งเสริมจริยธรรมการวิจัย',
+  'ศูนย์สัตว์ทดลองแห่งชาติ','ศูนย์อำนวยการด้านข้อมูลส่วนบุคคลมหาวิทยาลัยมหิดล',
+  'สถาบันชีววิทยาศาสตร์โมเลกุล','สถาบันนวัตกรรมการเรียนรู้',
+  'สถาบันบริหารจัดการเทคโนโลยีและนวัตกรรม','สถาบันพัฒนาสุขภาพอาเซียน',
+  'สถาบันราชสุดา คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี',
+  'สถาบันวิจัยประชากรและสังคม','สถาบันวิจัยภาษาและวัฒนธรรมเอเชีย',
+  'สถาบันวิทยาศาสตร์การวิเคราะห์และตรวจสารในการกีฬา',
+  'สถาบันสิทธิมนุษยชนและสันติศึกษา','สถาบันโภชนาการ',
+  'สถาบันแห่งชาติเพื่อการพัฒนาเด็กและครอบครัว',
+  'สำนักงานคณะกรรมการตรวจสอบการบริหารงานประจำมหาวิทยาลัย',
+  'สำนักงานสภามหาวิทยาลัยมหิดล',
+  'หอพักนักศึกษา 1','หอพักนักศึกษา 2','หอพักนักศึกษา 3','หอพักนักศึกษา 4',
+  'หอพักนักศึกษา 5','หอพักนักศึกษา 6','หอพักนักศึกษา 7','หอพักนักศึกษา 8',
+  'หอพักนักศึกษา 9','หอพักนักศึกษา 10','หอพักนักศึกษา 11',
+  'หอสมุดและคลังความรู้มหาวิทยาลัยมหิดล',
+  'อาคารเจรจานวัตกรรม','อาคารชุดพักอาศัย ม.มหิดล',
+  'อาคารเตรียมอุดมดนตรี','อาคารสิริวิทยา',
+  'โครงการจัดตั้งศูนย์พัฒนาอุตสาหกรรมชีวภาพ มหาวิทยาลัยมหิดล',
+  'โครงการจัดตั้งสถาบันอุทยานธรรมชาติวิทยาสิรีรุกขชาติ',
+  'โครงการจัดตั้งวิทยาเขตนครสวรรค์','โครงการจัดตั้งวิทยาเขตอำนาจเจริญ',
+  'ลานจอดรถ P1','ลานจอดรถ P2','ลานจอดรถ P3','ลานจอดรถ P4','ลานจอดรถ P5',
+  'ลานจอดรถ อาคารเจรจานวัตกรรม','ลานจอดรถเรือนไทย'
+];
+
+function getLocationIcon(name) {
+  if (name.startsWith('ประตู')) return '🚪';
+  if (name.startsWith('ถนน')) return '🛣️';
+  if (name.startsWith('ทางเข้า')) return '🔑';
+  if (name.startsWith('หอพัก')) return '🏠';
+  if (name.startsWith('ลานจอดรถ')) return '🅿️';
+  if (name.startsWith('คณะ')) return '🏛️';
+  if (name.startsWith('กอง')) return '🏢';
+  if (name.startsWith('อาคาร')) return '🏗️';
+  if (name.startsWith('ศูนย์')) return '🔬';
+  if (name.startsWith('สถาบัน')) return '📚';
+  if (name.startsWith('วิทยาลัย') || name.startsWith('วิทยาเขต')) return '🎓';
+  if (name.startsWith('หอสมุด')) return '📖';
+  return '📍';
+}
+
+let locDropActiveIdx = -1;
+
+function locationSearch(input) {
+  const q = input.value.trim();
+  const drop = document.getElementById('locationDrop');
+  locDropActiveIdx = -1;
+  const results = q.length === 0
+    ? LOCATION_DB.slice(0, 10)
+    : LOCATION_DB.filter(l => l.toLowerCase().includes(q.toLowerCase())).slice(0, 12);
+  if (!results.length) { drop.style.display = 'none'; return; }
+  drop.innerHTML = results.map(r =>
+    `<div class="autocomplete-item" data-val="${r}"
+      onmousedown="selectLocation('${r.replace(/'/g,"\\'")}')"
+      style="padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;transition:background 0.1s;">
+      <span style="font-size:16px;flex-shrink:0;">${getLocationIcon(r)}</span>
+      <span>${highlightMatch(r, q)}</span>
+    </div>`
+  ).join('') + (results.length >= 12 ? `<div style="padding:6px 14px;font-size:11px;color:var(--text-muted);background:var(--surface2);">พิมพ์เพิ่มเพื่อกรองผลลัพธ์</div>` : '');
+  drop.style.display = 'block';
+}
+
+function selectLocation(val) {
+  document.getElementById('locationInput').value = val;
+  document.getElementById('locationDrop').style.display = 'none';
+  addLocation();
+}
+
+function locationHide() {
+  const drop = document.getElementById('locationDrop');
+  if (drop) drop.style.display = 'none';
+  locDropActiveIdx = -1;
+}
+
+function locationKeydown(e) {
+  const drop = document.getElementById('locationDrop');
+  if (!drop || drop.style.display === 'none') {
+    if (e.key === 'Enter') { e.preventDefault(); addLocation(); }
+    return;
+  }
+  const items = drop.querySelectorAll('[data-val]');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    locDropActiveIdx = Math.min(locDropActiveIdx + 1, items.length - 1);
+    items.forEach((el, i) => el.style.background = i === locDropActiveIdx ? '#eef2fb' : '');
+    items[locDropActiveIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    locDropActiveIdx = Math.max(locDropActiveIdx - 1, 0);
+    items.forEach((el, i) => el.style.background = i === locDropActiveIdx ? '#eef2fb' : '');
+    items[locDropActiveIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (locDropActiveIdx >= 0 && items[locDropActiveIdx]) {
+      selectLocation(items[locDropActiveIdx].dataset.val);
+    } else {
+      addLocation();
+    }
+  } else if (e.key === 'Escape') {
+    locationHide();
+  }
+}
+
 function loadPresets() {
   const presets = JSON.parse(localStorage.getItem('cctv_preset_locations') || '[]');
   const wrap = document.getElementById('presetWrap');
   if (!presets.length) { wrap.innerHTML = ''; return; }
-  wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">จุดที่ใช้บ่อย:</div><div class="preset-locations">' +
+  wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">จุดที่ใช้บ่อย (ตั้งค่าโดย Admin):</div><div class="preset-locations">' +
     presets.map(p => `<button type="button" class="preset-btn" onclick="addPreset('${p}')">${p}</button>`).join('') + '</div>';
 }
 function addPreset(name) {
@@ -965,13 +1099,14 @@ let locationList = [];
 function addLocation() {
   const input = document.getElementById('locationInput');
   const val = input.value.trim();
-  if (!val || locationList.includes(val)) { input.value=''; return; }
+  locationHide();
+  if (!val || locationList.includes(val)) { input.value = ''; return; }
   locationList.push(val);
   renderLocationTags();
   input.value = '';
   document.getElementById('locations').value = locationList.join(', ');
 }
-document.getElementById('locationInput').addEventListener('keydown', e => { if(e.key==='Enter'){e.preventDefault();addLocation();} });
+document.getElementById('locationInput').addEventListener('keydown', locationKeydown);
 function removeLocation(idx) { locationList.splice(idx,1); renderLocationTags(); document.getElementById('locations').value = locationList.join(', '); }
 function renderLocationTags() {
   document.getElementById('locationTags').innerHTML = locationList.map((loc,i) =>
@@ -1531,14 +1666,4 @@ function acKeydown(e, dropId) {
     acActiveIdx = Math.max(acActiveIdx - 1, 0);
     items.forEach((el, i) => el.classList.toggle('active', i === acActiveIdx));
     items[acActiveIdx]?.scrollIntoView({block:'nearest'});
-  } else if (e.key === 'Enter' && acActiveIdx >= 0) {
-    e.preventDefault();
-    const val = items[acActiveIdx].dataset.val;
-    acSelect(dropId, val);
-  } else if (e.key === 'Escape') {
-    acHide(dropId);
-  }
-}
-</script>
-</body>
-</html>
+  } els
