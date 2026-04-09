@@ -417,10 +417,15 @@
       </div>
       <hr class="section-divider">
       <div class="form-group" style="margin-bottom:12px;">
-        <label for="locationInput">Camera Location(s) <span class="required">*</span> <span style="font-size:12px;color:var(--mu-blue);font-weight:600;">(Type location then click "+ Add")</span></label>
-        <div style="display:flex;gap:8px;">
-          <input type="text" id="locationInput" placeholder="Type location or area" style="flex:1;">
-          <button type="button" onclick="addLocation()" style="background:var(--mu-navy);color:white;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;white-space:nowrap;">+ Add</button>
+        <label for="locationInput">Camera Location(s) <span class="required">*</span></label>
+        <div style="display:flex;gap:8px;position:relative;align-items:flex-start;">
+          <div style="flex:1;position:relative;">
+            <input type="text" id="locationInput" placeholder="🔍 Type location name, e.g., Gate, Dormitory, Faculty..." style="width:100%;"
+              oninput="locationSearch(this)" onkeydown="locationKeydown(event)" onfocus="locationSearch(this)" onblur="setTimeout(()=>locationHide(),200)">
+            <div id="locationDrop" style="position:absolute;top:100%;left:0;right:0;z-index:9999;background:white;border:1.5px solid var(--mu-blue);border-top:none;border-radius:0 0 10px 10px;max-height:240px;overflow-y:auto;box-shadow:0 8px 24px rgba(26,39,68,0.13);display:none;"></div>
+          </div>
+          <button type="button" onclick="addLocation()" style="background:var(--mu-navy);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;white-space:nowrap;flex-shrink:0;">+ Add</button>
+          <div style="background:#fff0f0;border:1.5px solid #e74c3c;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;color:#c0392b;white-space:nowrap;align-self:center;flex-shrink:0;">⬅️ Click to add</div>
         </div>
         <div id="presetWrap" style="margin-top:6px;"></div>
         <div class="location-tags" id="locationTags"></div>
@@ -787,7 +792,7 @@
       Once submitted, the officer will be notified immediately and will respond within 24–48 hours.
       <br><br>
       For inquiries, please contact <strong>Traffic and Safety Unit</strong><br>
-      Tel: <strong>02-4414400 ext. 0</strong> &nbsp;|&nbsp; Email: <strong>Traffic.oppe@gmail.com</strong>
+      Tel: <strong>02-4414400 ext. 0</strong> &nbsp;|&nbsp; Email: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6e3a1c0f0808070d40011e1e0b2e09030f0702400d0103">[email&#160;protected]</a></strong>
     </div>
   </div>
 
@@ -805,7 +810,7 @@
 </div>
 </main>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ===== EMERGENCY MODE =====
 function setEmergencyMode(on) {
   document.getElementById('emergencyBanner').style.display = on ? 'block' : 'none';
@@ -873,11 +878,127 @@ function getAllDocFiles() {
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVfwqmg24QmG37NbdIpn5w90_TWzbilayADz2QdG29CY2qFH_fuD0FhZRinslAQL4I1Q/exec';
 
+// ===== LOCATION DATABASE (Thai names + English searchable) =====
+const LOCATION_DB = [
+  'กองกฎหมาย','กองกิจการนักศึกษา','กองกายภาพและสิ่งแวดล้อม','กองคลัง',
+  'กองทรัพยากรบุคคล','กองเทคโนโลยีสารสนเทศ','กองบริหารการศึกษา',
+  'กองบริหารงานทั่วไป','กองบริหารงานวิจัย','กองแผนงาน','กองพัฒนาคุณภาพ','กองวิเทศสัมพันธ์',
+  'คณะกายภาพบำบัด','คณะทันตแพทยศาสตร์','คณะเทคนิคการแพทย์',
+  'คณะเทคโนโลยีสารสนเทศและการสื่อสาร','คณะพยาบาลศาสตร์','คณะเภสัชศาสตร์',
+  'คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี','คณะแพทยศาสตร์ศิริราชพยาบาล',
+  'คณะวิทยาศาสตร์','คณะวิศวกรรมศาสตร์','คณะเวชศาสตร์เขตร้อน',
+  'คณะศิลปศาสตร์','คณะสังคมศาสตร์และมนุษยศาสตร์','คณะสัตวแพทยศาสตร์',
+  'คณะสาธารณสุขศาสตร์','คณะสิ่งแวดล้อมและทรัพยากรศาสตร์',
+  'งานจราจรและความปลอดภัย',
+  'ถนนกันภัยมหิดล','ถนนการุณยมิตร','ถนนจิตตสมาน','ถนนชนนีประทาน',
+  'ถนนถิ่นวิทยาการ','ถนนดำรงวิจัย','ถนนเทิดจักรี','ถนนปัญญาแผ่นดิน',
+  'ถนนผสานเทศไทย','ถนนพูนผลประชา','ถนนมานะมั่นคง','ถนนวิชาชื่นชน',
+  'ถนนวิถีปัญญา','ถนนสานสัตยา','ถนนส่องไทยทัศน์','ถนนสาย D',
+  'ทางเข้าเรือนไทย','ทางเข้าอาคารเตรียมอุดมดนตรี',
+  'บัณฑิตวิทยาลัย',
+  'ประตู 1','ประตู 2','ประตู 3','ประตู 4','ประตู 5',
+  'ประตู 6','ประตู 7','ประตู 8',
+  'ประตูคณะพยาบาลศาสตร์','ประตูวิทยาลัยดุริยางคศิลป์',
+  'โรงเรียนสาธิตนานาชาติ','เรือนเพาะชำ',
+  'วิทยาเขตกาญจนบุรี','วิทยาลัยการจัดการ','วิทยาลัยดุริยางคศิลป์',
+  'วิทยาลัยนานาชาติ','วิทยาลัยวิทยาศาสตร์และเทคโนโลยีการกีฬา','วิทยาลัยศาสนศึกษา',
+  'ศูนย์การแพทย์กาญจนาภิเษก','ศูนย์จิตตปัญญาศึกษา',
+  'ศูนย์ธรรมาภิบาลข้อมูลและยุทธศาสตร์อัจฉริยะ',
+  'ศูนย์บริหารความปลอดภัย อาชีวอนามัยและสภาพแวดล้อมในการทำงาน',
+  'ศูนย์บริหารจัดการความเสี่ยง','ศูนย์บริหารสินทรัพย์',
+  'ศูนย์สัตว์ทดลองแห่งชาติ','หอสมุดและคลังความรู้มหาวิทยาลัยมหิดล',
+  'หอพักนักศึกษา 1','หอพักนักศึกษา 2','หอพักนักศึกษา 3','หอพักนักศึกษา 4',
+  'หอพักนักศึกษา 5','หอพักนักศึกษา 6','หอพักนักศึกษา 7','หอพักนักศึกษา 8',
+  'หอพักนักศึกษา 9','หอพักนักศึกษา 10','หอพักนักศึกษา 11',
+  'อาคารเจรจานวัตกรรม','อาคารชุดพักอาศัย ม.มหิดล',
+  'อาคารเตรียมอุดมดนตรี','อาคารสิริวิทยา',
+  'ลานจอดรถ P1','ลานจอดรถ P2','ลานจอดรถ P3','ลานจอดรถ P4','ลานจอดรถ P5',
+  'ลานจอดรถ อาคารเจรจานวัตกรรม','ลานจอดรถเรือนไทย'
+];
+
+function getLocationIcon(name) {
+  if (name.startsWith('ประตู')) return '🚪';
+  if (name.startsWith('ถนน')) return '🛣️';
+  if (name.startsWith('ทางเข้า')) return '🔑';
+  if (name.startsWith('หอพัก')) return '🏠';
+  if (name.startsWith('ลานจอดรถ')) return '🅿️';
+  if (name.startsWith('คณะ')) return '🏛️';
+  if (name.startsWith('กอง')) return '🏢';
+  if (name.startsWith('อาคาร')) return '🏗️';
+  if (name.startsWith('ศูนย์')) return '🔬';
+  if (name.startsWith('สถาบัน')) return '📚';
+  if (name.startsWith('วิทยาลัย') || name.startsWith('วิทยาเขต')) return '🎓';
+  if (name.startsWith('หอสมุด')) return '📖';
+  return '📍';
+}
+
+let locDropActiveIdx = -1;
+
+function locationSearch(input) {
+  const q = input.value.trim();
+  const drop = document.getElementById('locationDrop');
+  locDropActiveIdx = -1;
+  const results = q.length === 0
+    ? LOCATION_DB.slice(0, 10)
+    : LOCATION_DB.filter(l => l.toLowerCase().includes(q.toLowerCase())).slice(0, 12);
+  if (!results.length) { drop.style.display = 'none'; return; }
+  drop.innerHTML = results.map(r =>
+    `<div class="autocomplete-item" data-val="${r}"
+      onmousedown="selectLocation('${r.replace(/'/g,"\\'")}')"
+      style="padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;transition:background 0.1s;">
+      <span style="font-size:16px;flex-shrink:0;">${getLocationIcon(r)}</span>
+      <span>${r}</span>
+    </div>`
+  ).join('') + (results.length >= 12 ? `<div style="padding:6px 14px;font-size:11px;color:var(--text-muted);background:var(--surface2);">Type more to filter results</div>` : '');
+  drop.style.display = 'block';
+}
+
+function selectLocation(val) {
+  document.getElementById('locationInput').value = val;
+  document.getElementById('locationDrop').style.display = 'none';
+  addLocation();
+}
+
+function locationHide() {
+  const drop = document.getElementById('locationDrop');
+  if (drop) drop.style.display = 'none';
+  locDropActiveIdx = -1;
+}
+
+function locationKeydown(e) {
+  const drop = document.getElementById('locationDrop');
+  if (!drop || drop.style.display === 'none') {
+    if (e.key === 'Enter') { e.preventDefault(); addLocation(); }
+    return;
+  }
+  const items = drop.querySelectorAll('[data-val]');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    locDropActiveIdx = Math.min(locDropActiveIdx + 1, items.length - 1);
+    items.forEach((el, i) => el.style.background = i === locDropActiveIdx ? '#eef2fb' : '');
+    items[locDropActiveIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    locDropActiveIdx = Math.max(locDropActiveIdx - 1, 0);
+    items.forEach((el, i) => el.style.background = i === locDropActiveIdx ? '#eef2fb' : '');
+    items[locDropActiveIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (locDropActiveIdx >= 0 && items[locDropActiveIdx]) {
+      selectLocation(items[locDropActiveIdx].dataset.val);
+    } else {
+      addLocation();
+    }
+  } else if (e.key === 'Escape') {
+    locationHide();
+  }
+}
+
 function loadPresets() {
   const presets = JSON.parse(localStorage.getItem('cctv_preset_locations') || '[]');
   const wrap = document.getElementById('presetWrap');
   if (!presets.length) { wrap.innerHTML = ''; return; }
-  wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Common Locations:</div><div class="preset-locations">' +
+  wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Common Locations (set by Admin):</div><div class="preset-locations">' +
     presets.map(p => `<button type="button" class="preset-btn" onclick="addPreset('${p}')">${p}</button>`).join('') + '</div>';
 }
 function addPreset(name) { document.getElementById('locationInput').value = name; addLocation(); }
@@ -886,13 +1007,14 @@ let locationList = [];
 function addLocation() {
   const input = document.getElementById('locationInput');
   const val = input.value.trim();
-  if (!val || locationList.includes(val)) { input.value=''; return; }
+  locationHide();
+  if (!val || locationList.includes(val)) { input.value = ''; return; }
   locationList.push(val);
   renderLocationTags();
   input.value = '';
   document.getElementById('locations').value = locationList.join(', ');
 }
-document.getElementById('locationInput').addEventListener('keydown', e => { if(e.key==='Enter'){e.preventDefault();addLocation();} });
+document.getElementById('locationInput').addEventListener('keydown', locationKeydown);
 function removeLocation(idx) { locationList.splice(idx,1); renderLocationTags(); document.getElementById('locations').value = locationList.join(', '); }
 function renderLocationTags() {
   document.getElementById('locationTags').innerHTML = locationList.map((loc,i) =>
@@ -1340,10 +1462,4 @@ function acKeydown(e, dropId) {
   const items = drop.querySelectorAll('.autocomplete-item');
   if (!drop.classList.contains('show') || !items.length) return;
   if (e.key==='ArrowDown'){ e.preventDefault(); acActiveIdx=Math.min(acActiveIdx+1,items.length-1); items.forEach((el,i)=>el.classList.toggle('active',i===acActiveIdx)); items[acActiveIdx]?.scrollIntoView({block:'nearest'}); }
-  else if (e.key==='ArrowUp'){ e.preventDefault(); acActiveIdx=Math.max(acActiveIdx-1,0); items.forEach((el,i)=>el.classList.toggle('active',i===acActiveIdx)); items[acActiveIdx]?.scrollIntoView({block:'nearest'}); }
-  else if (e.key==='Enter'&&acActiveIdx>=0){ e.preventDefault(); acSelect(dropId, items[acActiveIdx].dataset.val); }
-  else if (e.key==='Escape') acHide(dropId);
-}
-</script>
-</body>
-</html>
+  else if (e.key==='ArrowUp'){ e.preventDefault(); acActiveIdx=Math.max(acActiveIdx-1,0); items.forEach((el,i)=>el.classList.toggle('active',i===acActiveIdx)); items[acActive
