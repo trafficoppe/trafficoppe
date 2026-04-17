@@ -1074,6 +1074,8 @@ document.addEventListener('change', updateProgress);
 document.addEventListener('input', updateProgress);
 
 // ===== VALIDATE + POPUP =====
+let currentOfficerMode = '';
+
 function validate() {
   let valid = true;
   const errors = [];
@@ -1348,8 +1350,6 @@ const OFFICER_DB = [
   {name:'Mr. Anin Nakwatchara',       email:'anin.nak@mahidol.ac.th'},
   {name:'Mr. Amnart Maenprom',        email:'amnartmaen90@gmail.com'}
 ];
-
-let currentOfficerMode = '';
 
 function selectOfficerMode(mode) {
   currentOfficerMode = mode;
