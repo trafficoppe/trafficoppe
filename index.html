@@ -483,6 +483,7 @@
           <button type="button" onclick="addLocation()" style="background:var(--mu-navy);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;white-space:nowrap;flex-shrink:0;">+ เพิ่ม</button>
           <div style="background:#fff0f0;border:1.5px solid #e74c3c;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;color:#c0392b;white-space:nowrap;align-self:center;flex-shrink:0;">⬅️ กดเพื่อเพิ่ม</div>
         </div>
+        <div id="presetWrap" style="margin-top:6px;"></div>
         <div class="location-tags" id="locationTags"></div>
         <input type="hidden" id="locations" name="locations">
         <p class="error-msg" id="locationError">กรุณาระบุจุดที่ต้องการดูกล้องอย่างน้อย 1 จุด</p>
@@ -1181,6 +1182,8 @@ document.addEventListener('change', updateProgress);
 document.addEventListener('input', updateProgress);
 
 // ===== VALIDATE + POPUP =====
+let currentOfficerMode = '';
+
 function validate() {
   let valid = true;
   const errors = [];
@@ -1497,8 +1500,6 @@ const OFFICER_DB = [
   {name:'นายอนิน นาควัชระ',     email:'anin.nak@mahidol.ac.th'},
   {name:'นายอำนาจ แม้นพรม',     email:'amnartmaen90@gmail.com'}
 ];
-
-let currentOfficerMode = '';
 
 function selectOfficerMode(mode) {
   currentOfficerMode = mode;
