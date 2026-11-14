@@ -1,0 +1,24 @@
+// ทดสอบ Code.gs (CCTV v2) ด้วยข้อมูลสมมติเท่านั้น   รัน: node v2/tests/cctv.test.js
+const assert = require('assert'), fs = require('fs'), path = require('path'), vm = require('vm');
+const m = { exports: {} }; vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../apps-script/Code.gs'), 'utf8'), { module: m, Intl, Date, isNaN });
+const S = m.exports, H = S.headers_();
+assert.strictEqual(H.length, 48); assert.strictEqual(H.indexOf('status'), 42, 'คอลัมน์เดิมต้องอยู่ตำแหน่งเดิม'); assert.strictEqual(H[44], 'unit');
+const ok = { unit: 'mlc', refCode: 'CCTV-MLC-20261114-AB12', fname: 'ทดสอบ', lname: 'สมมติ', requesterType: 'นักศึกษา', phone: '000', dateStart: '2026-11-14', locations: 'จุดสมมติ', pdpaConsent: 'ยินยอม', purposeDetail: '=IMPORTRANGE("x")' };
+assert.ok(S.validatePayload(ok).ok); assert.strictEqual(S.validatePayload(ok).unit, 'MLC');
+assert.ok(!S.validatePayload(Object.assign({}, ok, { unit: '' })).ok, 'ไม่ระบุหน่วยงานต้องไม่ผ่าน');
+assert.ok(!S.validatePayload(Object.assign({}, ok, { unit: 'XYZ' })).ok);
+assert.ok(!S.validatePayload(Object.assign({}, ok, { unit: 'LA' })).ok, 'เลขอ้างอิง MLC ส่งเข้าหน่วย LA ต้องไม่ผ่าน');
+assert.ok(!S.validatePayload(Object.assign({}, ok, { pdpaConsent: '' })).ok);
+const row = S.rowFromPayload(ok, 'MLC');
+assert.strictEqual(row.length, 48); assert.strictEqual(row[0], ok.refCode); assert.strictEqual(row[42], 'รอดำเนินการ'); assert.strictEqual(row[44], 'MLC');
+assert.strictEqual(row[H.indexOf('purposeDetail')][0], "'", 'ข้อความที่ขึ้นต้นด้วย = ต้องถูกทำให้เป็นข้อความ');
+const legacy = new Array(44).fill(''); legacy[0] = 'CCTV-20260417-ZZZZ'; legacy[22] = 'อาคารสิริวิทยา ชั้น 1'; legacy[42] = 'ปิดเคส';
+const mp = S.mapLegacyRow(legacy, 2);
+assert.strictEqual(mp.unit, 'CEN'); assert.strictEqual(mp.suggestedUnit, 'LA'); assert.strictEqual(mp.row.length, 48); assert.strictEqual(mp.row[47], 2);
+const r2 = S.rowFromPayload(Object.assign({}, ok, { timestamp: '2026-10-31T18:00:00.000Z' }), 'MLC');
+const st = S.statsFromRows([r2, mp.row, new Array(48).fill('')], 'Asia/Bangkok');
+assert.strictEqual(st.total, 2); assert.strictEqual(st.byUnit.MLC, 1); assert.strictEqual(st.byUnit.CEN, 1); assert.strictEqual(st.byUnit.LA, 0);
+assert.strictEqual(st.byMonth['2026-11'], 1, '18:00 UTC ของ 31 ต.ค. = 1 พ.ย. เวลาไทย'); assert.strictEqual(st.byStatus['ปิดเคส'], 1);
+assert.ok(!JSON.stringify(st).includes('สมมติ'), 'สถิติต้องไม่มีชื่อบุคคล');
+assert.deepStrictEqual(Array.from(S.recipientsFor('MLC', [['MLC', '', '', 'placeholder-mlc@example.invalid', true], ['MLC', '', '', 'a@b.test', 'TRUE'], ['LA', '', '', 'c@d.test', true], ['MLC', '', '', 'off@b.test', false]])), ['a@b.test']);
+console.log('CCTV v2: ผ่านทั้งหมด (ข้อมูลสมมติ)');

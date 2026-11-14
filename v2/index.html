@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แบบฟอร์มขอดูกล้องวงจรปิด | งานจราจรและความปลอดภัย มหาวิทยาลัยมหิดล</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mu-navy: #1a2744; --mu-blue: #003087; --mu-gold: #c9a84c;
+    --bg: #f4f6fb; --surface: #ffffff; --surface2: #f8f9fc;
+    --border: #dde3ee; --text: #1a2744; --text-muted: #6b7a99;
+    --success: #1a7a4a; --success-bg: #e8f5ee;
+    --shadow: 0 2px 16px rgba(26,39,68,0.08);
+    --shadow-lg: 0 8px 40px rgba(26,39,68,0.14);
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'IBM Plex Sans Thai','Sarabun',sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
+
+  /* HEADER */
+  .header { background: linear-gradient(135deg,var(--mu-navy) 0%,var(--mu-blue) 60%,#1a4a8a 100%); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,0.25); transition: all 0.3s ease; overflow: hidden; }
+  .header.collapsed { padding: 0; }
+  .header.collapsed .header-inner { padding: 6px 16px; }
+  .header.collapsed .header-logo { width: 32px; height: 32px; font-size: 15px; }
+  .header.collapsed .header-text h1 { font-size: 13px; }
+  .header.collapsed .header-text p { display: none; }
+  .header-inner { max-width: 900px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; gap: 16px; transition: padding 0.3s; }
+  .header-logo { width: 52px; height: 52px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: all 0.3s; }
+  .header-text h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.3; transition: font-size 0.3s; }
+  .header-text p { font-size: 12px; opacity: 0.75; font-weight: 300; margin-top: 2px; transition: all 0.3s; }
+  .header-badge { margin-left: auto; background: var(--mu-gold); color: var(--mu-navy); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .progress-bar-wrap { background: rgba(255,255,255,0.15); height: 4px; }
+  .progress-bar-fill { height: 100%; background: var(--mu-gold); transition: width 0.4s ease; }
+
+  /* ADMIN ICON */
+  .admin-icon-btn { position: fixed; bottom: 24px; right: 24px; width: 44px; height: 44px; background: var(--mu-navy); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.25); z-index: 99; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; }
+  .admin-icon-btn:hover { opacity: 1; transform: scale(1.1); }
+
+  /* MAIN */
+  .main { max-width: 900px; margin: 0 auto; padding: 32px 16px 80px; }
+
+  /* PDPA */
+  .pdpa-notice { background: linear-gradient(135deg,#fff8e7,#fffdf4); border: 2px solid var(--mu-gold); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 28px; position: relative; overflow: hidden; }
+  .pdpa-notice::before { content:''; position: absolute; left:0; top:0; bottom:0; width:5px; background: var(--mu-gold); }
+  .pdpa-title { font-size: 14px; font-weight: 700; color: var(--mu-navy); display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .pdpa-body { font-size: 13px; color: #555; line-height: 1.7; }
+  .pdpa-consent { margin-top: 14px; display: flex; align-items: flex-start; gap: 10px; background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid #e0c87a; cursor: pointer; }
+  .pdpa-consent input[type="checkbox"] { width: 18px; height: 18px; margin-top: 1px; cursor: pointer; accent-color: var(--mu-blue); flex-shrink: 0; }
+  .pdpa-consent label { font-size: 13px; font-weight: 600; color: var(--mu-navy); cursor: pointer; line-height: 1.5; }
+
+  /* CARD */
+  .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 20px; overflow: visible; }
+  .card-header { background: linear-gradient(90deg,var(--mu-navy),#1e3a6e); color: white; padding: 14px 22px; display: flex; align-items: center; gap: 10px; border-radius: var(--radius) var(--radius) 0 0; }
+  .card-header .step-num { background: var(--mu-gold); color: var(--mu-navy); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+  .card-header h2 { font-size: 14px; font-weight: 700; }
+  .card-body { padding: 22px; }
+
+  /* FORM */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-row.single { grid-template-columns: 1fr; }
+  .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+  .form-row.quad { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  @media(max-width:600px){ .form-row,.form-row.triple,.form-row.quad { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label { font-size: 13px; font-weight: 600; color: var(--mu-navy); }
+  .required { color: #c0392b; }
+  .form-hint { font-size: 11px; color: var(--text-muted); }
+  input[type="text"],input[type="email"],input[type="tel"],input[type="date"],input[type="time"],textarea,select {
+    width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: inherit; font-size: 14px; color: var(--text); background: white;
+    transition: border-color 0.2s, box-shadow 0.2s; outline: none; appearance: none;
+  }
+  input:focus,textarea:focus,select:focus { border-color: var(--mu-blue); box-shadow: 0 0 0 3px rgba(0,48,135,0.1); }
+  input.error,textarea.error,select.error { border-color: #c0392b; box-shadow: 0 0 0 3px rgba(192,57,43,0.1); }
+  textarea { resize: vertical; min-height: 90px; }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231a2744' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; }
+
+  /* RADIO / CHECK */
+  .radio-group,.check-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .radio-item,.check-item { display: flex; align-items: center; gap: 7px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; transition: all 0.15s; font-size: 13px; font-weight: 500; }
+  .radio-item:hover,.check-item:hover { border-color: var(--mu-blue); background: #eef2fb; }
+  .radio-item input,.check-item input { accent-color: var(--mu-blue); }
+  .radio-item.selected,.check-item.selected { border-color: var(--mu-blue); background: #e8eef9; color: var(--mu-blue); }
+
+  /* DATETIME */
+  .datetime-range { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; }
+  .datetime-arrow { color: var(--text-muted); font-size: 20px; text-align: center; }
+
+  /* LOCATION TAGS */
+  .location-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .location-tag { background: var(--mu-navy); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .location-tag .remove { cursor: pointer; opacity: 0.7; font-size: 14px; }
+  .location-tag .remove:hover { opacity: 1; }
+
+  /* PRESET LOCATIONS */
+  .preset-locations { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .preset-btn { background: white; border: 1px dashed var(--border); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .preset-btn:hover { border-color: var(--mu-blue); color: var(--mu-blue); background: #eef2fb; }
+
+  /* INFO BOX */
+  .info-box { background: #eef2fb; border-left: 4px solid var(--mu-blue); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 13px; color: #344a7a; margin-bottom: 16px; }
+  .warn-box { background: #fff8e7; border-left: 4px solid var(--mu-gold); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 13px; color: #7a5800; margin-top: 12px; }
+
+  /* UPLOAD */
+  .upload-area { border: 2px dashed var(--border); border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; margin-top: 8px; background: var(--surface2); }
+  .mini-upload { border: 1.5px dashed var(--mu-blue); border-radius: 8px; padding: 10px 14px; text-align: center; cursor: pointer; font-size: 13px; color: var(--mu-blue); background: #f0f4ff; transition: all 0.2s; margin-top:4px; }
+  .mini-upload:hover { background: #dce8ff; border-color: var(--mu-navy); }
+  .file-mini-list { margin-top: 6px; }
+  .file-mini-item { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 4px 8px; background: #e8f5e9; border-radius: 6px; margin-top: 4px; color: #2e7d32; }
+  .doc-upload-item { border-radius: 8px; }
+  .upload-area:hover,.upload-area.dragover { border-color: var(--mu-blue); background: #eef2fb; }
+  .upload-area input[type="file"] { display: none; }
+  .upload-area .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-area p { font-size: 13px; color: var(--text-muted); }
+  .upload-area span { font-size: 12px; color: var(--text-muted); }
+  .file-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .file-item { display: flex; align-items: center; gap: 8px; background: white; border: 1px solid var(--border); border-radius: 7px; padding: 7px 12px; font-size: 13px; }
+  .file-item .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-item .file-remove { color: #c0392b; cursor: pointer; font-size: 16px; flex-shrink: 0; }
+
+  /* SUBMIT */
+  .submit-area { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 24px 22px; text-align: center; }
+  .btn-submit { background: linear-gradient(135deg,var(--mu-blue),#1a4a8a); color: white; border: none; padding: 14px 48px; border-radius: 10px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(0,48,135,0.3); display: inline-flex; align-items: center; gap: 10px; }
+  .btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,48,135,0.4); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .submit-note { font-size: 13px; color: var(--text-muted); margin-top: 14px; line-height: 1.8; }
+  .submit-note strong { color: var(--mu-navy); }
+
+  /* SUCCESS */
+  .success-screen { display: none; text-align: center; padding: 60px 24px; }
+  .success-icon { width: 80px; height: 80px; background: var(--success-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 20px; animation: pop 0.4s ease; }
+  @keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.1)} 100%{transform:scale(1)} }
+  .success-screen h2 { font-size: 22px; color: var(--success); font-weight: 700; margin-bottom: 8px; }
+  .ref-code { background: var(--mu-navy); color: var(--mu-gold); display: inline-block; padding: 8px 24px; border-radius: 8px; font-size: 18px; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 24px; font-family: monospace; }
+  .btn-new { background: white; color: var(--mu-blue); border: 2px solid var(--mu-blue); padding: 10px 28px; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-new:hover { background: var(--mu-blue); color: white; }
+
+  /* LOADING */
+  .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(26,39,68,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .loading-card { background: white; border-radius: 16px; padding: 32px 40px; text-align: center; }
+  .spinner { width: 48px; height: 48px; border: 4px solid #dde3ee; border-top-color: var(--mu-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  /* MISC */
+  .section-divider { border: none; border-top: 1px dashed var(--border); margin: 16px 0; }
+  .conditional-section { display: none; margin-top: 0; }
+  .conditional-section.show { display: block; margin-top: 16px; }
+  .error-msg { font-size: 11px; color: #c0392b; margin-top: 3px; display: none; }
+  .error-msg.show { display: block; }
+
+  /* AUTOCOMPLETE */
+  .autocomplete-wrap { position: relative; overflow: visible; }
+  .autocomplete-dropdown {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 9999;
+    background: white; border: 1.5px solid var(--mu-blue);
+    border-top: none; border-radius: 0 0 10px 10px;
+    max-height: 220px; overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(26,39,68,0.13);
+    display: none;
+  }
+  .autocomplete-dropdown.show { display: block; }
+  .autocomplete-item {
+    padding: 10px 14px; font-size: 13px; cursor: pointer;
+    border-bottom: 1px solid var(--border); color: var(--text);
+    transition: background 0.12s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .autocomplete-item:last-child { border-bottom: none; }
+  .autocomplete-item:hover, .autocomplete-item.active { background: #eef2fb; color: var(--mu-blue); }
+  .autocomplete-item mark { background: #ffeaa0; border-radius: 3px; padding: 0 2px; font-style: normal; color: var(--mu-navy); font-weight: 700; }
+  .autocomplete-item .item-icon { font-size: 14px; flex-shrink: 0; }
+  .autocomplete-count { padding: 6px 14px; font-size: 11px; color: var(--text-muted); background: var(--surface2); border-top: 1px solid var(--border); }
+
+  /* DOC INFO BOX (section 4.4) */
+  .doc-required-box {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border: 2px solid #f59e0b;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-top: 8px;
+  }
+  .doc-required-box .doc-title {
+    font-size: 15px; font-weight: 800; color: #92400e;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+  }
+  .doc-required-item {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: white; border-radius: 10px; padding: 14px 16px;
+    border: 1px solid #fde68a; margin-bottom: 10px;
+  }
+  .doc-required-item:last-child { margin-bottom: 0; }
+  .doc-required-item .doc-icon { font-size: 26px; flex-shrink: 0; margin-top: 1px; }
+  .doc-required-item .doc-label { font-size: 15px; font-weight: 700; color: #1a2744; line-height: 1.4; }
+  .doc-required-item .doc-sub { font-size: 12px; color: #6b7280; margin-top: 4px; }
+  .doc-required-item .doc-badge {
+    display: inline-block; background: #fef2f2; color: #c0392b;
+    border: 1px solid #fca5a5; border-radius: 20px;
+    padding: 2px 10px; font-size: 11px; font-weight: 700; margin-top: 6px;
+  }
+  .doc-upload-hint {
+    margin-top: 14px; background: #eff6ff; border: 1.5px solid #93c5fd;
+    border-radius: 10px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 600; color: #1e40af;
+  }
+</style>
+</head>
+<body>
+<!-- CCTV v2 (แยกหน่วยงาน) — ไฟล์ทดสอบใน branch cctv-multi-unit ยังไม่เปิดใช้งานจริง -->
+<script src="units.js"></script>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo">🎓</div>
+    <div class="header-text">
+      <h1>แบบฟอร์มขอดูกล้องวงจรปิด (CCTV)</h1>
+      <p>งานจราจรและความปลอดภัย | กองกายภาพและสิ่งแวดล้อม มหาวิทยาลัยมหิดล วิทยาเขตศาลายา</p>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+      <div class="header-badge">CCTV Request</div>
+      <a href="../index_en.html" style="font-size:11px;color:#c9a84c;text-decoration:none;display:flex;align-items:center;gap:4px;opacity:0.9;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
+        🌐 English Version
+      </a>
+    </div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+</header>
+<div id="unitBar" class="unit-bar" hidden></div>
+<div id="testModeBar" class="unit-test" hidden>โหมดทดสอบ: ยังไม่ได้เชื่อมกับระบบหลังบ้าน — การกดส่งจะ<strong>ไม่บันทึกข้อมูลใด ๆ</strong></div>
+<section id="unitChooser" class="unit-chooser" hidden></section>
+<link rel="stylesheet" href="unit-routing.css">
+<script>
+(function(){
+  const hdr = document.querySelector('.header');
+  window.addEventListener('scroll',function(){
+    hdr.classList.toggle('collapsed', window.scrollY > 80);
+  },{passive:true});
+})();
+</script>
+
+<!-- Admin icon (bottom right) -->
+<!-- ปุ่มผู้ดูแลถูกถอดออกในรุ่นทดสอบ v2 (หน้าผู้ดูแลรุ่นแยกหน่วยงานยังไม่ได้จัดทำ) -->
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-card"><div class="spinner"></div><p id="loadingText" style="color:var(--text-muted);font-size:14px;">กำลังส่งข้อมูล กรุณารอสักครู่...</p></div>
+</div>
+
+<main class="main">
+<form id="cctvForm" novalidate>
+
+  <!-- PDPA -->
+  <div class="pdpa-notice">
+    <div class="pdpa-title"><span>🔒</span> นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA) — พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</div>
+    <div class="pdpa-body">
+      มหาวิทยาลัยมหิดลเก็บรวบรวมข้อมูลส่วนบุคคลของท่านเพื่อ<strong>วัตถุประสงค์ด้านความปลอดภัยและการให้บริการดูกล้องวงจรปิดย้อนหลัง</strong>เท่านั้น
+      ข้อมูลของท่านจะถูกเก็บไว้ในระบบฐานข้อมูลของมหาวิทยาลัยและจะไม่ถูกเปิดเผยต่อบุคคลภายนอก เว้นแต่จะมีคำสั่งทางกฎหมาย
+      ท่านมีสิทธิ์ขอเข้าถึง แก้ไข หรือลบข้อมูลของตนเองได้ตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562
+      <br><br>ข้อมูลภาพจากกล้องวงจรปิดถือเป็น<strong>ข้อมูลส่วนบุคคลที่มีความอ่อนไหว</strong> การเข้าถึงจะได้รับอนุญาตเฉพาะเมื่อมีเหตุผลอันชอบธรรมตามกฎหมายเท่านั้น
+    </div>
+    <div class="pdpa-consent">
+      <input type="checkbox" id="pdpaConsent" required>
+      <label for="pdpaConsent">ข้าพเจ้ายินยอมให้มหาวิทยาลัยมหิดลเก็บรวบรวมและประมวลผลข้อมูลส่วนบุคคลของข้าพเจ้า เพื่อวัตถุประสงค์ในการขอดูกล้องวงจรปิดย้อนหลัง และรับทราบสิทธิ์ของข้าพเจ้าตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 <span class="required">*</span></label>
+    </div>
+    <p class="error-msg" id="pdpaConsentError">กรุณายินยอมให้เก็บข้อมูลส่วนบุคคลก่อนดำเนินการ</p>
+  </div>
+
+  <!-- SECTION 1: ข้อมูลผู้ขอ -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">1</div><h2>ข้อมูลผู้ขอดูกล้องวงจรปิด</h2></div>
+    <div class="card-body">
+      <div class="info-box">📋 กรุณากรอกข้อมูลตามบัตรประชาชนหรือบัตรประจำตัวที่ออกโดยมหาวิทยาลัยมหิดล</div>
+
+      <!-- คำนำหน้า + ชื่อ + นามสกุล -->
+      <div class="form-row triple" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label for="prefix">คำนำหน้า <span class="required">*</span></label>
+          <select id="prefix" name="prefix" required>
+            <option value="">-- เลือก --</option>
+            <option value="นาย">นาย</option>
+            <option value="นาง">นาง</option>
+            <option value="นางสาว">นางสาว</option>
+            <option value="เด็กชาย">เด็กชาย</option>
+            <option value="เด็กหญิง">เด็กหญิง</option>
+            <option value="ดร.">ดร.</option>
+            <option value="รศ.">รศ.</option>
+            <option value="ผศ.">ผศ.</option>
+            <option value="ศ.">ศ.</option>
+            <option value="พ.ต.อ.">พ.ต.อ.</option>
+            <option value="ร.ต.อ.">ร.ต.อ.</option>
+            <option value="อื่นๆ">อื่นๆ</option>
+          </select>
+          <p class="error-msg" id="prefixError">กรุณาเลือกคำนำหน้า</p>
+        </div>
+        <div class="form-group">
+          <label for="fname">ชื่อ <span class="required">*</span></label>
+          <input type="text" id="fname" name="fname" placeholder="ชื่อจริง" required>
+          <p class="error-msg" id="fnameError">กรุณากรอกชื่อ</p>
+        </div>
+        <div class="form-group">
+          <label for="lname">นามสกุล <span class="required">*</span></label>
+          <input type="text" id="lname" name="lname" placeholder="นามสกุล" required>
+          <p class="error-msg" id="lnameError">กรุณากรอกนามสกุล</p>
+        </div>
+      </div>
+
+      <!-- เพศ + ประเภทผู้ขอ -->
+      <div class="form-row" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label for="gender">เพศ <span class="required">*</span></label>
+          <select id="gender" name="gender" required>
+            <option value="">-- เลือก --</option>
+            <option value="ชาย">ชาย</option>
+            <option value="หญิง">หญิง</option>
+            <option value="ไม่ระบุ">ไม่ระบุ</option>
+          </select>
+          <p class="error-msg" id="genderError">กรุณาเลือกเพศ</p>
+        </div>
+        <div class="form-group">
+          <label for="requesterType">ประเภทผู้ขอ <span class="required">*</span></label>
+          <select id="requesterType" name="requesterType" required onchange="handleRequesterType()">
+            <option value="">-- เลือกประเภท --</option>
+            <option value="นักศึกษา">นักศึกษา</option>
+            <option value="บุคลากร">บุคลากร / อาจารย์</option>
+            <option value="เจ้าหน้าที่ภายนอก">เจ้าหน้าที่ภายนอก (ตำรวจ / หน่วยงานราชการ)</option>
+            <option value="บุคคลทั่วไป">บุคคลทั่วไป / ผู้ปกครอง</option>
+            <option value="หน่วยงานเอกชน">หน่วยงานเอกชน</option>
+          </select>
+          <p class="error-msg" id="requesterTypeError">กรุณาเลือกประเภทผู้ขอ</p>
+        </div>
+      </div>
+
+      <!-- เลขบัตร + โทรศัพท์ -->
+      <div class="form-row" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label for="idCard">เลขบัตรประชาชน / รหัสนักศึกษา / รหัสพนักงาน <span class="required">*</span></label>
+          <input type="text" id="idCard" name="idCard" placeholder="กรอกเลขบัตรหรือรหัส" required>
+          <span class="form-hint">ใช้เพื่อยืนยันตัวตนตามข้อกำหนด PDPA เท่านั้น</span>
+          <p class="error-msg" id="idCardError">กรุณากรอกเลขบัตรหรือรหัส</p>
+        </div>
+        <div class="form-group">
+          <label for="phone">เบอร์โทรศัพท์ติดต่อ <span class="required">*</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="0xx-xxx-xxxx" required>
+          <p class="error-msg" id="phoneError">กรุณากรอกเบอร์โทรศัพท์</p>
+        </div>
+      </div>
+
+      <!-- อีเมลติดต่อ — ย้ายมาอยู่หลังโทรศัพท์ ลบ muEmail ออกแล้ว -->
+      <div class="form-row single" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label for="email">อีเมลติดต่อ</label>
+          <input type="email" id="email" name="email" placeholder="email@example.com">
+          <span class="form-hint">สำหรับรับแจ้งผลการดำเนินการ — กรอกอีเมลที่ใช้งานประจำ (ไม่จำเป็นต้องเป็นอีเมลมหาวิทยาลัย)</span>
+        </div>
+      </div>
+
+      <!-- MU section -->
+      <div class="conditional-section" id="muSection">
+        <div class="form-row single">
+          <div class="form-group">
+            <label for="faculty">คณะ / หน่วยงาน</label>
+            <div class="autocomplete-wrap">
+              <input type="text" id="faculty" name="faculty" placeholder="พิมพ์ชื่อคณะ/หน่วยงาน..." autocomplete="off"
+                oninput="acSearch(this,'facultyDrop')" onkeydown="acKeydown(event,'facultyDrop')" onfocus="acSearch(this,'facultyDrop')" onblur="setTimeout(()=>acHide('facultyDrop'),180)">
+              <div class="autocomplete-dropdown" id="facultyDrop"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Official section -->
+      <div class="conditional-section" id="officialSection">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="officialOrg">หน่วยงาน</label>
+            <input type="text" id="officialOrg" name="officialOrg" placeholder="เช่น สถานีตำรวจภูธรสามพราน">
+          </div>
+          <div class="form-group">
+            <label for="officialDoc">เลขที่หนังสือราชการ</label>
+            <input type="text" id="officialDoc" name="officialDoc" placeholder="(ถ้ามี)">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: วัตถุประสงค์ -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">2</div><h2>วัตถุประสงค์การขอดูกล้อง</h2></div>
+    <div class="card-body">
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>วัตถุประสงค์หลัก <span class="required">*</span></label>
+        <div class="radio-group" id="purposeGroup">
+          <div class="radio-item" onclick="selectRadio('purpose','ติดตามทรัพย์สินสูญหาย',this)"><input type="radio" name="purpose" value="ติดตามทรัพย์สินสูญหาย"> 🔍 ติดตามทรัพย์สินสูญหาย</div>
+          <div class="radio-item" onclick="selectRadio('purpose','ติดตามยานพาหนะ',this)"><input type="radio" name="purpose" value="ติดตามยานพาหนะ"> 🚗 ติดตามยานพาหนะ</div>
+          <div class="radio-item" onclick="selectRadio('purpose','อุบัติเหตุ/เหตุฉุกเฉิน',this)"><input type="radio" name="purpose" value="อุบัติเหตุ/เหตุฉุกเฉิน"> 🚨 อุบัติเหตุ / เหตุฉุกเฉิน</div>
+          <div class="radio-item" onclick="selectRadio('purpose','การสอบสวนคดี',this)"><input type="radio" name="purpose" value="การสอบสวนคดี"> ⚖️ การสอบสวนคดี</div>
+          <div class="radio-item" onclick="selectRadio('purpose','ร้องเรียน/พิพาท',this)"><input type="radio" name="purpose" value="ร้องเรียน/พิพาท"> 📢 ร้องเรียน / พิพาท</div>
+          <div class="radio-item" onclick="selectRadio('purpose','อื่นๆ',this);toggleOtherPurpose(true)"><input type="radio" name="purpose" value="อื่นๆ"> 📝 อื่นๆ (ระบุ)</div>
+        </div>
+        <div class="conditional-section" id="otherPurposeSection" style="margin-top:10px;">
+          <input type="text" id="purposeOther" name="purposeOther" placeholder="ระบุวัตถุประสงค์อื่นๆ..." style="max-width:500px;">
+        </div>
+        <p class="error-msg" id="purposeError">กรุณาเลือกวัตถุประสงค์</p>
+      </div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label for="purposeDetail">รายละเอียดเหตุการณ์ที่เกิดขึ้น <span class="required">*</span></label>
+        <textarea id="purposeDetail" name="purposeDetail" required placeholder="กรุณาอธิบายเหตุการณ์โดยละเอียด เช่น สูญหาย/เกิดอุบัติเหตุ ที่ไหน เมื่อไหร่ อะไรบ้าง..."></textarea>
+        <p class="error-msg" id="purposeDetailError">กรุณากรอกรายละเอียดเหตุการณ์</p>
+      </div>
+      <div class="form-group">
+        <label>ลักษณะหลักฐานที่ต้องการ</label>
+        <div class="check-group">
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="ภาพบุคคล"> 👤 ภาพบุคคล</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="ภาพยานพาหนะ"> 🚗 ภาพยานพาหนะ</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="ทิศทางการเคลื่อนที่"> 🗺️ ทิศทางการเคลื่อนที่</div>
+          <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="เวลาเข้า-ออกสถานที่"> ⏰ เวลาเข้า-ออกสถานที่</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- URGENCY: ระดับความเร่งด่วน -->
+  <div class="card" id="urgencyCard">
+    <div class="card-header" style="background:linear-gradient(90deg,#8b1a1a,#c0392b);">
+      <div class="step-num" style="background:var(--mu-gold);">⚡</div>
+      <h2>ระดับความเร่งด่วน</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-group">
+        <label>กรุณาเลือกระดับความเร่งด่วน <span class="required">*</span></label>
+        <div class="radio-group" style="flex-direction:column;gap:10px;margin-top:8px;">
+          <div class="radio-item" style="padding:14px 18px;font-size:15px;font-weight:600;"
+            onclick="selectRadio('urgency','ปกติ',this);setEmergencyMode(false)">
+            <input type="radio" name="urgency" value="ปกติ">
+            🟢 ปกติ <span style="font-size:13px;font-weight:400;color:var(--text-muted);">(ภายใน 24–48 ชั่วโมง)</span>
+          </div>
+          <div class="radio-item" style="padding:14px 18px;font-size:15px;font-weight:600;"
+            onclick="selectRadio('urgency','เร่งด่วน',this);setEmergencyMode(false)">
+            <input type="radio" name="urgency" value="เร่งด่วน">
+            🟡 เร่งด่วน <span style="font-size:13px;font-weight:400;color:var(--text-muted);">(มีเหตุจำเป็น)</span>
+          </div>
+          <div class="radio-item" style="padding:14px 18px;font-size:15px;font-weight:700;border:2px solid rgba(231,76,60,0.5);background:rgba(231,76,60,0.05);"
+            onclick="selectRadio('urgency','ฉุกเฉิน',this);setEmergencyMode(true)">
+            <input type="radio" name="urgency" value="ฉุกเฉิน">
+            🔴 ฉุกเฉิน <span style="font-size:13px;font-weight:400;color:#c0392b;">(เกี่ยวกับชีวิต / อาชญากรรม)</span>
+          </div>
+        </div>
+        <p class="error-msg" id="urgencyError">กรุณาเลือกระดับความเร่งด่วน</p>
+      </div>
+      <!-- Emergency banner -->
+      <div id="emergencyBanner" style="display:none;margin-top:14px;background:#fef2f2;border:2px solid #e74c3c;border-radius:10px;padding:14px 16px;">
+        <div style="font-size:15px;font-weight:800;color:#c0392b;margin-bottom:6px;">🚨 โหมดฉุกเฉิน — กรอกเฉพาะข้อมูลจำเป็น</div>
+        <div style="font-size:13px;color:#7f1d1d;line-height:1.7;">
+          กรุณากรอกข้อมูลเท่าที่จำเป็น:<br>
+          ✅ ชื่อ + โทรศัพท์ &nbsp; ✅ วันเวลาสถานที่ &nbsp; ✅ ยืนยัน PDPA &nbsp; ✅ อัปโหลดสำเนาบัตร<br>
+          <span style="color:#c0392b;">ใบแจ้งความและเอกสารอื่นๆ สามารถยื่นเพิ่มเติมได้ในภายหลัง</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: วันเวลา/สถานที่ -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">3</div><h2>ช่วงเวลาและสถานที่ที่ต้องการดูย้อนหลัง</h2></div>
+    <div class="card-body">
+      <div class="info-box">📅 กล้องวงจรปิดบันทึกย้อนหลังได้ตามระยะเวลาที่กำหนดในแต่ละจุด กรุณาระบุช่วงเวลาให้ชัดเจน</div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>วันและเวลาที่เกิดเหตุ (โดยประมาณ) <span class="required">*</span></label>
+        <div class="datetime-range">
+          <div><div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">เริ่มต้น</div><input type="date" id="dateStart" name="dateStart" required><input type="time" id="timeStart" name="timeStart" style="margin-top:6px;"></div>
+          <div class="datetime-arrow">→</div>
+          <div><div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">สิ้นสุด</div><input type="date" id="dateEnd" name="dateEnd"><input type="time" id="timeEnd" name="timeEnd" style="margin-top:6px;"></div>
+        </div>
+        <p class="error-msg" id="dateError">กรุณาระบุวันที่เกิดเหตุ</p>
+      </div>
+      <hr class="section-divider">
+      <div class="form-group" style="margin-bottom:12px;">
+        <label for="locationInput">จุดที่ต้องการดูกล้อง <span class="required">*</span></label>
+        <div style="display:flex;gap:8px;position:relative;align-items:flex-start;">
+          <div style="flex:1;position:relative;">
+            <input type="text" id="locationInput" placeholder="🔍 พิมพ์ชื่อสถานที่ เช่น ประตู, หอพัก, คณะ..." style="width:100%;"
+              oninput="locationSearch(this)" onkeydown="locationKeydown(event)" onfocus="locationSearch(this)" onblur="setTimeout(()=>locationHide(),200)">
+            <div id="locationDrop" style="position:absolute;top:100%;left:0;right:0;z-index:9999;background:white;border:1.5px solid var(--mu-blue);border-top:none;border-radius:0 0 10px 10px;max-height:240px;overflow-y:auto;box-shadow:0 8px 24px rgba(26,39,68,0.13);display:none;"></div>
+          </div>
+          <button type="button" onclick="addLocation()" style="background:var(--mu-navy);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;white-space:nowrap;flex-shrink:0;">+ เพิ่ม</button>
+          <div style="background:#fff0f0;border:1.5px solid #e74c3c;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;color:#c0392b;white-space:nowrap;align-self:center;flex-shrink:0;">⬅️ กดเพื่อเพิ่ม</div>
+        </div>
+        <div id="presetWrap" style="margin-top:6px;"></div>
+        <div class="location-tags" id="locationTags"></div>
+        <input type="hidden" id="locations" name="locations">
+        <p class="error-msg" id="locationError">กรุณาระบุจุดที่ต้องการดูกล้องอย่างน้อย 1 จุด</p>
+      </div>
+      <div class="form-group">
+        <label>ข้อมูลยานพาหนะที่เกี่ยวข้อง (ถ้ามี)</label>
+        <div class="form-row" style="margin-bottom:0;">
+          <input type="text" id="vehiclePlate" name="vehiclePlate" placeholder="ทะเบียนรถ">
+          <input type="text" id="vehicleDesc" name="vehicleDesc" placeholder="รุ่น/สี เช่น Toyota Yaris สีขาว">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: การขอรับข้อมูล/ไฟล์ภาพ -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">4</div><h2>การขอรับข้อมูล / ไฟล์ภาพ</h2></div>
+    <div class="card-body">
+
+      <!-- 4.1 PDPA ยินยอมก่อนเลือกข้ออื่น -->
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>4.1 การรับทราบและยินยอมตามกฎหมาย PDPA <span class="required">*</span></label>
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px 16px;margin-top:6px;">
+          <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer;font-weight:400;">
+            <input type="checkbox" id="pdpaFileConsent" name="pdpaFileConsent"
+              style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:#16a34a;"
+              onchange="toggleSection4Consent(this.checked)">
+            <span style="font-size:13px;line-height:1.8;color:#14532d;">
+              ข้าพเจ้ารับทราบและยืนยันว่า การขอรับข้อมูลนี้เป็นไปเพื่อวัตถุประสงค์ที่ระบุไว้เท่านั้น
+              ข้าพเจ้า<strong>จะไม่นำภาพหรือข้อมูลจากกล้องวงจรปิดไปเผยแพร่</strong>ต่อสาธารณะ สื่อสังคมออนไลน์
+              หรือกระทำการใดๆ ที่ละเมิดสิทธิส่วนบุคคลของผู้อื่น ทั้งนี้ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562
+              หากฝ่าฝืน ข้าพเจ้ายินยอมรับผิดชอบความเสียหายและรับโทษทางกฎหมายทั้งทางแพ่งและทางอาญาแต่เพียงผู้เดียว
+            </span>
+          </label>
+        </div>
+        <p class="error-msg" id="pdpaFileConsentError">กรุณายืนยันการรับทราบ PDPA ก่อนดำเนินการต่อ</p>
+      </div>
+
+      <!-- 4.2–4.4 ล็อคไว้จนกว่าจะติ๊ก 4.1 -->
+      <div id="section4Rest" style="opacity:0.4;pointer-events:none;transition:all 0.3s;">
+
+        <!-- 4.2 ความประสงค์ -->
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>4.2 ความประสงค์ในการขอรับข้อมูล <span class="required">*</span></label>
+          <div class="radio-group" style="flex-direction:column;gap:10px;">
+            <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:14px 16px;"
+              onclick="selectRadio('requestFile','ดูอย่างเดียว',this);showFileSection(false)">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="radio" name="requestFile" value="ดูอย่างเดียว">
+                <strong>👁️ ขอดูภาพอย่างเดียว (View Only)</strong>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:5px;padding-left:22px;">
+                ไม่ต้องใช้ใบแจ้งความ — ดูได้เฉพาะหน้าจอมอนิเตอร์ของเจ้าหน้าที่เท่านั้น ไม่อนุญาตให้บันทึกภาพหน้าจอ
+              </div>
+            </div>
+            <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:14px 16px;"
+              onclick="selectRadio('requestFile','ต้องการไฟล์',this);showFileSection(true)">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="radio" name="requestFile" value="ต้องการไฟล์">
+                <strong>📁 ขอรับสำเนาไฟล์ภาพ (Export File)</strong>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:5px;padding-left:22px;">
+                ต้องมีใบแจ้งความ/บันทึกประจำวันเป็นหลักฐานประกอบเสมอ — ใช้เวลาดำเนินการ 3–5 วันทำการ
+              </div>
+            </div>
+          </div>
+          <p class="error-msg" id="requestFileError">กรุณาเลือกความประสงค์</p>
+        </div>
+
+        <!-- 4.3–4.4 แสดงเฉพาะเมื่อเลือก "ขอรับสำเนา" -->
+        <div class="conditional-section" id="fileSection">
+
+          <!-- 4.3 เหตุผล -->
+          <div class="form-group" style="margin-bottom:20px;">
+            <label>4.3 เหตุผลความจำเป็นในการขอรับสำเนา <span class="required">*</span></label>
+            <div class="radio-group" style="flex-direction:column;gap:8px;">
+              <div class="radio-item" onclick="selectRadio('fileReason','ใช้เป็นหลักฐานประกอบคดีความ/แจ้งความร้องทุกข์',this)">
+                <input type="radio" name="fileReason" value="ใช้เป็นหลักฐานประกอบคดีความ/แจ้งความร้องทุกข์">
+                ⚖️ ใช้เป็นหลักฐานประกอบคดีความ / แจ้งความร้องทุกข์
+              </div>
+              <div class="radio-item" onclick="selectRadio('fileReason','ใช้ประกอบการสอบสวนของเจ้าพนักงานตำรวจ/หน่วยงานรัฐ',this)">
+                <input type="radio" name="fileReason" value="ใช้ประกอบการสอบสวนของเจ้าพนักงานตำรวจ/หน่วยงานรัฐ">
+                🏛️ ใช้ประกอบการสอบสวนของเจ้าพนักงานตำรวจ / หน่วยงานรัฐ
+              </div>
+              <div class="radio-item" onclick="selectRadio('fileReason','ใช้ประกอบการเรียกร้องค่าสินไหมทดแทนจากบริษัทประกันภัย',this)">
+                <input type="radio" name="fileReason" value="ใช้ประกอบการเรียกร้องค่าสินไหมทดแทนจากบริษัทประกันภัย">
+                🛡️ ใช้ประกอบการเรียกร้องค่าสินไหมทดแทนจากบริษัทประกันภัย
+              </div>
+            </div>
+            <p class="error-msg" id="fileReasonError">กรุณาเลือกเหตุผล</p>
+          </div>
+
+          <!-- 4.4 เอกสารที่จำเป็น — info display (ไม่ใช่ checkbox) -->
+          <div class="form-group" style="margin-bottom:0;">
+            <label style="font-size:15px;font-weight:800;color:var(--mu-navy);">4.4 เอกสารที่จำเป็น</label>
+            <div class="doc-required-box">
+              <div class="doc-title">
+                <span>⚠️</span> กรุณาเตรียมเอกสารต่อไปนี้ให้พร้อมก่อนส่งคำขอ
+              </div>
+
+              <div class="doc-required-item">
+                <span class="doc-icon">🪪</span>
+                <div>
+                  <div class="doc-label">1. ไฟล์สำเนา / ภาพบัตรประชาชน, บัตรนักศึกษา หรือบัตรพนักงาน</div>
+                  <div class="doc-sub">พร้อมเซ็นรับรองสำเนาถูกต้องของผู้ขอดูกล้อง</div>
+                  <span class="doc-badge">จำเป็นต้องแนบ</span>
+                </div>
+              </div>
+
+              <div class="doc-required-item">
+                <span class="doc-icon">📋</span>
+                <div>
+                  <div class="doc-label">2. ไฟล์สำเนา / ภาพสำเนาบันทึกประจำวัน หรือใบแจ้งความจากเจ้าหน้าที่ตำรวจ</div>
+                  <div class="doc-sub">ต้องระบุวันที่ เวลา และสถานที่เกิดเหตุชัดเจน</div>
+                  <span class="doc-badge">จำเป็นต้องแนบ <span id="emergencyExcept" style="display:none;font-weight:400;color:#7f1d1d;">(ยกเว้นกรณีฉุกเฉิน — ยื่นเพิ่มเติมได้ภายหลัง)</span></span>
+                </div>
+              </div>
+
+              <div class="doc-upload-hint">
+                <span style="font-size:20px;">📎</span>
+                <span>กรุณาอัปโหลดไฟล์เอกสารทั้งหมดในส่วนที่ 5 ด้านล่าง</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- end fileSection -->
+      </div><!-- end section4Rest -->
+    </div>
+  </div>
+
+  <!-- SECTION 5: เอกสารประกอบ -->
+  <div class="card" id="section5Card">
+    <div class="card-header" id="section5Header">
+      <div class="step-num">5</div>
+      <h2 id="section5Title">เอกสารประกอบคำขอ</h2>
+    </div>
+    <div class="card-body">
+
+      <!-- โหมด: ดูอย่างเดียว -->
+      <div id="s5ViewOnly">
+        <div class="info-box">📎 เอกสารที่ควรนำมาแสดง: สำเนาบัตรประชาชน, บัตรนักศึกษา/พนักงาน และเอกสารอื่นที่เกี่ยวข้อง</div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>เอกสารที่นำมาด้วย (เลือกและอัปโหลดไฟล์)</label>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+            <div class="doc-upload-item" data-doc="บัตรประชาชน">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-id')"><input type="checkbox" name="docs" value="บัตรประชาชน"> 🪪 บัตรประชาชน</div>
+              <div class="doc-upload-zone" id="upload-doc-id" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-id')">📎 อัปโหลดสำเนาบัตรประชาชน</div>
+                <input type="file" id="file-doc-id" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-id')">
+                <div class="file-mini-list" id="list-doc-id"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item" data-doc="บัตรนักศึกษา/พนักงาน">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-student')"><input type="checkbox" name="docs" value="บัตรนักศึกษา/พนักงาน"> 🎓 บัตรนักศึกษา/พนักงาน</div>
+              <div class="doc-upload-zone" id="upload-doc-student" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-student')">📎 อัปโหลดสำเนาบัตรนักศึกษา/พนักงาน</div>
+                <input type="file" id="file-doc-student" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-student')">
+                <div class="file-mini-list" id="list-doc-student"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item" data-doc="ใบแจ้งความ">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-police')"><input type="checkbox" name="docs" value="ใบแจ้งความ"> 📋 ใบแจ้งความ</div>
+              <div class="doc-upload-zone" id="upload-doc-police" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-police')">📎 อัปโหลดใบแจ้งความ</div>
+                <input type="file" id="file-doc-police" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-police')">
+                <div class="file-mini-list" id="list-doc-police"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item" data-doc="หนังสือมอบอำนาจ">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-poa')"><input type="checkbox" name="docs" value="หนังสือมอบอำนาจ"> 📜 หนังสือมอบอำนาจ</div>
+              <div class="doc-upload-zone" id="upload-doc-poa" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-poa')">📎 อัปโหลดหนังสือมอบอำนาจ</div>
+                <input type="file" id="file-doc-poa" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-poa')">
+                <div class="file-mini-list" id="list-doc-poa"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item" data-doc="หนังสือราชการ">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-official')"><input type="checkbox" name="docs" value="หนังสือราชการ"> 🏛️ หนังสือราชการ</div>
+              <div class="doc-upload-zone" id="upload-doc-official" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-official')">📎 อัปโหลดหนังสือราชการ</div>
+                <input type="file" id="file-doc-official" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-official')">
+                <div class="file-mini-list" id="list-doc-official"></div>
+              </div>
+            </div>
+            <div class="doc-upload-item" data-doc="คำสั่งศาล">
+              <div class="check-item" onclick="toggleDocUpload(this,'upload-doc-court')"><input type="checkbox" name="docs" value="คำสั่งศาล"> ⚖️ คำสั่งศาล</div>
+              <div class="doc-upload-zone" id="upload-doc-court" style="display:none;margin-top:6px;margin-left:24px;">
+                <div class="mini-upload" onclick="triggerDocUpload('file-doc-court')">📎 อัปโหลดคำสั่งศาล</div>
+                <input type="file" id="file-doc-court" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-doc-court')">
+                <div class="file-mini-list" id="list-doc-court"></div>
+              </div>
+            </div>
+            <div class="check-item" onclick="toggleCheck(this);toggleOtherDoc(this)"><input type="checkbox" name="docs" value="อื่นๆ"> 📝 อื่นๆ</div>
+          </div>
+          <div class="conditional-section" id="otherDocSection" style="margin-top:10px;">
+            <input type="text" id="docsOther" name="docsOther" placeholder="ระบุเอกสารอื่นๆ..." style="max-width:400px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- โหมด: ขอรับสำเนาไฟล์ -->
+      <div id="s5Export" style="display:none;">
+        <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;color:#7f1d1d;margin-bottom:16px;">
+          ⚠️ <strong>เอกสารต้องครบถ้วนทุกรายการ</strong> มิฉะนั้นหน่วยงานขอสงวนสิทธิ์ในการปฏิเสธการให้ไฟล์ภาพ
+        </div>
+
+        <!-- บัตรประชาชน — บังคับ -->
+        <div class="form-group" style="margin-bottom:16px;padding:14px;background:#f8faff;border-radius:10px;border:1px solid #dde3ee;">
+          <label style="font-size:14px;font-weight:700;">🪪 สำเนาบัตรประชาชน / บัตรนักศึกษา / บัตรพนักงาน
+            <span style="color:#c0392b;font-weight:800;"> *</span>
+          </label>
+          <div style="font-size:12px;color:#c0392b;font-weight:600;margin:4px 0 10px;">(พร้อมเซ็นรับรองสำเนาถูกต้องของผู้ขอดูกล้อง — จำเป็นต้องแนบไฟล์)</div>
+          <div class="mini-upload" onclick="triggerDocUpload('file-export-id')" id="uploadIdBtn">📎 คลิกเพื่ออัปโหลดสำเนาบัตร</div>
+          <input type="file" id="file-export-id" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-export-id');updateIdUploadBtn()">
+          <div class="file-mini-list" id="list-export-id"></div>
+          <p class="error-msg" id="exportIdError">กรุณาอัปโหลดสำเนาบัตรประชาชน / บัตรนักศึกษา / บัตรพนักงาน</p>
+        </div>
+
+        <!-- ใบแจ้งความ — บังคับ (ยกเว้นฉุกเฉิน) -->
+        <div class="form-group" style="margin-bottom:16px;padding:14px;background:#f8faff;border-radius:10px;border:1px solid #dde3ee;" id="policeDocBox">
+          <label style="font-size:14px;font-weight:700;">📋 สำเนาบันทึกประจำวัน หรือ ใบแจ้งความ
+            <span style="color:#c0392b;font-weight:800;"> *</span>
+            <span id="policeDocEmergencyNote" style="display:none;color:#c0392b;font-size:12px;font-weight:400;"> (โหมดฉุกเฉิน: ยื่นเพิ่มเติมได้ภายหลัง)</span>
+          </label>
+          <div style="font-size:12px;color:#c0392b;font-weight:600;margin:4px 0 10px;">(ระบุวันที่ เวลา และสถานที่เกิดเหตุชัดเจน — จำเป็นต้องแนบไฟล์)</div>
+          <div class="mini-upload" onclick="triggerDocUpload('file-export-police')">📎 คลิกเพื่ออัปโหลดใบแจ้งความ</div>
+          <input type="file" id="file-export-police" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-export-police')">
+          <div class="file-mini-list" id="list-export-police"></div>
+          <p class="error-msg" id="exportPoliceError">กรุณาอัปโหลดสำเนาบันทึกประจำวัน / ใบแจ้งความ</p>
+        </div>
+
+        <!-- หนังสือมอบอำนาจ — optional -->
+        <div class="form-group" style="margin-bottom:8px;padding:14px;background:#f8faff;border-radius:10px;border:1px solid #dde3ee;">
+          <div class="check-item" onclick="toggleDocUpload(this,'upload-export-poa')" style="margin-bottom:0;">
+            <input type="checkbox" name="exportDocs" value="หนังสือมอบอำนาจ">
+            📜 หนังสือมอบอำนาจ และสำเนาบัตรประชาชนของผู้มอบและผู้รับมอบ
+            <em style="color:#c0392b;font-weight:700;"> (เฉพาะกรณีรับแทน)</em>
+          </div>
+          <div id="upload-export-poa" style="display:none;margin-top:10px;">
+            <div class="mini-upload" onclick="triggerDocUpload('file-export-poa')">📎 คลิกเพื่ออัปโหลดหนังสือมอบอำนาจ</div>
+            <input type="file" id="file-export-poa" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="handleDocFile(this,'file-export-poa')">
+            <div class="file-mini-list" id="list-export-poa"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- หมายเหตุ (ทุกโหมด) -->
+      <div class="form-group" style="margin-top:16px;">
+        <label for="additionalNote">หมายเหตุเพิ่มเติม</label>
+        <textarea id="additionalNote" name="additionalNote" style="min-height:70px;" placeholder="ข้อมูลเพิ่มเติมที่ต้องการแจ้งเจ้าหน้าที่..."></textarea>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION 5.5: ช่องทางการรับไฟล์ภาพ — แยกออกมาต่างหาก แสดงเฉพาะกรณีขอสำเนา -->
+  <div class="card" id="section45Card" style="display:none;">
+    <div class="card-header" style="background:linear-gradient(90deg,#1a5276,#2471a3);">
+      <div class="step-num" style="background:var(--mu-gold);color:var(--mu-navy);">5.5</div>
+      <h2>ช่องทางการรับไฟล์ภาพ</h2>
+    </div>
+    <div class="card-body">
+      <div class="info-box">📦 กรุณาเลือกช่องทางที่ต้องการรับไฟล์ภาพ CCTV หลังจากที่เจ้าหน้าที่ดำเนินการแล้วเสร็จ</div>
+      <div class="form-group">
+        <label>เลือกช่องทางที่ต้องการรับไฟล์ <span class="required">*</span></label>
+        <div class="radio-group" style="flex-direction:column;gap:10px;margin-top:8px;">
+          <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:16px 18px;"
+            onclick="selectRadio('deliveryMethod','นำ Flash Drive มาเองในวันรับไฟล์',this);toggleGDriveEmail(false)">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <input type="radio" name="deliveryMethod" value="นำ Flash Drive มาเองในวันรับไฟล์">
+              <strong style="font-size:15px;">💾 นำ Flash Drive มาเองในวันรับไฟล์</strong>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:6px;padding-left:24px;">
+              แนะนำ: USB 2.0 ขึ้นไป ความจุ ≥ 4GB และไม่เป็นพาหะนำไวรัสคอมพิวเตอร์
+            </div>
+          </div>
+          <div class="radio-item" style="flex-direction:column;align-items:flex-start;padding:16px 18px;"
+            onclick="selectRadio('deliveryMethod','รับผ่านลิงก์ Google Drive',this);toggleGDriveEmail(true)">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <input type="radio" name="deliveryMethod" value="รับผ่านลิงก์ Google Drive">
+              <strong style="font-size:15px;">🔗 รับผ่านลิงก์ Google Drive</strong>
+            </div>
+            <div id="gdriveEmailSection" style="display:none;width:100%;margin-top:12px;padding-left:24px;">
+              <label style="font-size:13px;color:var(--text-muted);display:block;margin-bottom:6px;">อีเมลสำหรับจัดส่งลิงก์ <span class="required">*</span></label>
+              <input type="email" id="gdriveEmail" name="gdriveEmail" placeholder="email@example.com"
+                style="width:100%;max-width:380px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size:13px;outline:none;">
+              <p class="error-msg" id="gdriveEmailError" style="margin-top:6px;">กรุณากรอกอีเมลสำหรับรับลิงก์</p>
+              <div style="background:#fffbeb;border:1px solid #f59e0b;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:13px;color:#78350f;">
+                <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-weight:400;">
+                  <input type="checkbox" id="gdriveConsent" name="gdriveConsent"
+                    style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:#d97706;">
+                  <span>
+                    ข้าพเจ้ารับทราบและยินยอมว่า จะต้องดาวน์โหลดไฟล์เก็บไว้ในอุปกรณ์ของตนเอง
+                    เนื่องจากระบบจะทำการ<strong>ลบไฟล์ออกจากลิงก์ภายใน 48 ชั่วโมง</strong>หลังจากการจัดส่งอีเมล
+                    เพื่อความปลอดภัยของข้อมูล
+                  </span>
+                </label>
+                <span id="gdriveConsentError" style="display:none;font-size:12px;color:#c0392b;margin-top:6px;display:block;">⚠️ กรุณายืนยันการรับทราบเงื่อนไขการรับไฟล์ก่อนส่ง</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="error-msg" id="deliveryMethodError">กรุณาเลือกช่องทางการรับไฟล์</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: เจ้าหน้าที่ผู้ให้บริการ -->
+  <div class="card">
+    <div class="card-header"><div class="step-num">6</div><h2>เจ้าหน้าที่ผู้ให้บริการดูกล้อง CCTV</h2></div>
+    <div class="card-body">
+      <div class="info-box">👮 กรุณาระบุเจ้าหน้าที่ที่ให้บริการดูกล้อง CCTV ณ วันที่มาติดต่อ</div>
+
+      <div class="form-row" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label>เจ้าหน้าที่ผู้ให้บริการ <span class="required">*</span></label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+            <div class="radio-item" id="officerKnownBtn" onclick="selectOfficerMode('known')" style="flex:1;min-width:160px;">
+              <input type="radio" name="officerMode" value="known"> 👮 เลือกจากฐานข้อมูล
+            </div>
+            <div class="radio-item" id="officerOtherBtn" onclick="selectOfficerMode('other')" style="flex:1;min-width:160px;">
+              <input type="radio" name="officerMode" value="other"> 📝 อื่นๆ (ไม่มีในฐานข้อมูล)
+            </div>
+          </div>
+          <p class="error-msg" id="officerModeError">กรุณาเลือกประเภทเจ้าหน้าที่</p>
+        </div>
+      </div>
+
+      <!-- ค้นหาจากฐานข้อมูล -->
+      <div class="conditional-section" id="officerKnownSection">
+        <div class="form-group">
+          <label for="officerNameInput">ค้นหาชื่อเจ้าหน้าที่ <span class="required">*</span></label>
+          <div class="autocomplete-wrap">
+            <input type="text" id="officerNameInput" name="officerNameInput"
+              placeholder="พิมพ์ชื่อ-นามสกุล เจ้าหน้าที่..." autocomplete="off"
+              oninput="officerSearch(this)" onkeydown="officerKeydown(event)"
+              onfocus="officerSearch(this)" onblur="setTimeout(()=>acHide('officerDrop'),180)">
+            <div class="autocomplete-dropdown" id="officerDrop"></div>
+          </div>
+          <input type="hidden" id="officerName" name="officerName">
+          <input type="hidden" id="officerEmail" name="officerEmail">
+          <span class="form-hint" id="officerSelectedHint" style="color:var(--success);display:none;margin-top:4px;">✓ เลือกแล้ว: <strong id="officerSelectedName"></strong></span>
+          <p class="error-msg" id="officerNameError">กรุณาเลือกชื่อเจ้าหน้าที่จากรายการ</p>
+        </div>
+      </div>
+
+      <!-- อื่นๆ -->
+      <div class="conditional-section" id="officerOtherSection">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="officerOtherName">ชื่อ-นามสกุล เจ้าหน้าที่ <span class="required">*</span></label>
+            <input type="text" id="officerOtherName" name="officerOtherName" placeholder="ชื่อ-นามสกุล เจ้าหน้าที่">
+            <p class="error-msg" id="officerOtherNameError">กรุณากรอกชื่อ-นามสกุล</p>
+          </div>
+          <div class="form-group">
+            <label for="officerOtherEmail">อีเมล เจ้าหน้าที่ <span class="required">*</span></label>
+            <input type="email" id="officerOtherEmail" name="officerOtherEmail" placeholder="officer@example.com">
+            <p class="error-msg" id="officerOtherEmailError">กรุณากรอกอีเมล</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-area">
+    <button type="submit" class="btn-submit" id="submitBtn"><span>📤</span> ส่งคำขอดูกล้องวงจรปิด</button>
+    <div class="submit-note">
+      เมื่อส่งแล้ว เจ้าหน้าที่จะได้รับแจ้งทันที และจะดำเนินการแจ้งผลภายใน 24–48 ชั่วโมง
+      <br><br>
+      หากมีข้อสงสัยหรือต้องการสอบถามข้อมูลเพิ่มเติม
+      <br>
+      โปรดติดต่อ <strong>งานจราจรและความปลอดภัย</strong> โทร <strong>02-4414400 กด 0</strong> &nbsp;|&nbsp; อีเมล <strong>Traffic&#46;oppe&#64;gmail&#46;com</strong>
+    </div>
+  </div>
+
+</form>
+
+<!-- SUCCESS -->
+<div class="success-screen" id="successScreen">
+  <div class="success-icon">✅</div>
+  <h2>ส่งคำขอสำเร็จ!</h2>
+  <p style="color:var(--text-muted);font-size:14px;max-width:400px;margin:0 auto 16px;line-height:1.7;">คำขอของท่านได้รับการบันทึกแล้ว เจ้าหน้าที่จะตรวจสอบและแจ้งผลภายใน 24–48 ชั่วโมง</p>
+  <p style="font-size:13px;color:var(--text-muted);">หมายเลขอ้างอิงคำขอ:</p>
+  <div class="ref-code" id="refCode">CCTV-XXXXXXXX</div>
+  <p style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">ระบบได้ส่งอีเมลแจ้งเตือนไปยังเจ้าหน้าที่ที่รับผิดชอบแล้ว</p>
+  <button class="btn-new" onclick="resetForm()">+ ส่งคำขอใหม่</button>
+</div>
+</main>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ===== EMERGENCY MODE =====
+function setEmergencyMode(on) {
+  document.getElementById('emergencyBanner').style.display = on ? 'block' : 'none';
+  // แสดง/ซ่อน note ฉุกเฉินในส่วน 4.4 และ section 5
+  const excepts = document.querySelectorAll('#emergencyExcept, #policeDocEmergencyNote');
+  excepts.forEach(el => { if(el) el.style.display = on ? 'inline' : 'none'; });
+}
+
+// ===== SECTION 5 DYNAMIC =====
+function updateSection5(requestFileVal) {
+  const s5Title = document.getElementById('section5Title');
+  const s5ViewOnly = document.getElementById('s5ViewOnly');
+  const s5Export = document.getElementById('s5Export');
+  if (!s5Title) return;
+  if (requestFileVal === 'ต้องการไฟล์') {
+    s5Title.textContent = 'เอกสารประกอบคำขอ (กรณีรับสำเนาไฟล์ภาพ)';
+    if(s5ViewOnly) s5ViewOnly.style.display = 'none';
+    if(s5Export) s5Export.style.display = 'block';
+  } else {
+    s5Title.textContent = 'เอกสารประกอบคำขอ';
+    if(s5ViewOnly) s5ViewOnly.style.display = 'block';
+    if(s5Export) s5Export.style.display = 'none';
+  }
+}
+
+// ===== DOC UPLOAD HELPERS =====
+const docFiles = {};
+
+function toggleDocUpload(checkEl, uploadId) {
+  const cb = checkEl.querySelector('input[type=checkbox]');
+  if(cb) { cb.checked = !cb.checked; checkEl.classList.toggle('selected', cb.checked); }
+  const zone = document.getElementById(uploadId);
+  if(zone) zone.style.display = (cb && cb.checked) ? 'block' : 'none';
+}
+
+function triggerDocUpload(inputId) {
+  const el = document.getElementById(inputId);
+  if(el) el.click();
+}
+
+function handleDocFile(input, inputId) {
+  const files = Array.from(input.files);
+  if(!docFiles[inputId]) docFiles[inputId] = [];
+  files.forEach(f => {
+    if(f.size > 10*1024*1024){ alert('ไฟล์ "'+f.name+'" มีขนาดเกิน 10MB'); return; }
+    docFiles[inputId].push(f);
+  });
+  renderDocFileList(inputId);
+}
+
+function renderDocFileList(inputId) {
+  const listId = inputId.replace('file-','list-');
+  const el = document.getElementById(listId);
+  if(!el) return;
+  const files = docFiles[inputId] || [];
+  el.innerHTML = files.map((f,i) =>
+    `<div class="file-mini-item">✅ ${f.name} <span style="color:#666;">(${(f.size/1024).toFixed(0)} KB)</span>
+     <span onclick="removeDocFile('${inputId}',${i})" style="margin-left:auto;cursor:pointer;color:#c0392b;">✕</span></div>`
+  ).join('');
+}
+
+function removeDocFile(inputId, idx) {
+  if(docFiles[inputId]) { docFiles[inputId].splice(idx,1); renderDocFileList(inputId); }
+}
+
+function updateIdUploadBtn() {
+  const files = docFiles['file-export-id'] || [];
+  const btn = document.getElementById('uploadIdBtn');
+  if(btn) btn.style.borderColor = files.length > 0 ? '#27ae60' : '';
+}
+
+function getAllDocFiles() {
+  const all = [];
+  Object.values(docFiles).forEach(arr => arr.forEach(f => all.push(f)));
+  return all;
+}
+
+const APPS_SCRIPT_URL = (window.CCTV_V2_CONFIG && window.CCTV_V2_CONFIG.scriptUrl) || 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'; // v2: ค่าเริ่มต้น = โหมดทดสอบ ไม่ส่งข้อมูล
+
+// ===== LOCATION DATABASE =====
+const LOCATION_DB = [
+  'กองกฎหมาย','กองกิจการนักศึกษา','กองกายภาพและสิ่งแวดล้อม','กองคลัง',
+  'กองทรัพยากรบุคคล','กองเทคโนโลยีสารสนเทศ','กองบริหารการศึกษา',
+  'กองบริหารงานทั่วไป','กองบริหารงานวิจัย','กองแผนงาน','กองพัฒนาคุณภาพ','กองวิเทศสัมพันธ์',
+  'คณะกายภาพบำบัด','คณะทันตแพทยศาสตร์','คณะเทคนิคการแพทย์',
+  'คณะเทคโนโลยีสารสนเทศและการสื่อสาร','คณะพยาบาลศาสตร์','คณะเภสัชศาสตร์',
+  'คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี','คณะแพทยศาสตร์ศิริราชพยาบาล',
+  'คณะวิทยาศาสตร์','คณะวิศวกรรมศาสตร์','คณะเวชศาสตร์เขตร้อน',
+  'คณะศิลปศาสตร์','คณะสังคมศาสตร์และมนุษยศาสตร์','คณะสัตวแพทยศาสตร์',
+  'คณะสาธารณสุขศาสตร์','คณะสิ่งแวดล้อมและทรัพยากรศาสตร์',
+  'งานจราจรและความปลอดภัย',
+  'ถนนกันภัยมหิดล','ถนนการุณยมิตร','ถนนจิตตสมาน','ถนนชนนีประทาน',
+  'ถนนถิ่นวิทยาการ','ถนนดำรงวิจัย','ถนนเทิดจักรี','ถนนปัญญาแผ่นดิน',
+  'ถนนผสานเทศไทย','ถนนพูนผลประชา','ถนนมานะมั่นคง','ถนนวิชาชื่นชน',
+  'ถนนวิถีปัญญา','ถนนสานสัตยา','ถนนส่องไทยทัศน์','ถนนสาย D',
+  'ทางเข้าเรือนไทย','ทางเข้าอาคารเตรียมอุดมดนตรี',
+  'บัณฑิตวิทยาลัย',
+  'ประตู 1','ประตู 2','ประตู 3','ประตู 4','ประตู 5',
+  'ประตู 6','ประตู 7','ประตู 8',
+  'ประตูคณะพยาบาลศาสตร์','ประตูวิทยาลัยดุริยางคศิลป์',
+  'โรงเรียนสาธิตนานาชาติ','เรือนเพาะชำ',
+  'วิทยาเขตกาญจนบุรี','วิทยาลัยการจัดการ','วิทยาลัยดุริยางคศิลป์',
+  'วิทยาลัยนานาชาติ','วิทยาลัยวิทยาศาสตร์และเทคโนโลยีการกีฬา','วิทยาลัยศาสนศึกษา',
+  'ศูนย์การแพทย์กาญจนาภิเษก','ศูนย์จิตตปัญญาศึกษา',
+  'ศูนย์ธรรมาภิบาลข้อมูลและยุทธศาสตร์อัจฉริยะ',
+  'ศูนย์บริหารความปลอดภัย อาชีวอนามัยและสภาพแวดล้อมในการทำงาน',
+  'ศูนย์บริหารจัดการความเสี่ยง','ศูนย์บริหารสินทรัพย์',
+  'ศูนย์ส่งเสริมการเรียนรู้แบบบูรณาการชีวิต','ศูนย์ส่งเสริมจริยธรรมการวิจัย',
+  'ศูนย์สัตว์ทดลองแห่งชาติ','ศูนย์อำนวยการด้านข้อมูลส่วนบุคคลมหาวิทยาลัยมหิดล',
+  'สถาบันชีววิทยาศาสตร์โมเลกุล','สถาบันนวัตกรรมการเรียนรู้',
+  'สถาบันบริหารจัดการเทคโนโลยีและนวัตกรรม','สถาบันพัฒนาสุขภาพอาเซียน',
+  'สถาบันราชสุดา คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี',
+  'สถาบันวิจัยประชากรและสังคม','สถาบันวิจัยภาษาและวัฒนธรรมเอเชีย',
+  'สถาบันวิทยาศาสตร์การวิเคราะห์และตรวจสารในการกีฬา',
+  'สถาบันสิทธิมนุษยชนและสันติศึกษา','สถาบันโภชนาการ',
+  'สถาบันแห่งชาติเพื่อการพัฒนาเด็กและครอบครัว',
+  'สำนักงานคณะกรรมการตรวจสอบการบริหารงานประจำมหาวิทยาลัย',
+  'สำนักงานสภามหาวิทยาลัยมหิดล',
+  'หอพักนักศึกษา 1','หอพักนักศึกษา 2','หอพักนักศึกษา 3','หอพักนักศึกษา 4',
+  'หอพักนักศึกษา 5','หอพักนักศึกษา 6','หอพักนักศึกษา 7','หอพักนักศึกษา 8',
+  'หอพักนักศึกษา 9','หอพักนักศึกษา 10','หอพักนักศึกษา 11',
+  'หอสมุดและคลังความรู้มหาวิทยาลัยมหิดล',
+  'อาคารเจรจานวัตกรรม','อาคารชุดพักอาศัย ม.มหิดล',
+  'อาคารเตรียมอุดมดนตรี','อาคารสิริวิทยา',
+  'โครงการจัดตั้งศูนย์พัฒนาอุตสาหกรรมชีวภาพ มหาวิทยาลัยมหิดล',
+  'โครงการจัดตั้งสถาบันอุทยานธรรมชาติวิทยาสิรีรุกขชาติ',
+  'โครงการจัดตั้งวิทยาเขตนครสวรรค์','โครงการจัดตั้งวิทยาเขตอำนาจเจริญ',
+  'ลานจอดรถ P1','ลานจอดรถ P2','ลานจอดรถ P3','ลานจอดรถ P4','ลานจอดรถ P5',
+  'ลานจอดรถ อาคารเจรจานวัตกรรม','ลานจอดรถเรือนไทย'
+];
+
+function getLocationIcon(name) {
+  if (name.startsWith('ประตู')) return '🚪';
+  if (name.startsWith('ถนน')) return '🛣️';
+  if (name.startsWith('ทางเข้า')) return '🔑';
+  if (name.startsWith('หอพัก')) return '🏠';
+  if (name.startsWith('ลานจอดรถ')) return '🅿️';
+  if (name.startsWith('คณะ')) return '🏛️';
+  if (name.startsWith('กอง')) return '🏢';
+  if (name.startsWith('อาคาร')) return '🏗️';
+  if (name.startsWith('ศูนย์')) return '🔬';
+  if (name.startsWith('สถาบัน')) return '📚';
+  if (name.startsWith('วิทยาลัย') || name.startsWith('วิทยาเขต')) return '🎓';
+  if (name.startsWith('หอสมุด')) return '📖';
+  return '📍';
+}
+
+let locDropActiveIdx = -1;
+
+function locationSearch(input) {
+  const q = input.value.trim();
+  const drop = document.getElementById('locationDrop');
+  locDropActiveIdx = -1;
+  const results = q.length === 0
+    ? LOCATION_DB.slice(0, 10)
+    : LOCATION_DB.filter(l => l.toLowerCase().includes(q.toLowerCase())).slice(0, 12);
+  if (!results.length) { drop.style.display = 'none'; return; }
+  drop.innerHTML = results.map(r =>
+    `<div class="autocomplete-item" data-val="${r}"
+      onmousedown="selectLocation('${r.replace(/'/g,"\\'")}')"
+      style="padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;transition:background 0.1s;">
+      <span style="font-size:16px;flex-shrink:0;">${getLocationIcon(r)}</span>
+      <span>${highlightMatch(r, q)}</span>
+    </div>`
+  ).join('') + (results.length >= 12 ? `<div style="padding:6px 14px;font-size:11px;color:var(--text-muted);background:var(--surface2);">พิมพ์เพิ่มเพื่อกรองผลลัพธ์</div>` : '');
+  drop.style.display = 'block';
+}
+
+function selectLocation(val) {
+  document.getElementById('locationInput').value = val;
+  document.getElementById('locationDrop').style.display = 'none';
+  addLocation();
+}
+
+function locationHide() {
+  const drop = document.getElementById('locationDrop');
+  if (drop) drop.style.display = 'none';
+  locDropActiveIdx = -1;
+}
+
+function locationKeydown(e) {
+  const drop = document.getElementById('locationDrop');
+  if (!drop || drop.style.display === 'none') {
+    if (e.key === 'Enter') { e.preventDefault(); addLocation(); }
+    return;
+  }
+  const items = drop.querySelectorAll('[data-val]');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    locDropActiveIdx = Math.min(locDropActiveIdx + 1, items.length - 1);
+    items.forEach((el, i) => el.style.background = i === locDropActiveIdx ? '#eef2fb' : '');
+    items[locDropActiveIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    locDropActiveIdx = Math.max(locDropActiveIdx - 1, 0);
+    items.forEach((el, i) => el.style.background = i === locDropActiveIdx ? '#eef2fb' : '');
+    items[locDropActiveIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (locDropActiveIdx >= 0 && items[locDropActiveIdx]) {
+      selectLocation(items[locDropActiveIdx].dataset.val);
+    } else {
+      addLocation();
+    }
+  } else if (e.key === 'Escape') {
+    locationHide();
+  }
+}
+
+function loadPresets() {
+  const presets = JSON.parse(localStorage.getItem('cctv_preset_locations') || '[]');
+  const wrap = document.getElementById('presetWrap');
+  if (!presets.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">จุดที่ใช้บ่อย (ตั้งค่าโดย Admin):</div><div class="preset-locations">' +
+    presets.map(p => `<button type="button" class="preset-btn" onclick="addPreset('${p}')">${p}</button>`).join('') + '</div>';
+}
+function addPreset(name) {
+  document.getElementById('locationInput').value = name;
+  addLocation();
+}
+
+let locationList = [];
+function addLocation() {
+  const input = document.getElementById('locationInput');
+  const val = input.value.trim();
+  locationHide();
+  if (!val || locationList.includes(val)) { input.value = ''; return; }
+  locationList.push(val);
+  renderLocationTags();
+  input.value = '';
+  document.getElementById('locations').value = locationList.join(', ');
+}
+document.getElementById('locationInput').addEventListener('keydown', locationKeydown);
+function removeLocation(idx) { locationList.splice(idx,1); renderLocationTags(); document.getElementById('locations').value = locationList.join(', '); }
+function renderLocationTags() {
+  document.getElementById('locationTags').innerHTML = locationList.map((loc,i) =>
+    `<div class="location-tag">📍 ${loc} <span class="remove" onclick="removeLocation(${i})">✕</span></div>`).join('');
+}
+
+let uploadedFiles = [];
+function handleFileSelect(e) { addFiles(Array.from(e.target.files)); }
+function handleDragOver(e) { e.preventDefault(); }
+function handleDrop(e) { e.preventDefault(); addFiles(Array.from(e.dataTransfer.files)); }
+function addFiles(files) {
+  files.forEach(f => {
+    if (uploadedFiles.length >= 5) { alert('อัปโหลดได้สูงสุด 5 ไฟล์ค่ะ'); return; }
+    if (f.size > 10*1024*1024) { alert(`ไฟล์ "${f.name}" มีขนาดเกิน 10MB`); return; }
+    if (!uploadedFiles.find(x => x.name===f.name)) uploadedFiles.push(f);
+  });
+}
+function removeFile(idx) { uploadedFiles.splice(idx,1); }
+
+// Radio / checkbox
+function selectRadio(name, value, el) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.parentElement.classList.remove('selected'));
+  el.classList.add('selected'); el.querySelector('input').checked = true;
+  if (name === 'purpose') toggleOtherPurpose(value === 'อื่นๆ');
+}
+function toggleCheck(el) { el.classList.toggle('selected'); el.querySelector('input').checked = el.classList.contains('selected'); }
+
+// Conditional
+function handleRequesterType() {
+  const val = document.getElementById('requesterType').value;
+  document.getElementById('muSection').classList.toggle('show', ['นักศึกษา','บุคลากร'].includes(val));
+  document.getElementById('officialSection').classList.toggle('show', val==='เจ้าหน้าที่ภายนอก');
+}
+
+function showFileSection(show) {
+  document.getElementById('fileSection').classList.toggle('show', show);
+  updateSection5(show ? 'ต้องการไฟล์' : 'ดูอย่างเดียว');
+  const s45 = document.getElementById('section45Card');
+  if(s45) s45.style.display = show ? 'block' : 'none';
+}
+
+function toggleSection4Consent(checked) {
+  const rest = document.getElementById('section4Rest');
+  if (!rest) return;
+  rest.style.opacity = checked ? '1' : '0.4';
+  rest.style.pointerEvents = checked ? 'auto' : 'none';
+  if (!checked) {
+    document.querySelectorAll('input[name="requestFile"]').forEach(r=>r.checked=false);
+    showFileSection(false);
+  }
+}
+
+function toggleGDriveEmail(show) {
+  const el = document.getElementById('gdriveEmailSection');
+  if (el) el.style.display = show ? 'block' : 'none';
+  if (!show) {
+    const em = document.getElementById('gdriveEmail');
+    if (em) em.value = '';
+    const gc = document.getElementById('gdriveConsent');
+    if (gc) gc.checked = false;
+  }
+}
+
+// Progress
+function updateProgress() {
+  const required = ['fname','lname','requesterType','idCard','phone','dateStart','locations'];
+  const filled = required.filter(id => { const el=document.getElementById(id); return el&&el.value.trim(); }).length;
+  const extras = (document.querySelector('input[name="purpose"]:checked')?1:0) + (document.querySelector('input[name="urgency"]:checked')?1:0) + (document.getElementById('pdpaConsent').checked?1:0);
+  document.getElementById('progressBar').style.width = Math.round(((filled+extras)/10)*100)+'%';
+}
+document.addEventListener('change', updateProgress);
+document.addEventListener('input', updateProgress);
+
+// ===== VALIDATE + POPUP =====
+let currentOfficerMode = '';
+
+function validate() {
+  let valid = true;
+  const errors = [];
+
+  // Helper: เช็คและเพิ่ม error
+  function check(condition, errorId, msg) {
+    const el = document.getElementById(errorId);
+    if (!condition) {
+      if(el) el.classList.add('show');
+      errors.push(msg);
+      valid = false;
+    } else {
+      if(el) el.classList.remove('show');
+    }
+  }
+
+  // PDPA หลัก
+  check(document.getElementById('pdpaConsent').checked, 'pdpaConsentError', 'กรุณายินยอม PDPA ก่อนดำเนินการ (ส่วนบนสุด)');
+  check(!!document.getElementById('fname').value.trim(), 'fnameError', 'กรุณากรอกชื่อจริง');
+  check(!!document.getElementById('lname').value.trim(), 'lnameError', 'กรุณากรอกนามสกุล');
+  check(!!document.getElementById('requesterType').value, 'requesterTypeError', 'กรุณาเลือกประเภทผู้ขอ');
+  check(!!document.getElementById('idCard').value.trim(), 'idCardError', 'กรุณากรอกเลขบัตรประชาชน / รหัส');
+  check(!!document.getElementById('phone').value.trim(), 'phoneError', 'กรุณากรอกเบอร์โทรศัพท์');
+  check(!!document.querySelector('input[name="purpose"]:checked'), 'purposeError', 'กรุณาเลือกวัตถุประสงค์ (ส่วนที่ 2)');
+  check(!!document.getElementById('purposeDetail').value.trim(), 'purposeDetailError', 'กรุณากรอกรายละเอียดเหตุการณ์ (ส่วนที่ 2)');
+  check(!!document.querySelector('input[name="urgency"]:checked'), 'urgencyError', 'กรุณาเลือกระดับความเร่งด่วน');
+  check(!!document.getElementById('dateStart').value, 'dateError', 'กรุณาระบุวันที่เกิดเหตุ (ส่วนที่ 3)');
+  check(!!document.getElementById('locations').value, 'locationError', 'กรุณาระบุจุดที่ต้องการดูกล้อง แล้วกด "+ เพิ่ม" (ส่วนที่ 3)');
+
+  // 4.1 PDPA file consent
+  check(document.getElementById('pdpaFileConsent').checked, 'pdpaFileConsentError', 'กรุณายืนยัน PDPA ในส่วนที่ 4.1');
+
+  // 4.2 requestFile
+  const rfEl = document.querySelector('input[name="requestFile"]:checked');
+  check(!!rfEl, 'requestFileError', 'กรุณาเลือกความประสงค์การขอรับข้อมูล (ส่วนที่ 4.2)');
+
+  if (rfEl && rfEl.value === 'ต้องการไฟล์') {
+    // 4.3 fileReason
+    check(!!document.querySelector('input[name="fileReason"]:checked'), 'fileReasonError', 'กรุณาเลือกเหตุผลในการขอรับสำเนา (ส่วนที่ 4.3)');
+
+    // Section 5: บัตรประชาชน — บังคับเสมอ
+    const idFiles = docFiles['file-export-id'] || [];
+    check(idFiles.length > 0, 'exportIdError', 'กรุณาอัปโหลดสำเนาบัตรประชาชน / บัตรนักศึกษา (ส่วนที่ 5)');
+
+    // Section 5: ใบแจ้งความ — บังคับเฉพาะกรณีไม่ฉุกเฉิน
+    const urgency = document.querySelector('input[name="urgency"]:checked')?.value || '';
+    if (urgency !== 'ฉุกเฉิน') {
+      const policeFiles = docFiles['file-export-police'] || [];
+      check(policeFiles.length > 0, 'exportPoliceError', 'กรุณาอัปโหลดสำเนาบันทึกประจำวัน / ใบแจ้งความ (ส่วนที่ 5)');
+    } else {
+      const policeErr = document.getElementById('exportPoliceError');
+      if(policeErr) policeErr.classList.remove('show');
+    }
+
+    // 5.5 ช่องทางรับไฟล์
+    const dmEl = document.querySelector('input[name="deliveryMethod"]:checked');
+    check(!!dmEl, 'deliveryMethodError', 'กรุณาเลือกช่องทางการรับไฟล์ (ส่วนที่ 5.5)');
+
+    if (dmEl && dmEl.value === 'รับผ่านลิงก์ Google Drive') {
+      const gEmail = document.getElementById('gdriveEmail');
+      check(!!(gEmail && gEmail.value.includes('@')), 'gdriveEmailError', 'กรุณากรอกอีเมลสำหรับรับลิงก์ Google Drive');
+
+      const gc = document.getElementById('gdriveConsent');
+      const gcErr = document.getElementById('gdriveConsentError');
+      if (!gc || !gc.checked) {
+        if(gcErr) { gcErr.style.display = 'block'; }
+        if(gc) gc.style.outline = '2px solid #c0392b';
+        errors.push('กรุณายืนยันเงื่อนไขการรับไฟล์ Google Drive (ส่วนที่ 5.5)');
+        valid = false;
+      } else {
+        if(gcErr) gcErr.style.display = 'none';
+        if(gc) gc.style.outline = '';
+      }
+    }
+  }
+
+  // Section 6: เจ้าหน้าที่
+  const mode = currentOfficerMode;
+  check(!!mode, 'officerModeError', 'กรุณาเลือกเจ้าหน้าที่ผู้ให้บริการ (ส่วนที่ 6)');
+
+  if (mode === 'known') {
+    const ov = document.getElementById('officerName').value;
+    if (!ov) {
+      document.getElementById('officerNameInput').classList.add('error');
+      document.getElementById('officerNameError').classList.add('show');
+      errors.push('กรุณาเลือกชื่อเจ้าหน้าที่จากรายการ (ส่วนที่ 6)');
+      valid = false;
+    } else {
+      document.getElementById('officerNameInput').classList.remove('error');
+      document.getElementById('officerNameError').classList.remove('show');
+    }
+  }
+  if (mode === 'other') {
+    check(!!document.getElementById('officerOtherName').value.trim(), 'officerOtherNameError', 'กรุณากรอกชื่อเจ้าหน้าที่ (ส่วนที่ 6)');
+    check(!!document.getElementById('officerOtherEmail').value.trim(), 'officerOtherEmailError', 'กรุณากรอกอีเมลเจ้าหน้าที่ (ส่วนที่ 6)');
+  }
+
+  if (!valid && errors.length > 0) {
+    showValidationPopup(errors);
+  }
+
+  return valid;
+}
+
+function showValidationPopup(errors) {
+  // ลบ popup เก่า
+  document.getElementById('validationPopup')?.remove();
+  document.getElementById('validationOverlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'validationOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9998;backdrop-filter:blur(2px);';
+
+  const popup = document.createElement('div');
+  popup.id = 'validationPopup';
+  popup.style.cssText = [
+    'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;',
+    'background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);',
+    'max-width:92vw;width:420px;max-height:80vh;overflow-y:auto;'
+  ].join('');
+
+  popup.innerHTML = `
+    <div style="background:linear-gradient(135deg,#c0392b,#e74c3c);color:white;padding:18px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:1;">
+      <span style="font-size:26px;flex-shrink:0;">⚠️</span>
+      <div>
+        <div style="font-size:15px;font-weight:800;letter-spacing:0.01em;">กรุณาตรวจสอบข้อมูล</div>
+        <div style="font-size:12px;opacity:0.88;margin-top:2px;">พบ ${errors.length} รายการที่ยังไม่ครบถ้วน</div>
+      </div>
+    </div>
+    <div style="padding:18px 22px 22px;">
+      <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;">
+        ${errors.map((e,i) => `
+          <li style="display:flex;gap:10px;align-items:flex-start;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;">
+            <span style="background:#c0392b;color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px;">${i+1}</span>
+            <span style="font-size:13px;color:#1a2744;line-height:1.55;">${e}</span>
+          </li>`).join('')}
+      </ul>
+      <button id="popupCloseBtn"
+        style="width:100%;margin-top:18px;padding:13px;background:linear-gradient(135deg,var(--mu-blue,#003087),#1a4a8a);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.02em;box-shadow:0 4px 12px rgba(0,48,135,0.25);">
+        ✓ รับทราบ — ไปแก้ไขข้อมูล
+      </button>
+    </div>`;
+
+  document.body.append(overlay, popup);
+
+  // ปิด popup + scroll ไปหา error แรก
+  function closePopup() {
+    popup.remove();
+    overlay.remove();
+    setTimeout(() => {
+      const first = document.querySelector('.error-msg.show');
+      if (first) {
+        const target = first.closest('.card, .pdpa-notice') || first;
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  }
+
+  document.getElementById('popupCloseBtn').addEventListener('click', closePopup);
+  overlay.addEventListener('click', closePopup);
+}
+
+function generateRefCode() {
+  const date = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  return `CCTV-${(window.CCTV_UNIT||{}).code||'CEN'}-${date}-${Math.random().toString(36).substr(2,4).toUpperCase()}`;
+}
+
+function collectData(refCode) {
+  const get = id => (document.getElementById(id)||{}).value||'';
+  const getChecked = name => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(e=>e.value).join(', ');
+  const getRadio = name => { const el=document.querySelector(`input[name="${name}"]:checked`); return el?el.value:''; };
+  return {
+    refCode, timestamp: new Date().toISOString(), pdpaConsent:'ยินยอม',
+    unit: (window.CCTV_UNIT||{}).code||'', unitName: (window.CCTV_UNIT||{}).nameTh||'', formVersion: 'v2',
+    prefix: get('prefix'), fname: get('fname'), lname: get('lname'),
+    gender: get('gender'), requesterType: get('requesterType'), idCard: get('idCard'),
+    faculty: get('faculty'), officialOrg: get('officialOrg'), officialDoc: get('officialDoc'),
+    phone: get('phone'), email: get('email'),
+    purpose: getRadio('purpose')==='อื่นๆ' ? ('อื่นๆ: '+get('purposeOther')) : getRadio('purpose'),
+    purposeDetail: get('purposeDetail'), evidenceTypes: getChecked('evidence'),
+    dateStart: get('dateStart'), timeStart: get('timeStart'), dateEnd: get('dateEnd'), timeEnd: get('timeEnd'),
+    locations: get('locations'), vehiclePlate: get('vehiclePlate'), vehicleDesc: get('vehicleDesc'),
+    requestFile: getRadio('requestFile'),
+    fileReason: getRadio('fileReason'),
+    deliveryMethod: getRadio('deliveryMethod'),
+    exportDocs: getChecked('exportDocs'),
+    gdriveEmail: get('gdriveEmail'),
+    pdpaFileConsent: document.getElementById('pdpaFileConsent')?.checked ? 'รับทราบและยินยอม' : '',
+    gdriveConsent: document.getElementById('gdriveConsent')?.checked ? 'รับทราบ-ลิงก์หมดอายุ48ชม' : '',
+    docs: getChecked('docs') + (get('docsOther') ? ', อื่นๆ: '+get('docsOther') : ''),
+    additionalNote: get('additionalNote'), urgency: getRadio('urgency'),
+    attachedFiles: uploadedFiles.map(f=>f.name).join(', '),
+    serviceOfficerName: currentOfficerMode==='known'
+      ? (document.getElementById('officerName').value||'')
+      : (document.getElementById('officerOtherName').value||''),
+    serviceOfficerEmail: currentOfficerMode==='known'
+      ? (document.getElementById('officerEmail').value||'')
+      : (document.getElementById('officerOtherEmail').value||''),
+    officerMode: currentOfficerMode,
+    officerName:'', cctvResult:'', footageFound:'', fileGiven:'', actionTaken:'', closedDate:'', satisfactionScore:'', officerNote:'', status:''
+  };
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = () => reject(new Error('อ่านไฟล์ไม่ได้: ' + file.name));
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById('cctvForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if(!validate()) return;
+
+  const refCode = generateRefCode();
+  document.getElementById('loadingOverlay').style.display='flex';
+  document.getElementById('submitBtn').disabled=true;
+
+  if(APPS_SCRIPT_URL==='YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'){
+    await new Promise(r=>setTimeout(r,1500));
+    showSuccess(refCode); return;
+  }
+
+  try {
+    document.getElementById('loadingText').textContent = 'กำลังเตรียมข้อมูล...';
+    const filesData = [];
+    const allFiles4Upload = [...uploadedFiles, ...getAllDocFiles()];
+    for (let i = 0; i < allFiles4Upload.length; i++) {
+      document.getElementById('loadingText').textContent = 'กำลังเตรียมไฟล์ ' + (i+1) + '/' + allFiles4Upload.length + '...';
+      const file = allFiles4Upload[i];
+      const base64 = await fileToBase64(file);
+      filesData.push({ fileName: file.name, mimeType: file.type || 'application/octet-stream', base64Data: base64 });
+    }
+
+    const data = collectData(refCode);
+    if (filesData.length > 0) {
+      data.filesToUpload = filesData;
+      data.attachedFiles = filesData.map((f,i) => {
+        const ext = f.fileName.includes('.') ? '.' + f.fileName.split('.').pop() : '';
+        return i === 0 ? refCode + ext : refCode + '_' + (i+1) + ext;
+      }).join(', ');
+    }
+
+    document.getElementById('loadingText').textContent = 'กำลังส่งข้อมูล...';
+
+    // ส่งข้อมูลไป Apps Script
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify(data)
+      });
+    } catch(fetchErr) {
+      console.warn('fetch error (ignored):', fetchErr);
+    }
+
+    showSuccess(refCode);
+
+  } catch(err) {
+    document.getElementById('loadingOverlay').style.display='none';
+    document.getElementById('submitBtn').disabled=false;
+    alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+    console.error(err);
+  }
+});
+
+function showSuccess(refCode) {
+  document.getElementById('loadingOverlay').style.display='none';
+  document.getElementById('cctvForm').style.display='none';
+  document.getElementById('refCode').textContent=refCode;
+  document.getElementById('successScreen').style.display='block';
+  document.getElementById('progressBar').style.width='100%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function resetForm() {
+  document.getElementById('cctvForm').reset();
+  document.getElementById('cctvForm').style.display='block';
+  document.getElementById('successScreen').style.display='none';
+  locationList=[]; uploadedFiles=[]; renderLocationTags();
+  document.querySelectorAll('.radio-item,.check-item').forEach(el=>el.classList.remove('selected'));
+  document.querySelectorAll('.conditional-section').forEach(el=>el.classList.remove('show'));
+  document.getElementById('submitBtn').disabled=false;
+  document.getElementById('progressBar').style.width='0%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleOtherPurpose(show) {
+  document.getElementById('otherPurposeSection').classList.toggle('show', show);
+  if (!show) document.getElementById('purposeOther').value = '';
+}
+function toggleOtherDoc(el) {
+  const checked = el.classList.contains('selected');
+  document.getElementById('otherDocSection').classList.toggle('show', checked);
+  if (!checked) document.getElementById('docsOther').value = '';
+}
+
+loadPresets();
+
+// ===== ฐานข้อมูลเจ้าหน้าที่งานจราจรฯ =====
+const OFFICER_DB = [
+  {name:'นายไกรสอน คชมิตร',     email:'kaison.noum@gmail.com'},
+  {name:'นายชนสรณ์ เนียมสุภาพ', email:'chanasorn.nem@mahidol.ac.th'},
+  {name:'นายชัยเทพ เจียมวีระบรรยง', email:'chaiyathep.jia@mahidol.ac.th'},
+  {name:'นายตะวัน ทรัพย์อบรมย์', email:'tawan.sap@mahidol.ac.th'},
+  {name:'นายทรงกลด สุดตา',      email:'songklod.sud@mahidol.ac.th'},
+  {name:'นายนพกร เมืองแก้ว',    email:'noppakorn.mua@mahidol.ac.th'},
+  {name:'นายนฤเดช เวชบุญ',      email:'wetbun1063@gmail.com'},
+  {name:'นายบัญชา ฟักเฟื่อง',   email:'bancha.fak@mahidol.ac.th'},
+  {name:'นายบุญฤทธิ์ สายลือนาม',email:'klaoklao195@gmail.com'},
+  {name:'นายปิยนันท์ ศรีชุมพวง',email:'piyanan.sri@mahidol.ac.th'},
+  {name:'นางสาวปิยะพร มาลัย',   email:'traffic.oppe@gmail.com'},
+  {name:'นายพชร สาธร',          email:'pup2441@gmail.com'},
+  {name:'นายพรชัย โพธิ์ไซย์',   email:'phrchayphothichi@gmail.com'},
+  {name:'นางสาวพิชญา ดลมินทร์', email:'pichaya.don@mahidol.ac.th'},
+  {name:'นายยุทธภูมิ ญานเพิ่ม', email:'yuthapoom.yan@mahidol.ac.th'},
+  {name:'นายรวี จำเนียร',        email:'rawee.jum@mahidol.ac.th'},
+  {name:'นายวิฑูรย์ สุวรรณกิจ', email:'withun.suw@mahidol.ac.th'},
+  {name:'นายศักดิ์นรินทร์ คัญทัพ',email:'saknarin.kha@mahidol.ac.th'},
+  {name:'นายศุภชัย เรืองเพชร',  email:'suphachai.rue@mahidol.ac.th'},
+  {name:'นายสถาพร แจ่มใจ',      email:'sathaphon1051@gmail.com'},
+  {name:'นายสุรชัย สุวรรณราฐ',  email:'suwannarat1472@gmail.com'},
+  {name:'นางสาวโสภาณา จันทร์ทวีนุช',email:'sopanachanthawinut52@gmail.com'},
+  {name:'นายอนิน นาควัชระ',     email:'anin.nak@mahidol.ac.th'},
+  {name:'นายอำนาจ แม้นพรม',     email:'amnartmaen90@gmail.com'}
+];
+
+function selectOfficerMode(mode) {
+  currentOfficerMode = mode;
+  document.getElementById('officerKnownSection').classList.toggle('show', mode==='known');
+  document.getElementById('officerOtherSection').classList.toggle('show', mode==='other');
+  document.getElementById('officerKnownBtn').classList.toggle('selected', mode==='known');
+  document.getElementById('officerOtherBtn').classList.toggle('selected', mode==='other');
+  document.querySelector(`input[name="officerMode"][value="${mode}"]`).checked = true;
+  if (mode==='known') {
+    document.getElementById('officerOtherName').value='';
+    document.getElementById('officerOtherEmail').value='';
+  } else {
+    document.getElementById('officerName').value='';
+    document.getElementById('officerEmail').value='';
+    document.getElementById('officerNameInput').value='';
+    document.getElementById('officerSelectedHint').style.display='none';
+  }
+}
+
+function officerKeydown(e) {
+  const drop = document.getElementById('officerDrop');
+  const items = drop.querySelectorAll('.autocomplete-item');
+  if (!drop.classList.contains('show') || !items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    acActiveIdx = Math.min(acActiveIdx + 1, items.length - 1);
+    items.forEach((el, i) => el.classList.toggle('active', i === acActiveIdx));
+    items[acActiveIdx]?.scrollIntoView({block:'nearest'});
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acActiveIdx = Math.max(acActiveIdx - 1, 0);
+    items.forEach((el, i) => el.classList.toggle('active', i === acActiveIdx));
+    items[acActiveIdx]?.scrollIntoView({block:'nearest'});
+  } else if (e.key === 'Enter' && acActiveIdx >= 0) {
+    e.preventDefault();
+    const item = items[acActiveIdx];
+    selectOfficer(item.dataset.name, item.dataset.email);
+  } else if (e.key === 'Escape') {
+    acHide('officerDrop');
+  }
+}
+
+function officerSearch(input) {
+  const q = input.value.trim().toLowerCase();
+  const drop = document.getElementById('officerDrop');
+  acActiveIdx = -1;
+  const results = q.length===0
+    ? OFFICER_DB.slice(0,8)
+    : OFFICER_DB.filter(o => o.name.toLowerCase().includes(q)).slice(0,10);
+  if (!results.length) { drop.classList.remove('show'); return; }
+  drop.innerHTML = results.map(o =>
+    `<div class="autocomplete-item" data-name="${o.name}" data-email="${o.email}"
+      onmousedown="selectOfficer('${o.name.replace(/'/g,"\'")}','${o.email}')">
+      <span class="item-icon">👮</span>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <span style="font-weight:600;">${highlightMatch(o.name, input.value.trim())}</span>
+        <span style="font-size:11px;color:var(--text-muted);">${o.email}</span>
+      </div>
+    </div>`
+  ).join('');
+  drop.classList.add('show');
+}
+
+function selectOfficer(name, email) {
+  document.getElementById('officerNameInput').value = name;
+  document.getElementById('officerName').value = name;
+  document.getElementById('officerEmail').value = email;
+  document.getElementById('officerDrop').classList.remove('show');
+  document.getElementById('officerSelectedHint').style.display='block';
+  document.getElementById('officerSelectedName').textContent = name + ' (' + email + ')';
+}
+
+// ===== AUTOCOMPLETE: รายชื่อคณะ/หน่วยงาน =====
+const MU_ORGS = [
+  'โครงการจัดตั้งวิทยาเขตนครสวรรค์','โครงการจัดตั้งวิทยาเขตอำนาจเจริญ',
+  'โครงการจัดตั้งศูนย์พัฒนาอุตสาหกรรมชีวภาพ มหาวิทยาลัยมหิดล',
+  'โครงการจัดตั้งสถาบันสิทธิมนุษยชนและสันติศึกษา',
+  'โครงการจัดตั้งสถาบันอุทยานธรรมชาติวิทยาสิรีรุกขชาติ',
+  'โรงเรียนสาธิตนานาชาติ','กองเทคโนโลยีสารสนเทศ','กองแผนงาน','กองกฎหมาย',
+  'กองกายภาพและสิ่งแวดล้อม','กองกิจการนักศึกษา','กองคลัง','กองทรัพยากรบุคคล',
+  'กองบริหารการศึกษา','กองบริหารงานทั่วไป','กองบริหารงานวิจัย','กองพัฒนาคุณภาพ','กองวิเทศสัมพันธ์',
+  'คณะเทคโนโลยีสารสนเทศและการสื่อสาร','คณะเทคนิคการแพทย์','คณะเภสัชศาสตร์',
+  'คณะเวชศาสตร์เขตร้อน','คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี','คณะแพทยศาสตร์ศิริราชพยาบาล',
+  'คณะกายภาพบำบัด','คณะทันตแพทยศาสตร์','คณะพยาบาลศาสตร์','คณะวิทยาศาสตร์',
+  'คณะวิศวกรรมศาสตร์','คณะศิลปศาสตร์','คณะสังคมศาสตร์และมนุษยศาสตร์',
+  'คณะสัตวแพทยศาสตร์','คณะสาธารณสุขศาสตร์','คณะสิ่งแวดล้อมและทรัพยากรศาสตร์',
+  'บัณฑิตวิทยาลัย','วิทยาเขตกาญจนบุรี','วิทยาลัยการจัดการ','วิทยาลัยดุริยางคศิลป์',
+  'วิทยาลัยนานาชาติ','วิทยาลัยวิทยาศาสตร์และเทคโนโลยีการกีฬา','วิทยาลัยศาสนศึกษา',
+  'ศูนย์การแพทย์กาญจนาภิเษก','ศูนย์จิตตปัญญาศึกษา','ศูนย์ธรรมาภิบาลข้อมูลและยุทธศาสตร์อัจฉริยะ',
+  'ศูนย์บริหารความปลอดภัย อาชีวอนามัยและสภาพแวดล้อมในการทำงาน',
+  'ศูนย์บริหารจัดการความเสี่ยง','ศูนย์บริหารสินทรัพย์',
+  'ศูนย์ส่งเสริมการเรียนรู้แบบบูรณาการชีวิต','ศูนย์ส่งเสริมจริยธรรมการวิจัย',
+  'ศูนย์สัตว์ทดลองแห่งชาติ','ศูนย์อำนวยการด้านข้อมูลส่วนบุคคลมหาวิทยาลัยมหิดล',
+  'สถาบันแห่งชาติเพื่อการพัฒนาเด็กและครอบครัว','สถาบันโภชนาการ',
+  'สถาบันชีววิทยาศาสตร์โมเลกุล','สถาบันนวัตกรรมการเรียนรู้',
+  'สถาบันบริหารจัดการเทคโนโลยีและนวัตกรรม','สถาบันพัฒนาสุขภาพอาเซียน',
+  'สถาบันราชสุดา คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี',
+  'สถาบันวิจัยประชากรและสังคม','สถาบันวิจัยภาษาและวัฒนธรรมเอเชีย',
+  'สถาบันวิทยาศาสตร์การวิเคราะห์และตรวจสารในการกีฬา',
+  'สำนักงานคณะกรรมการตรวจสอบการบริหารงานประจำมหาวิทยาลัย',
+  'สำนักงานสภามหาวิทยาลัยมหิดล','หอสมุดและคลังความรู้มหาวิทยาลัยมหิดล'
+];
+
+function getOrgIcon(name) {
+  if (name.startsWith('คณะ')) return '🏛️';
+  if (name.startsWith('กอง')) return '🏢';
+  if (name.startsWith('วิทยาลัย') || name.startsWith('วิทยาเขต')) return '🎓';
+  if (name.startsWith('ศูนย์')) return '🔬';
+  if (name.startsWith('สถาบัน')) return '📚';
+  if (name.startsWith('สำนักงาน')) return '📋';
+  if (name.startsWith('โครงการ')) return '🌱';
+  return '🏫';
+}
+
+function highlightMatch(text, query) {
+  if (!query) return text;
+  const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+  return text.replace(re, '<mark>$1</mark>');
+}
+
+let acActiveIdx = -1;
+
+function acSearch(input, dropId) {
+  const q = input.value.trim();
+  const drop = document.getElementById(dropId);
+  acActiveIdx = -1;
+  const results = q.length === 0
+    ? MU_ORGS.slice(0, 8)
+    : MU_ORGS.filter(o => o.toLowerCase().includes(q.toLowerCase())).slice(0, 10);
+  if (!results.length) { drop.classList.remove('show'); return; }
+  drop.innerHTML = results.map((r) =>
+    `<div class="autocomplete-item" data-val="${r}" onmousedown="acSelect('${dropId}','${r.replace(/'/g,"\\'")}')">
+      <span class="item-icon">${getOrgIcon(r)}</span>
+      <span>${highlightMatch(r, q)}</span>
+    </div>`
+  ).join('') + (results.length >= 10 ? `<div class="autocomplete-count">แสดง 10 จาก ${MU_ORGS.filter(o=>o.toLowerCase().includes(q.toLowerCase())).length} รายการ</div>` : '');
+  drop.classList.add('show');
+}
+
+function acSelect(dropId, val) {
+  const drop = document.getElementById(dropId);
+  const input = drop.previousElementSibling;
+  input.value = val;
+  drop.classList.remove('show');
+  acActiveIdx = -1;
+}
+
+function acHide(dropId) {
+  const el = document.getElementById(dropId);
+  if(el) el.classList.remove('show');
+  acActiveIdx = -1;
+}
+
+function acKeydown(e, dropId) {
+  const drop = document.getElementById(dropId);
+  const items = drop.querySelectorAll('.autocomplete-item');
+  if (!drop.classList.contains('show') || !items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    acActiveIdx = Math.min(acActiveIdx + 1, items.length - 1);
+    items.forEach((el, i) => el.classList.toggle('active', i === acActiveIdx));
+    items[acActiveIdx]?.scrollIntoView({block:'nearest'});
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acActiveIdx = Math.max(acActiveIdx - 1, 0);
+    items.forEach((el, i) => el.classList.toggle('active', i === acActiveIdx));
+    items[acActiveIdx]?.scrollIntoView({block:'nearest'});
+  } else if (e.key === 'Enter' && acActiveIdx >= 0) {
+    e.preventDefault();
+    const val = items[acActiveIdx].dataset.val;
+    acSelect(dropId, val);
+  } else if (e.key === 'Escape') {
+    acHide(dropId);
+  }
+}
+</script>
+<script src="unit-routing.js"></script>
+</body>
+</html>
