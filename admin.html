@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<!-- CCTV Admin Dashboard v20260324-031547 -->
+<!-- CCTV Admin Dashboard v3.2.1 (build 3.2.1-20261123a) -->
 <html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
 <title>Admin Dashboard | CCTV | มหาวิทยาลัยมหิดล</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js" integrity="sha384-FcQlsUOd0TJjROrBxhJdUhXTUgNJQxTMcxZe6nHbaEfFL1zjQ+bq/uRoBQxb0KMo" crossorigin="anonymous"></script>
 <style>
   :root {
     --navy:#1a2744; --blue:#003087; --gold:#c9a84c; --gold-lt:#f5e9c0;
@@ -31,6 +33,8 @@
   .login-field input:focus{border-color:var(--gold);}
   .btn-login{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),#a8893e);color:var(--navy);border:none;border-radius:10px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;margin-top:8px;transition:all 0.2s;}
   .btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,168,76,0.4);}
+  .btn-login:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none;}
+  .login-card{max-width:92vw;}
   .login-error{color:var(--red);font-size:12px;margin-top:10px;display:none;}
   .back-link{margin-top:20px;} .back-link a{color:var(--text-muted);font-size:12px;text-decoration:none;}
 
@@ -222,7 +226,8 @@
     <div class="login-field"><label>USERNAME</label><input type="text" id="loginUser" placeholder="admin" autocomplete="username"></div>
     <div class="login-field"><label>PASSWORD</label><input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <button class="btn-login" onclick="doLogin()">เข้าสู่ระบบ</button>
-    <p class="login-error" id="loginError">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</p>
+    <p class="login-error" id="loginError" role="alert"></p>
+    <p id="backendInfo" style="font-size:11px;color:var(--text-muted);margin-top:14px;"></p>
     <div class="back-link"><a href="index.html">← กลับหน้าแบบฟอร์ม</a></div>
   </div>
 </div>
@@ -233,7 +238,7 @@
     <div style="font-size:22px;">📹</div>
     <div><h1>CCTV Admin Dashboard</h1><p>งานจราจรและความปลอดภัย | มหาวิทยาลัยมหิดล วิทยาเขตศาลายา</p></div>
     <div class="topbar-spacer"></div>
-    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);"><div class="status-dot"></div> เชื่อมต่อแล้ว</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);"><div class="status-dot"></div> <span id="connText">กำลังเชื่อมต่อ...</span></div>
     <div style="background:var(--surface2);border:1px solid var(--border);padding:4px 10px;border-radius:6px;font-size:11px;color:var(--gold);" id="userRoleBadge">Admin</div>
     <div style="font-size:12px;color:var(--text-muted);" id="lastUpdate"></div>
     <button class="btn-logout" onclick="doLogout()">ออกจากระบบ</button>
@@ -255,7 +260,7 @@
         <div class="stat-card" style="--accent:#f1c40f"><div class="stat-icon">⏳</div><div class="stat-value" id="stat-pending">—</div><div class="stat-label">รอดำเนินการ</div></div>
         <div class="stat-card" style="--accent:#2ecc71"><div class="stat-icon">✅</div><div class="stat-value" id="stat-done">—</div><div class="stat-label">เสร็จสิ้น</div></div>
         <div class="stat-card" style="--accent:#e74c3c"><div class="stat-icon">🔴</div><div class="stat-value" id="stat-emergency">—</div><div class="stat-label">เร่งด่วน/ฉุกเฉิน</div></div>
-        <div class="stat-card" style="--accent:#c0392b"><div class="stat-icon">⚠️</div><div class="stat-value" id="stat-overdue">—</div><div class="stat-label">เกิน 2 วัน ไม่ปิดงาน</div></div>
+        <div class="stat-card" style="--accent:#c0392b"><div class="stat-icon">⚠️</div><div class="stat-value" id="stat-overdue">—</div><div class="stat-label" id="stat-overdue-label">ค้างครบ 2 วัน ไม่ปิดงาน</div></div>
         <div class="stat-card" style="--accent:#3498db"><div class="stat-icon">📁</div><div class="stat-value" id="stat-file">—</div><div class="stat-label">ขอรับไฟล์ภาพ</div></div>
         <div class="stat-card" style="--accent:#9b59b6"><div class="stat-icon">📅</div><div class="stat-value" id="stat-today">—</div><div class="stat-label">คำขอวันนี้</div></div>
       </div>
@@ -284,7 +289,8 @@
       <div class="filter-bar">
         <select class="filter-select" id="filterStatus" onchange="applyFilters()"><option value="">ทุกสถานะ</option><option>รอดำเนินการ</option><option>กำลังดำเนินการ</option><option>เสร็จสิ้น</option><option>ปิดเคส</option><option>ปฏิเสธ</option></select>
         <select class="filter-select" id="filterUrgency" onchange="applyFilters()"><option value="">ทุกระดับ</option><option>ปกติ</option><option>เร่งด่วน</option><option>ฉุกเฉิน</option></select>
-        <select class="filter-select" id="filterType" onchange="applyFilters()"><option value="">ทุกประเภท</option><option>นักศึกษา</option><option>บุคลากร</option><option>เจ้าหน้าที่ภายนอก</option><option>บุคคลทั่วไป</option></select>
+        <select class="filter-select" id="filterType" onchange="applyFilters()"><option value="">ทุกประเภท</option><option>นักศึกษา</option><option>บุคลากร</option><option>เจ้าหน้าที่ภายนอก</option><option>บุคคลทั่วไป</option><option>หน่วยงานเอกชน</option></select>
+        <select class="filter-select" id="filterVenue" onchange="applyFilters()"><option value="">ทุกสถานที่</option></select>
         <div class="date-filter-wrap">
           <label>ตั้งแต่</label>
           <input type="date" id="filterDateFrom" onchange="applyFilters()">
@@ -324,7 +330,7 @@
         <div class="chart-card"><div class="chart-title">✅ ผลการดำเนินการ</div><div class="chart-wrap"><canvas id="chartResult"></canvas></div></div>
       </div>
       <div class="charts-grid">
-        <div class="chart-card"><div class="chart-title">📍 จุดที่ขอดูบ่อย (Top 8)</div><div class="chart-wrap" style="height:280px;"><canvas id="chartLocation"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">📍 คำขอตามสถานที่/อาคาร</div><div class="chart-wrap" style="height:280px;"><canvas id="chartLocation"></canvas></div></div>
         <div class="chart-card"><div class="chart-title">🕒 เวลาที่พบเหตุบ่อย (ชั่วโมง)</div><div class="chart-wrap" style="height:280px;"><canvas id="chartHour"></canvas></div></div>
       </div>
     </div>
@@ -332,52 +338,36 @@
     <!-- CONFIG -->
     <div class="tab-panel" id="panel-config">
 
-      <!-- Apps Script -->
       <div class="config-section">
-        <h3>⚙️ ตั้งค่า Google Apps Script</h3>
-        <div class="config-row"><label>Web App URL</label><input type="text" id="cfgScriptUrl" placeholder="https://script.google.com/macros/s/XXXXXXX/exec"></div>
-        <div class="config-row"><label>Google Sheet ID</label><input type="text" id="cfgSheetId" placeholder="Sheet ID"></div>
-        <div class="config-row"><label>เปลี่ยน Admin Password</label><input type="password" id="cfgPassword" placeholder="••••••••"></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn-save-config" onclick="saveConfig()">💾 บันทึกการตั้งค่า</button>
-          <button class="btn-save-config" style="background:var(--surface3);color:var(--gold);border:1px solid var(--gold);" onclick="testEmail()">📧 ทดสอบส่งอีเมล</button>
+        <h3>ℹ️ ข้อมูลระบบ</h3>
+        <div id="sysInfo"></div>
+      </div>
+
+      <div class="config-section">
+        <h3>📧 ผู้รับอีเมลแจ้งเตือน (อ่านอย่างเดียว)</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">รายชื่อนี้ดึงจากระบบหลังบ้านจริง — การเพิ่ม/ลบผู้รับต้องแก้ <code style="color:var(--gold);">CONFIG.NOTIFY_EMAILS</code> ใน Code.gs แล้ว Deploy เวอร์ชันใหม่ (หน้านี้แก้ไม่ได้ เพื่อไม่ให้เข้าใจผิดว่ามีผลทั้งระบบ)</p>
+        <div id="emailList"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+          <button class="btn-save-config" style="background:var(--surface3);color:var(--gold);border:1px solid var(--gold);" onclick="testEmail()">📧 ทดสอบส่งอีเมลคำขอใหม่</button>
           <button class="btn-save-config" style="background:rgba(231,76,60,0.15);color:var(--red);border:1px solid rgba(231,76,60,0.5);" onclick="testOverdueAlert()">⚠️ ทดสอบแจ้งเคสค้าง</button>
         </div>
         <div id="testEmailResult" style="margin-top:10px;font-size:13px;display:none;padding:10px 14px;border-radius:8px;"></div>
       </div>
 
-      <!-- EMAIL MANAGEMENT -->
       <div class="config-section">
-        <h3>📧 จัดการอีเมลแจ้งเตือน</h3>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">อีเมลที่เปิดใช้งานจะได้รับแจ้งเตือนทุกครั้งที่มีคำขอใหม่</p>
-        <div id="emailList"></div>
-        <div class="email-add-row">
-          <input type="email" id="newEmailInput" placeholder="เพิ่มอีเมลใหม่...">
-          <button class="btn-add-email" onclick="addEmail()">+ เพิ่ม</button>
-        </div>
-        <button class="btn-save-config" style="margin-top:12px;" onclick="saveEmails()">💾 บันทึกรายชื่ออีเมล</button>
-        <div style="background:var(--surface2);border-radius:8px;padding:12px 14px;margin-top:14px;font-size:12px;color:var(--text-muted);">
-          ⚠️ หลังบันทึก ให้นำอีเมลไปอัปเดตใน Google Apps Script (Code.gs) ส่วน NOTIFY_EMAILS ด้วย แล้ว Deploy ใหม่
-        </div>
+        <h3>🔑 รหัสผ่านผู้ดูแล</h3>
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.8;">รหัสผ่านไม่ได้เก็บในหน้าเว็บนี้แล้ว — เจ้าของระบบตั้ง/เปลี่ยนได้ที่ Google Sheet → เมนู <b style="color:var(--gold);">🔐 CCTV ผู้ดูแล → ตั้ง/เปลี่ยนรหัสผ่านผู้ใช้ Admin</b><br>เมื่อเปลี่ยนรหัสผ่าน ผู้ที่ล็อกอินด้วยบัญชีนั้นอยู่จะถูกให้ล็อกอินใหม่</p>
       </div>
 
-      <!-- PRESET LOCATIONS -->
       <div class="config-section">
-        <h3>📍 จุด CCTV ที่ใช้บ่อย (Preset)</h3>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">จุดที่เพิ่มที่นี่จะแสดงเป็นตัวเลือกด่วนในหน้าแบบฟอร์ม</p>
-        <div class="preset-list" id="presetList"></div>
-        <div class="preset-add-row">
-          <input type="text" id="newPresetInput" placeholder="เพิ่มจุดใหม่ เช่น ลานจอดรถ A, หน้าประตู 1..." onkeydown="if(event.key==='Enter')addPreset()">
-          <button class="btn-add-email" onclick="addPreset()">+ เพิ่ม</button>
-        </div>
-        <button class="btn-save-config" style="margin-top:12px;" onclick="savePresets()">💾 บันทึกจุด CCTV</button>
+        <h3>🏢 ผู้รับอีเมลตามสถานที่/อาคาร (อ่านอย่างเดียว)</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">รายชื่อเจ้าหน้าที่ของแต่ละอาคารแก้ได้ที่ <code style="color:var(--gold);">VENUE_STAFF</code> ใน Code.gs จุดเดียว แล้ว Deploy เวอร์ชันใหม่ — แบบฟอร์ม การแจ้งเตือน และการตรวจสิทธิ์จะใช้รายชื่อเดียวกัน<br>การอยู่ในรายชื่อนี้ "ไม่ใช่" บัญชีเข้าระบบ — บัญชีเจ้าหน้าที่อาคารสร้างจากเมนูใน Google Sheet เท่านั้น</p>
+        <div id="routingTable"></div>
       </div>
 
-      <!-- SHEET STRUCTURE -->
       <div class="config-section">
         <h3>📝 โครงสร้าง Google Sheet</h3>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">Sheet ชื่อ <strong style="color:var(--gold);">CCTV_Requests</strong> — columns ที่เพิ่มใหม่: <code style="color:var(--gold);">prefix, gender, attachedFiles</code></p>
-        <p style="font-size:13px;color:var(--text-muted);">หากยังไม่ได้รัน setupSheet ใหม่ ให้รัน function <code style="color:var(--gold);">migrateSheet</code> ใน Apps Script เพื่อเพิ่มคอลัมน์ที่ขาดหายไป</p>
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.8;">Sheet ชื่อ <strong style="color:var(--gold);">CCTV_Requests</strong> — ระบบเขียนข้อมูลตาม "ชื่อหัวตาราง" และเพิ่มคอลัมน์ใหม่ต่อท้ายด้วยเมนู Setup ขั้นที่ 2 (ไม่สลับ/ไม่ลบของเดิม; v3.2 เพิ่ม <code>venue</code> ต่อท้าย และคงคอลัมน์ idCard เดิมไว้ — คำขอใหม่ไม่เก็บเลขบัตรแล้ว)<br>ตรวจได้ที่เมนู <b style="color:var(--gold);">🔐 CCTV ผู้ดูแล → ตรวจหัวตาราง (อ่านอย่างเดียว)</b></p>
       </div>
     </div>
 
@@ -396,833 +386,732 @@
 </div>
 
 <script>
-// ===== STATE =====
-const SCRIPT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbxVfwqmg24QmG37NbdIpn5w90_TWzbilayADz2QdG29CY2qFH_fuD0FhZRinslAQL4I1Q/exec';
-if (!localStorage.getItem('script_url')) localStorage.setItem('script_url', SCRIPT_URL_DEFAULT);
+// ===== CCTV Admin Dashboard v3.2 — ตรวจสิทธิ์และกรองข้อมูลทุกคำสั่งที่ฝั่ง server (รวมขอบเขตอาคาร) =====
+const API_URL = 'https://script.google.com/macros/s/AKfycbxVfwqmg24QmG37NbdIpn5w90_TWzbilayADz2QdG29CY2qFH_fuD0FhZRinslAQL4I1Q/exec';
+const BACKEND_EXPECT = { env: 'PROD', version: '3.2.1', contract: 'cctv-3.2' }; // หน้า TEST ถูกสร้างให้เป็น env: 'TEST'
+const TOKEN_KEY = 'cctv_admin_token_v3';
+const SAFE_VIEW_MIME = ['image/jpeg', 'image/png', 'application/pdf'];
 
-let config = {
-  password:  localStorage.getItem('admin_password') || 'cctv2026musafety',
-  scriptUrl: localStorage.getItem('script_url') || SCRIPT_URL_DEFAULT,
-  sheetId:   localStorage.getItem('sheet_id') || ''
-};
+let session = { token: null, user: '', role: '', policy: { label: 'ค้างครบ 2 วัน' }, today: '', cfg: null };
+let currentRole = '';
 let allData = [];
 let charts = {};
-let emailList = JSON.parse(localStorage.getItem('notify_emails') || JSON.stringify([
-  {email:'anin.nak@mahidol.ac.th', active:true},
-  {email:'pichaya.don@mahidol.ac.th', active:true},
-  {email:'rawee.jum@mahidol.ac.th', active:true}
-]));
-let presetLocations = JSON.parse(localStorage.getItem('cctv_preset_locations') || '[]');
+// สถานที่/อาคาร (v3.2): ชื่อมาจากระบบหลังบ้าน (session) — แถวเดิมที่ไม่มีค่า = "ไม่ระบุ (ข้อมูลเดิม)"
+const VENUE_FALLBACK = { common: 'พื้นที่ส่วนกลาง', mlc: 'อาคารศูนย์การเรียนรู้มหิดล MLC', sirivithaya: 'อาคารสิริวิทยา', mahidol_hall: 'มหิดลสิทธาคาร' };
+const LEGACY_VENUE_LABEL = 'ไม่ระบุ (ข้อมูลเดิม)';
+function venueLabel(v) {
+  const list = (session.cfg && session.cfg.venues) || [];
+  const hit = list.filter(x => x.id === v)[0];
+  return hit ? hit.th : (VENUE_FALLBACK[v] || ((session.cfg && session.cfg.legacyVenueLabel) || LEGACY_VENUE_LABEL));
+}
+function officerText(r) { return r.officerMode === 'pending' ? 'รอจัดสรร (ส่งขณะอาคารยังไม่มีรายชื่อเจ้าหน้าที่)' : (r.serviceOfficerName || r.officerName || ''); }
 
-// ===== DEMO DATA =====
-function generateDemoData() {
-  const purposes=['ติดตามทรัพย์สินสูญหาย','ติดตามยานพาหนะ','อุบัติเหตุ/เหตุฉุกเฉิน','การสอบสวนคดี','ร้องเรียน/พิพาท'];
-  const types=['นักศึกษา','บุคลากร','เจ้าหน้าที่ภายนอก','บุคคลทั่วไป'];
-  const urgencies=['ปกติ','ปกติ','ปกติ','เร่งด่วน','ฉุกเฉิน'];
-  const statuses=['รอดำเนินการ','กำลังดำเนินการ','เสร็จสิ้น','เสร็จสิ้น','ปฏิเสธ'];
-  const locations=['ลานจอดรถ A','หน้าตึก MU','ประตู 1','หอพัก','โรงอาหาร','ลานกิจกรรม'];
-  const names=[['สมชาย','ใจดี'],['มาลี','สวรรค์'],['ประเสริฐ','มีสุข'],['นภา','ดาวเรือง'],['ก้องไกล','วรรณา']];
-  const data=[];
-  const now=new Date();
-  for(let i=0;i<35;i++){
-    const d=new Date(now-Math.random()*90*86400000);
-    const nm=names[i%names.length];
-    data.push({
-      refCode:`CCTV-${d.toISOString().slice(0,10).replace(/-/g,'')}-${Math.random().toString(36).substr(2,4).toUpperCase()}`,
-      timestamp:d.toISOString(),fname:nm[0],lname:nm[1],prefix:'นาย',gender:'ชาย',
-      requesterType:types[Math.floor(Math.random()*types.length)],
-      purpose:purposes[Math.floor(Math.random()*purposes.length)],
-      purposeDetail:'รายละเอียดเหตุการณ์ที่เกิดขึ้น...',
-      locations:locations[Math.floor(Math.random()*locations.length)],
-      dateStart:d.toISOString().slice(0,10),
-      urgency:urgencies[Math.floor(Math.random()*urgencies.length)],
-      requestFile:Math.random()>0.4?'ดูอย่างเดียว':'ต้องการไฟล์',
-      phone:'08x-xxx-xxxx',email:'example@mahidol.ac.th',
-      status:statuses[Math.floor(Math.random()*statuses.length)],
-      footageFound:Math.random()>0.3?'พบภาพ':'ไม่พบภาพ',
-      fileGiven:Math.random()>0.5?'ใช่':'ไม่',idCard:'****-****-***',docs:'บัตรประชาชน',vehiclePlate:''
-    });
+// ===== ความปลอดภัยในการแสดงผล =====
+function esc(s) {
+  return String(s === undefined || s === null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+const escHtml = esc;
+function escBr(s) { return esc(s).replace(/\n/g, '<br>'); }
+function safeUrl(u) { return /^https:\/\/(drive|docs)\.google\.com\//.test(String(u || '')) ? String(u) : ''; }
+
+// ===== API =====
+class ApiError extends Error { constructor(code, data) { super(code); this.code = code; this.data = data || {}; } }
+async function apiRaw(action, payload) {
+  const body = JSON.stringify(Object.assign({ action: action, expectEnv: BACKEND_EXPECT.env }, payload || {}));
+  let res;
+  try { res = await fetch(API_URL, { method: 'POST', body: body, redirect: 'follow', cache: 'no-store' }); }
+  catch (e) { throw new ApiError('network'); }
+  let j;
+  try { j = JSON.parse(await res.text()); } catch (e) { throw new ApiError('unreadable'); }
+  return j;
+}
+async function api(action, payload) {
+  const j = await apiRaw(action, Object.assign({ token: session.token }, payload || {}));
+  if (!j || j.ok !== true) {
+    const code = (j && j.code) || 'server';
+    if (code === 'auth') handleAuthLost();
+    throw new ApiError(code, j);
   }
-  return data;
+  return j;
+}
+const API_ERR = {
+  network: 'เชื่อมต่อระบบไม่ได้ (ตรวจอินเทอร์เน็ต หรือ Apps Script ยังไม่ได้ Deploy)',
+  unreadable: 'อ่านผลตอบกลับจากระบบไม่ได้',
+  auth: 'หมดเวลาการใช้งาน กรุณาเข้าสู่ระบบใหม่',
+  forbidden: 'บัญชีนี้ไม่มีสิทธิ์ทำรายการนี้',
+  not_found: 'ไม่พบคำขอนี้ในระบบ (อาจถูกลบหรือแก้เลขอ้างอิง)',
+  no_change: 'ไม่มีข้อมูลที่เปลี่ยนแปลง',
+  ambiguous: 'เลขอ้างอิงนี้ซ้ำกันหลายแถวใน Sheet และแถวถูกย้าย — กด รีเฟรช แล้วลองใหม่ หรือแก้เลขซ้ำใน Sheet',
+  already_closed: 'เคสนี้ถูกปิดไปแล้ว',
+  validation: 'ข้อมูลไม่ถูกต้อง',
+  busy: 'ระบบกำลังทำงานหนัก กรุณาลองใหม่',
+  file_too_large: 'ไฟล์ใหญ่เกินกว่าจะเปิดผ่านหน้านี้',
+  email_failed: 'ส่งอีเมลไม่สำเร็จ',
+  server: 'ระบบขัดข้อง',
+  gone: 'ระบบหลังบ้านไม่รองรับคำสั่งนี้',
+  unknown_action: 'ระบบหลังบ้านยังไม่ได้อัปเดตเป็นเวอร์ชัน 3.2',
+  no_scope: 'บัญชีนี้ยังไม่ได้ผูกอาคาร/สิทธิ์ที่ถูกต้อง จึงเข้าสู่ระบบไม่ได้ — ให้ผู้ดูแลตั้งค่าในเมนู "ตั้ง/เปลี่ยนรหัสผ่านผู้ใช้ Admin" หรือ "เปลี่ยนอาคารของบัญชีเจ้าหน้าที่อาคาร"',
+  stale: 'เคสนี้ถูกแก้ไขโดยผู้อื่นหลังจากคุณเปิด — โหลดข้อมูลล่าสุดแล้ว กรุณาตรวจและบันทึกอีกครั้ง (ยังไม่ได้บันทึกของคุณ)',
+  not_configured: 'ระบบหลังบ้านยังไม่ได้ตั้งค่า/ยืนยัน (Setup) — ไม่มีการอ่านหรือเขียนข้อมูล',
+  env_mismatch: 'หน้านี้เชื่อมต่อกับระบบผิดชุด (TEST/ใช้งานจริง)',
+  maintenance: 'ระบบปิดรับคำขอชั่วคราว',
+  credentials_changed: 'รหัสผ่าน/สิทธิ์ของบัญชีนี้ถูกเปลี่ยน หรือถูกสั่งออกจากระบบ ระหว่างที่กำลังเข้าสู่ระบบ — ไม่ได้เข้าสู่ระบบ กรุณาเข้าใหม่ด้วยรหัสปัจจุบัน',
+  delivery_time_order: 'เวลายกเลิกสิทธิ์ต้องใส่หลังจากมีเวลาแชร์แล้ว และต้องไม่ก่อนเวลาแชร์'
+};
+function errText(e) { const c = e && e.code ? e.code : 'server'; return (API_ERR[c] || c) + (c === 'validation' && e.data && e.data.fields ? ' (' + e.data.fields.join(', ') + ')' : ''); }
+
+function jsonpPing() {
+  return new Promise(resolve => {
+    const cb = '__cctvPing_' + Date.now();
+    const s = document.createElement('script');
+    let done = false;
+    const finish = v => { if (done) return; done = true; clearTimeout(t); try { delete window[cb]; } catch (e) { window[cb] = undefined; } s.remove(); resolve(v); };
+    window[cb] = d => finish(d);
+    s.onerror = () => finish(null);
+    const t = setTimeout(() => finish(null), 15000);
+    s.src = API_URL + '?action=ping&prefix=' + cb + '&_=' + Date.now();
+    document.head.appendChild(s);
+  });
 }
 
-// ===== AUTH =====
-let currentRole = 'viewer';
-
-function escHtml(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+// ===== เข้าสู่ระบบ =====
+function showLoginMsg(msg, isInfo) {
+  const el = document.getElementById('loginError');
+  el.textContent = msg; el.style.display = msg ? 'block' : 'none';
+  el.style.color = isInfo ? 'var(--text-muted)' : 'var(--red)';
 }
+(async function boot() {
+  const btn = document.querySelector('.btn-login');
+  const ping = await jsonpPing();
+  const mm = v => String(v || '').split('.').slice(0, 2).join('.');
+  let problem = '';
+  if (!ping || !ping.ok || ping.service !== 'cctv') problem = 'เชื่อมต่อระบบหลังบ้านไม่ได้';
+  else if (mm(ping.version) !== mm(BACKEND_EXPECT.version) || ping.contract !== BACKEND_EXPECT.contract) problem = 'ระบบหลังบ้านเป็นเวอร์ชัน ' + (ping.version || '?') + ' ไม่ตรงกับหน้านี้ (' + BACKEND_EXPECT.version + ') — ต้องอัปเดต Code.gs และ Deploy ให้ตรงกันก่อน';
+  else if (!ping.configured) problem = 'ระบบหลังบ้านยังไม่ได้ตั้งค่า/ยืนยัน (Setup ขั้นที่ 1–6 ในเมนูของ Google Sheet)';
+  else if (ping.env !== BACKEND_EXPECT.env) problem = 'หน้านี้สำหรับ ' + BACKEND_EXPECT.env + ' แต่ระบบหลังบ้านเป็น ' + ping.env;
+  if (problem) {
+    showLoginMsg(problem + ' — ปิดการเข้าสู่ระบบไว้ก่อนเพื่อความปลอดภัย');
+    if (btn) btn.disabled = true;
+    return;
+  }
+  const badge = document.getElementById('backendInfo');
+  if (badge) badge.textContent = 'ระบบหลังบ้าน v' + ping.version + (ping.build ? ' (build ' + ping.build + ')' : '') + ' — ' + (ping.env === 'TEST' ? 'TEST' : 'ใช้งานจริง') + (ping.maintenance ? ' — ปิดรับคำขอชั่วคราว' : '');
+  let t = null;
+  try { t = sessionStorage.getItem(TOKEN_KEY); } catch (e) {}
+  if (t) {
+    session.token = t;
+    try { afterLogin(await api('session')); } catch (e) { clearToken(); }
+  }
+})();
 
-// แปลง "[name](url), [name2](url2)" เป็น HTML links
-function formatFileLinks(str) {
-  if (!str) return '—';
-  return str.split(', ').map(item => {
-    const m = item.match(/^\[(.+?)\]\((https?:\/\/.+?)\)$/);
-    if (m) {
-      return '<a href="' + m[2] + '" target="_blank" style="color:var(--gold);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:4px;">&#128279; ' + escHtml(m[1]) + '</a>';
-    }
-    return '<span style="color:var(--text-muted);">&#128196; ' + escHtml(item) + ' (ไม่มีลิงค์)</span>';
-  }).join('<br>');
-}
-
-function getAdminPassword() {
-  return localStorage.getItem('admin_password') || 'cctv2026musafety';
-}
-
-function doLogin() {
+async function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
-  const p = document.getElementById('loginPass').value;
-  document.getElementById('loginError').style.display='none';
-
-  // กำหนด users และ password แบบ dynamic
-  const USERS = {
-    'admin':   { password: getAdminPassword(), role: 'admin' },
-    'cctv':    { password: getAdminPassword(), role: 'admin' },
-    'admin01': { password: '024414400',        role: 'closer' }
-  };
-
-  const user = USERS[u.toLowerCase()]; // case-insensitive
-  if (user && p === user.password) {
-    currentRole = user.role;
-    // อัปเดต config ด้วย password ล่าสุด
-    config.password = getAdminPassword();
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('dashboardScreen').style.display='block';
-    applyRoleUI();
-    loadData(); loadConfig(); renderEmailList(); renderPresetList();
-  } else {
-    document.getElementById('loginError').style.display='block';
+  const pEl = document.getElementById('loginPass');
+  const p = pEl.value;
+  if (!u || !p) { showLoginMsg('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'); return; }
+  const btn = document.querySelector('.btn-login');
+  btn.disabled = true; showLoginMsg('กำลังตรวจสอบ...', true);
+  try {
+    const r = await apiRaw('login', { username: u, password: p });
+    if (!r || r.ok !== true) {
+      const code = (r && r.code) || 'server';
+      const msg = {
+        login_failed: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+        locked: 'ใส่รหัสผิดหลายครั้ง ระบบล็อกชั่วคราว ' + ((r && r.retryAfterMin) || 15) + ' นาที',
+        credentials_changed: API_ERR.credentials_changed,
+        busy: 'ระบบกำลังทำงานหนัก — ยังไม่ได้เข้าสู่ระบบ กรุณาลองใหม่',
+        not_configured: 'ยังไม่ได้ตั้งรหัสผ่านผู้ดูแล — เจ้าของระบบต้องตั้งผ่านเมนู "🔐 CCTV ผู้ดูแล" ใน Google Sheet',
+        env_mismatch: 'หน้านี้เชื่อมต่อกับระบบผิดชุด (TEST/ใช้งานจริง)',
+        unknown_action: 'ระบบหลังบ้านยังไม่ได้อัปเดตเป็นเวอร์ชัน 3'
+      }[code] || errText({ code: code });
+      showLoginMsg(msg);
+      return;
+    }
+    session.token = r.token;
+    try { sessionStorage.setItem(TOKEN_KEY, r.token); } catch (e) {}
+    afterLogin(await api('session'));
+    showLoginMsg('');
+  } catch (e) {
+    showLoginMsg(errText(e));
+  } finally {
+    pEl.value = '';
+    btn.disabled = false;
   }
+}
+
+function afterLogin(s) {
+  session.user = s.user; session.role = s.role; session.policy = s.policy || session.policy; session.today = s.today || ''; session.cfg = s;
+  currentRole = s.role;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboardScreen').style.display = 'block';
+  applyRoleUI();
+  updatePolicyLabels();
+  renderConfigInfo();
+  buildVenueFilter();
+  loadData();
+}
+function clearToken() { session.token = null; try { sessionStorage.removeItem(TOKEN_KEY); } catch (e) {} }
+function handleAuthLost() {
+  clearToken();
+  closeModal();
+  document.getElementById('dashboardScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  showLoginMsg('หมดเวลาการใช้งาน หรือสิทธิ์ถูกเปลี่ยน กรุณาเข้าสู่ระบบใหม่');
+  allData = [];
+}
+async function doLogout() {
+  try { if (session.token) await api('logout'); } catch (e) {}
+  clearToken();
+  window.location.replace(window.location.pathname);
 }
 
 function applyRoleUI() {
-  if (currentRole === 'closer') {
-    // admin01: ซ่อนแท็บ analytics และ config
-    document.querySelectorAll('.tab').forEach((t,i) => {
-      if (i >= 2) t.style.display = 'none';
-    });
-  } else if (currentRole === 'admin') {
-    // admin/cctv: แสดงทุก tab
-    document.querySelectorAll('.tab').forEach(t => {
-      t.style.display = '';
-    });
-  }
-  // badge ชื่อ user
-  const roleLabel = {'admin':'Admin','closer':'Admin01 (ปิดเคส)'};
-  const badge = document.getElementById('userRoleBadge');
-  if (badge) badge.textContent = roleLabel[currentRole] || currentRole;
+  document.querySelectorAll('.tab').forEach((t, i) => { t.style.display = (currentRole !== 'admin' && i >= 2) ? 'none' : ''; });
+  const roleLabel = { admin: 'Admin', closer: 'ปิดเคส (ส่วนกลาง)', venue: 'เจ้าหน้าที่อาคาร' };
+  const vLabel = currentRole === 'venue' ? ' · ' + ((session.cfg && session.cfg.venueLabel) || '') : '';
+  document.getElementById('userRoleBadge').textContent = (session.user || '') + ' · ' + (roleLabel[currentRole] || currentRole) + vLabel;
 }
-function doLogout(){
-  document.getElementById('loginScreen').style.display='flex';
-  document.getElementById('dashboardScreen').style.display='none';
-  document.getElementById('loginPass').value='';
+// ตัวกรองสถานที่: เจ้าหน้าที่อาคารเห็นเฉพาะอาคารตน (server ส่งมาเฉพาะของอาคารนั้นอยู่แล้ว) จึงไม่ต้องเลือก
+function buildVenueFilter() {
+  const sel = document.getElementById('filterVenue'); if (!sel) return;
+  const list = (session.cfg && session.cfg.venues) || Object.keys(VENUE_FALLBACK).map(k => ({ id: k, th: VENUE_FALLBACK[k] }));
+  sel.innerHTML = '<option value="">ทุกสถานที่</option>' + list.map(v => '<option value="' + esc(v.id) + '">' + esc(v.th) + '</option>').join('') +
+    '<option value="__legacy">' + esc(LEGACY_VENUE_LABEL) + '</option>';
+  sel.style.display = currentRole === 'venue' ? 'none' : '';
+}
+function updatePolicyLabels() {
+  const el = document.getElementById('stat-overdue-label');
+  if (el) el.textContent = session.policy.label + ' ไม่ปิดงาน';
 }
 
 // ===== TABS =====
 function switchTab(name) {
-  const names=['overview','requests','analytics','config'];
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById(`panel-${name}`).classList.add('active');
-  if(name==='analytics')renderAnalyticsCharts();
+  const names = ['overview', 'requests', 'analytics', 'config'];
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', names[i] === name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'analytics') renderAnalyticsCharts();
 }
 
 // ===== LOAD DATA =====
-async function loadData(){
-  if(!config.scriptUrl){
-    allData=generateDemoData();
-    renderAll();
-    return;
-  }
+function setConnState(ok, text) {
+  const dot = document.querySelector('.status-dot');
+  if (dot) dot.style.background = ok ? 'var(--green)' : 'var(--red)';
+  const t = document.getElementById('connText');
+  if (t) t.textContent = text;
+}
+async function loadData() {
   try {
-    const res=await fetch(config.scriptUrl+'?action=getData');
-    const json=await res.json();
-    // กรองเฉพาะแถวที่มี refCode จริง ตัดแถวว่างออก
-    allData=(json.data||[]).filter(r=>r.refCode && String(r.refCode).trim()!=='');
-    console.log('Loaded '+allData.length+' valid records from Sheet');
-  } catch(e){
-    console.warn('loadData error:',e);
-    allData=[];
+    const r = await api('list');
+    allData = (r.records || []).filter(x => x.refCode && String(x.refCode).trim() !== '');
+    session.today = r.today || session.today;
+    session.policy = r.policy || session.policy;
+    updatePolicyLabels();
+    setConnState(true, 'เชื่อมต่อแล้ว');
+  } catch (e) {
+    if (e.code === 'auth') return;
+    setConnState(false, 'โหลดข้อมูลไม่สำเร็จ');
+    const msg = '<div class="empty-state"><div style="font-size:36px;margin-bottom:8px;">⚠️</div><p>' + esc(errText(e)) + '</p></div>';
+    document.getElementById('recentTableWrap').innerHTML = msg;
+    document.getElementById('fullTableWrap').innerHTML = msg;
+    return;
   }
   renderAll();
 }
 
-function showDemoBanner(show){
-  let b=document.getElementById('demoBanner');
-  if(!b){
-    b=document.createElement('div');
-    b.id='demoBanner';
-    b.style.cssText='background:rgba(241,196,15,0.1);border:1px solid rgba(241,196,15,0.4);border-radius:8px;padding:10px 16px;margin-bottom:12px;font-size:13px;color:var(--yellow);display:none;';
-    b.innerHTML='⚠️ ยังไม่ได้ตั้งค่า Web App URL — กำลังแสดงข้อมูลตัวอย่าง ไปที่ <b>⚙️ ตั้งค่าระบบ</b> เพื่อเชื่อมต่อ Google Sheet';
-    const content=document.querySelector('.content');
-    if(content)content.prepend(b);
-  }
-  b.style.display=show?'block':'none';
+// ===== วันที่/เวลา (แสดงตามเวลาไทยเสมอ) =====
+function bkkKey(ts) {
+  try {
+    const p = {};
+    new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(ts)).forEach(x => { p[x.type] = x.value; });
+    return p.year + '-' + p.month + '-' + p.day;
+  } catch (e) { return new Date(ts + 7 * 3600000).toISOString().slice(0, 10); }
 }
-
-// ===== TIMESTAMP HELPERS =====
-// Apps Script ส่ง timestamp มาเป็น string ISO หรือ Date serial number
-function formatDateDisplay(val) {
-  if (!val || val === '' || val === '—') return '—';
-  const s = String(val).trim();
-  if (s.startsWith('1899-12-30')) return '—'; // Google Sheets time serial = ไม่ใช่วันที่
-  if (s.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(s)) {
-    const ts = safeTimestamp(s);
-    if (!ts) return '—';
-    return new Date(ts).toLocaleDateString('th-TH', {
-      day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok'
-    });
-  }
-  return s;
-}
-
-function formatTimeDisplay(val) {
-  if (!val || val === '' || val === '—') return '';
-  const s = String(val).trim();
-  // กรณีเป็น HH:MM:SS หรือ HH:MM ธรรมดา
-  if (/^\d{1,2}:\d{2}/.test(s)) {
-    return s.slice(0,5); // ตัดเหลือ HH:MM
-  }
-  // กรณีเป็น ISO จาก Google Sheet เช่น 1899-12-30T04:00:56.000Z หรือ 2026-03-31T17:00:00.000Z
-  if (s.includes('T')) {
-    if (s.startsWith('1899-12-30')) {
-      // เป็น time-only serial → ดึงแค่เวลา UTC
-      const d = new Date(s);
-      const hh = String(d.getUTCHours()).padStart(2,'0');
-      const mm = String(d.getUTCMinutes()).padStart(2,'0');
-      return hh + ':' + mm;
-    }
-    // ISO วันที่จริง → แปลงเป็นเวลาไทย
-    const d = new Date(s);
-    if (isNaN(d.getTime())) return '';
-    return d.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit', timeZone:'Asia/Bangkok'});
-  }
-  return '';
-}
-
 function safeTimestamp(val) {
-  if (!val || val === '') return null;
-  if (typeof val === 'string') {
-    const s = val.trim();
-    // ISO string ที่มี Z หรือ +/- timezone → parse ตามปกติ
-    if (s.includes('T') || s.includes('Z') || /[+-]\d{2}:\d{2}$/.test(s)) {
-      const d = new Date(s);
-      return isNaN(d.getTime()) ? null : d.getTime();
-    }
-    // string แบบ "YYYY-MM-DD" หรือ "DD/MM/YYYY" → แปลงเป็น UTC midnight
-    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-      const d = new Date(s + 'T00:00:00.000Z');
-      return isNaN(d.getTime()) ? null : d.getTime();
-    }
-    // ลอง parse ปกติ
-    const d = new Date(s);
-    return isNaN(d.getTime()) ? null : d.getTime();
-  }
-  // กรณีเป็น number (Date serial จาก Google Sheet)
-  if (typeof val === 'number') {
-    // Google Sheet date serial: days since Dec 30, 1899
-    const d = new Date((val - 25569) * 86400000);
-    return isNaN(d.getTime()) ? null : d.getTime();
-  }
-  return null;
+  if (!val) return null;
+  const s = String(val).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) { const d = new Date(s + 'T00:00:00+07:00'); return isNaN(d.getTime()) ? null : d.getTime(); }
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d.getTime();
 }
-
-function safeDate(val) {
-  const ts = safeTimestamp(val);
-  if (!ts) return '—';
-  return new Date(ts).toLocaleDateString('th-TH', {day:'2-digit',month:'short',year:'2-digit'});
+function formatDateDisplay(val) {
+  if (!val) return '—';
+  const s = String(val).trim();
+  if (s.startsWith('1899-12-30')) return '—';
+  const ts = safeTimestamp(s);
+  if (!ts) return s;
+  return new Date(ts).toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' });
 }
-
-function safeDateTime(val) {
-  const ts = safeTimestamp(val);
-  if (!ts) return '—';
-  return new Date(ts).toLocaleString('th-TH');
+function formatTimeDisplay(val) {
+  if (!val) return '';
+  const s = String(val).trim();
+  const m = s.match(/^(\d{1,2}):(\d{2})/);
+  if (m) return ('0' + m[1]).slice(-2) + ':' + m[2];
+  if (s.startsWith('1899-12-30T')) { const d = new Date(s); return ('0' + d.getUTCHours()).slice(-2) + ':' + ('0' + d.getUTCMinutes()).slice(-2); }
+  const ts = safeTimestamp(s);
+  return ts ? new Date(ts).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }) : '';
 }
+function safeDate(val) { const ts = safeTimestamp(val); return ts ? new Date(ts).toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: '2-digit', timeZone: 'Asia/Bangkok' }) : '—'; }
+function safeDateTime(val) { const ts = safeTimestamp(val); return ts ? new Date(ts).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) : '—'; }
+function createdKey(r) { if (r._created) return r._created; const ts = safeTimestamp(r.timestamp); return ts ? bkkKey(ts) : ''; }
+function isOverdue(r) { return !!r._overdue; }
 
-function renderAll(){
-  document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH');
+function renderAll() {
+  document.getElementById('lastUpdate').textContent = 'อัปเดต: ' + new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' });
   renderStats();
   renderOverviewCharts();
-  renderRecentTable();  // แสดง 10 รายการล่าสุดในหน้าภาพรวม
-  applyFilters();       // แสดงตาราง + filter ในหน้ารายการคำขอ
-}
-
-// ===== STATS =====
-function renderStats(){
-  const today=new Date().toISOString().slice(0,10);
-  const overdueCt=allData.filter(isOverdue).length;
-  document.getElementById('stat-total').textContent=allData.length;
-  document.getElementById('stat-pending').textContent=allData.filter(r=>r.status==='รอดำเนินการ'||r.status==='กำลังดำเนินการ').length;
-  document.getElementById('stat-done').textContent=allData.filter(r=>r.status==='เสร็จสิ้น'||r.status==='ปิดเคส').length;
-  document.getElementById('stat-emergency').textContent=allData.filter(r=>r.urgency==='ฉุกเฉิน'||r.urgency==='เร่งด่วน').length;
-  document.getElementById('stat-overdue').textContent=overdueCt;
-  document.getElementById('stat-file').textContent=allData.filter(r=>r.requestFile==='ต้องการไฟล์').length;
-  document.getElementById('stat-today').textContent=allData.filter(r=>{const ts=safeTimestamp(r.timestamp);return ts&&new Date(ts).toISOString().startsWith(today);}).length;
-}
-
-// ===== CHARTS =====
-const CC=['#c9a84c','#3498db','#2ecc71','#e74c3c','#9b59b6','#e67e22','#1abc9c','#e91e63'];
-function countBy(data,key){const m={};data.forEach(r=>{const v=r[key]||'ไม่ระบุ';m[v]=(m[v]||0)+1;});return m;}
-function makeChart(id,type,labels,values,opts={}){
-  if(charts[id])charts[id].destroy();
-  const ctx=document.getElementById(id)?.getContext('2d');
-  if(!ctx)return;
-  charts[id]=new Chart(ctx,{type,data:{labels,datasets:[{data:values,backgroundColor:CC,borderColor:type==='line'?'#c9a84c':'transparent',borderWidth:type==='line'?2:0,fill:type==='line',tension:0.4,pointRadius:4,pointBackgroundColor:'#c9a84c',...(opts.ds||{})}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:type==='doughnut'||type==='pie',labels:{color:'#8a9bc0',font:{size:11},padding:12,boxWidth:12}},tooltip:{backgroundColor:'#1a2744',titleColor:'#c9a84c',bodyColor:'#e8edf8'}},
-      scales:type!=='doughnut'&&type!=='pie'?{x:{ticks:{color:'#8a9bc0',font:{size:11}},grid:{color:'#2d3d6a'}},y:{ticks:{color:'#8a9bc0',font:{size:11}},grid:{color:'#2d3d6a'},beginAtZero:true}}:undefined,...(opts.co||{})}});
-}
-
-function renderOverviewCharts(){
-  const p=countBy(allData,'purpose');makeChart('chartPurpose','doughnut',Object.keys(p),Object.values(p));
-  const r=countBy(allData,'requesterType');makeChart('chartRequester','doughnut',Object.keys(r),Object.values(r));
-  const mm={};allData.forEach(r=>{const m=(r.timestamp||'').slice(0,7);if(m)mm[m]=(mm[m]||0)+1;});
-  const months=Object.keys(mm).sort().slice(-6);
-  makeChart('chartMonthly','bar',months,months.map(m=>mm[m]),{ds:{backgroundColor:'#003087',borderRadius:6}});
-  const u=countBy(allData,'urgency');makeChart('chartUrgency','doughnut',Object.keys(u),Object.values(u));
-}
-
-function renderAnalyticsCharts(){
-  const f=countBy(allData,'footageFound');makeChart('chartFound','doughnut',Object.keys(f),Object.values(f));
-  const fi=countBy(allData,'requestFile');makeChart('chartFile','doughnut',Object.keys(fi),Object.values(fi));
-  const re=countBy(allData,'status');makeChart('chartResult','doughnut',Object.keys(re),Object.values(re));
-  const lm={};allData.forEach(r=>{(r.locations||'').split(',').forEach(l=>{const loc=l.trim();if(loc)lm[loc]=(lm[loc]||0)+1;});});
-  const t8=Object.entries(lm).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  makeChart('chartLocation','bar',t8.map(x=>x[0]),t8.map(x=>x[1]),{ds:{backgroundColor:'#c9a84c',borderRadius:6}});
-  const hm={};for(let i=0;i<24;i++)hm[i]=0;
-  allData.forEach(r=>{if(r.timeStart){const h=parseInt(r.timeStart.split(':')[0]);if(!isNaN(h))hm[h]++;}else hm[Math.floor(Math.random()*24)]++;});
-  const hours=Object.keys(hm).map(Number).sort((a,b)=>a-b);
-  makeChart('chartHour','line',hours.map(h=>h+':00'),hours.map(h=>hm[h]),{ds:{backgroundColor:'rgba(201,168,76,0.15)',borderColor:'#c9a84c',fill:true}});
-}
-
-// ===== TABLES =====
-const statusBadge={'รอดำเนินการ':'badge-pending','กำลังดำเนินการ':'badge-processing','เสร็จสิ้น':'badge-done','ปฏิเสธ':'badge-rejected'};
-const urgencyBadge={'เร่งด่วน':'badge-urgent','ฉุกเฉิน':'badge-emergency'};
-
-function renderRecentTable(){
-  const el=document.getElementById('recentTableWrap');
-  if(!el) return;
-  if(!allData.length){
-    el.innerHTML='<div class="empty-state"><div style="font-size:36px;margin-bottom:8px;">📭</div><p>ยังไม่มีข้อมูล</p></div>';
-    const titleEl=document.getElementById('recentTableTitle');
-    if(titleEl) titleEl.textContent='📋 คำขอล่าสุด';
-    return;
-  }
-  const sorted=[...allData].sort((a,b)=>(safeTimestamp(b.timestamp)||0)-(safeTimestamp(a.timestamp)||0));
-  const count=Math.min(sorted.length, 10);
-  const display=sorted.slice(0, count);
-  // อัปเดตหัวข้อให้ตรงกับจำนวนจริง
-  const titleEl=document.getElementById('recentTableTitle');
-  if(titleEl) titleEl.textContent='📋 คำขอล่าสุด '+count+' รายการ (ทั้งหมด '+allData.length+' รายการ)';
-  el.innerHTML=renderTable(display,true);
-}
-
-// ===== FILTER + PDF STATE =====
-let filteredData=[], selectedIds=new Set(), pdfPanelOpen=false;
-
-function isOverdue(r){
-  // ปิดแล้วทุกกรณี ไม่ถือว่า overdue
-  const closedStatuses = ['ปิดเคส','เสร็จสิ้น','ปฏิเสธ'];
-  if(closedStatuses.includes(r.status)) return false;
-  if(r.closedDate && String(r.closedDate).trim() !== '') return false;
-
-  // ดึงวันที่จาก refCode เช่น CCTV-20260322-XXXX → 2026-03-22
-  // วิธีนี้แม่นยำ 100% ไม่มีปัญหา timezone หรือ format ของ Sheet
-  const m = (r.refCode||'').match(/CCTV-(\d{4})(\d{2})(\d{2})-/);
-  if(m){
-    const requestDate = new Date(m[1]+'-'+m[2]+'-'+m[3]);
-    const today = new Date();
-    // เซ็ต today เป็น midnight เพื่อนับวันเต็ม
-    today.setHours(0,0,0,0);
-    const diffDays = Math.floor((today - requestDate) / 86400000);
-    return diffDays >= 2; // ครบ 2 วันแล้ว = overdue
-  }
-
-  // fallback: ใช้ timestamp ถ้าไม่มี refCode
-  if(!r.timestamp) return false;
-  const ts = safeTimestamp(r.timestamp);
-  if(!ts) return false;
-  return (Date.now() - ts) / 86400000 >= 2;
-}
-
-function applyFilters(){
-  const status=document.getElementById('filterStatus')?.value||'';
-  const urgency=document.getElementById('filterUrgency')?.value||'';
-  const type=document.getElementById('filterType')?.value||'';
-  const search=(document.getElementById('searchInput')?.value||'').toLowerCase();
-  const df=document.getElementById('filterDateFrom')?.value||'';
-  const dt=document.getElementById('filterDateTo')?.value||'';
-  filteredData=allData.filter(r=>{
-    if(status&&r.status!==status) return false;
-    if(urgency&&r.urgency!==urgency) return false;
-    if(type&&r.requesterType!==type) return false;
-    if(search&&!((r.refCode||'').toLowerCase().includes(search)||((r.fname||'')+' '+(r.lname||'')).toLowerCase().includes(search)||(r.purpose||'').toLowerCase().includes(search)||(r.serviceOfficerName||'').toLowerCase().includes(search))) return false;
-    const ts=safeTimestamp(r.timestamp);
-    const rd=ts?new Date(ts).toISOString().slice(0,10):'';
-    if(df&&rd&&rd<df) return false;
-    if(dt&&rd&&rd>dt) return false;
-    return true;
-  });
-  filteredData.sort((a,b)=>(safeTimestamp(b.timestamp)||0)-(safeTimestamp(a.timestamp)||0));
-  renderRequestTable();
-  updatePdfCounts();
-  const oc=filteredData.filter(isOverdue).length;
-  const bn=document.getElementById('overdueBannerReq');
-  if(bn){if(oc>0){bn.classList.add('show');document.getElementById('overdueTextReq').textContent=`มี ${oc} เคสเกิน 2 วันยังไม่ปิดงาน!`;}else bn.classList.remove('show');}
-}
-
-function clearFilters(){
-  ['filterStatus','filterUrgency','filterType','filterDateFrom','filterDateTo','searchInput'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  renderRecentTable();
   applyFilters();
 }
 
-function renderRequestTable(){
-  document.getElementById('fullTableWrap').innerHTML=renderTable(filteredData,false);
+// ===== STATS =====
+function renderStats() {
+  const today = session.today || bkkKey(Date.now());
+  document.getElementById('stat-total').textContent = allData.length;
+  document.getElementById('stat-pending').textContent = allData.filter(r => r.status === 'รอดำเนินการ' || r.status === 'กำลังดำเนินการ' || !r.status).length;
+  document.getElementById('stat-done').textContent = allData.filter(r => r.status === 'เสร็จสิ้น' || r.status === 'ปิดเคส').length;
+  document.getElementById('stat-emergency').textContent = allData.filter(r => r.urgency === 'ฉุกเฉิน' || r.urgency === 'เร่งด่วน').length;
+  document.getElementById('stat-overdue').textContent = allData.filter(isOverdue).length;
+  document.getElementById('stat-file').textContent = allData.filter(r => r.requestFile === 'ต้องการไฟล์').length;
+  document.getElementById('stat-today').textContent = allData.filter(r => createdKey(r) === today).length;
 }
 
-// ===== PDF PANEL =====
-function togglePdfPanel(){
-  pdfPanelOpen=!pdfPanelOpen;
-  document.getElementById('pdfPanel').classList.toggle('show',pdfPanelOpen);
-  selectedIds.clear(); renderRequestTable(); updatePdfCounts();
+// ===== CHARTS (Chart.js วาดลง canvas — ไม่แทรก HTML) =====
+const CC = ['#c9a84c', '#3498db', '#2ecc71', '#e74c3c', '#9b59b6', '#e67e22', '#1abc9c', '#e91e63'];
+function countBy(data, key) { const m = {}; data.forEach(r => { const v = r[key] || 'ไม่ระบุ'; m[v] = (m[v] || 0) + 1; }); return m; }
+function makeChart(id, type, labels, values, opts) {
+  opts = opts || {};
+  if (typeof Chart === 'undefined') return;
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id) && document.getElementById(id).getContext('2d');
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, {
+    type: type,
+    data: { labels: labels, datasets: [Object.assign({ data: values, backgroundColor: CC, borderColor: type === 'line' ? '#c9a84c' : 'transparent', borderWidth: type === 'line' ? 2 : 0, fill: type === 'line', tension: 0.4, pointRadius: 4, pointBackgroundColor: '#c9a84c' }, opts.ds || {})] },
+    options: Object.assign({
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: type === 'doughnut' || type === 'pie', labels: { color: '#8a9bc0', font: { size: 11 }, padding: 12, boxWidth: 12 } }, tooltip: { backgroundColor: '#1a2744', titleColor: '#c9a84c', bodyColor: '#e8edf8' } },
+      scales: type !== 'doughnut' && type !== 'pie' ? { x: { ticks: { color: '#8a9bc0', font: { size: 11 } }, grid: { color: '#2d3d6a' } }, y: { ticks: { color: '#8a9bc0', font: { size: 11 } }, grid: { color: '#2d3d6a' }, beginAtZero: true } } : undefined
+    }, opts.co || {})
+  });
 }
-function toggleSelectAll(checked){
-  filteredData.forEach(r=>{if(checked)selectedIds.add(r.refCode);else selectedIds.delete(r.refCode);});
+function renderOverviewCharts() {
+  const p = countBy(allData, 'purpose'); makeChart('chartPurpose', 'doughnut', Object.keys(p), Object.values(p));
+  const r = countBy(allData, 'requesterType'); makeChart('chartRequester', 'doughnut', Object.keys(r), Object.values(r));
+  const mm = {}; allData.forEach(x => { const m = createdKey(x).slice(0, 7); if (m) mm[m] = (mm[m] || 0) + 1; });
+  const months = Object.keys(mm).sort().slice(-6);
+  makeChart('chartMonthly', 'bar', months, months.map(m => mm[m]), { ds: { backgroundColor: '#003087', borderRadius: 6 } });
+  const u = countBy(allData, 'urgency'); makeChart('chartUrgency', 'doughnut', Object.keys(u), Object.values(u));
+}
+function renderAnalyticsCharts() {
+  const f = countBy(allData.filter(r => r.footageFound), 'footageFound'); makeChart('chartFound', 'doughnut', Object.keys(f), Object.values(f));
+  const fi = countBy(allData, 'requestFile'); makeChart('chartFile', 'doughnut', Object.keys(fi), Object.values(fi));
+  const re = countBy(allData, 'status'); makeChart('chartResult', 'doughnut', Object.keys(re), Object.values(re));
+  // v3.2: จุดกล้องเป็นข้อความอิสระ → สรุปตาม "สถานที่/อาคาร" แทน (ไม่แยกคำจากข้อความ)
+  const vm = {}; allData.forEach(r => { const k = venueLabel(r.venue || ''); vm[k] = (vm[k] || 0) + 1; });
+  const vs = Object.entries(vm).sort((a, b) => b[1] - a[1]);
+  makeChart('chartLocation', 'bar', vs.map(x => x[0]), vs.map(x => x[1]), { ds: { backgroundColor: '#c9a84c', borderRadius: 6 } });
+  const hm = {}; for (let i = 0; i < 24; i++) hm[i] = 0;
+  allData.forEach(r => { const m = String(r.timeStart || '').match(/^(\d{1,2}):/); if (m && +m[1] < 24) hm[+m[1]]++; }); // ไม่สุ่มค่าแทนข้อมูลที่ไม่มี
+  const hours = Object.keys(hm).map(Number).sort((a, b) => a - b);
+  makeChart('chartHour', 'line', hours.map(h => h + ':00'), hours.map(h => hm[h]), { ds: { backgroundColor: 'rgba(201,168,76,0.15)', borderColor: '#c9a84c', fill: true } });
+}
+
+// ===== TABLES =====
+const statusBadge = { 'รอดำเนินการ': 'badge-pending', 'กำลังดำเนินการ': 'badge-processing', 'เสร็จสิ้น': 'badge-done', 'ปฏิเสธ': 'badge-rejected', 'ปิดเคส': 'badge-closed' };
+const urgencyBadge = { 'เร่งด่วน': 'badge-urgent', 'ฉุกเฉิน': 'badge-emergency' };
+
+function renderRecentTable() {
+  const el = document.getElementById('recentTableWrap');
+  const titleEl = document.getElementById('recentTableTitle');
+  if (!allData.length) {
+    el.innerHTML = '<div class="empty-state"><div style="font-size:36px;margin-bottom:8px;">📭</div><p>ยังไม่มีข้อมูล</p></div>';
+    titleEl.textContent = '📋 คำขอล่าสุด';
+    return;
+  }
+  const sorted = allData.slice().sort((a, b) => (safeTimestamp(b.timestamp) || 0) - (safeTimestamp(a.timestamp) || 0));
+  const count = Math.min(sorted.length, 10);
+  titleEl.textContent = '📋 คำขอล่าสุด ' + count + ' รายการ (ทั้งหมด ' + allData.length + ' รายการ)';
+  el.innerHTML = renderTable(sorted.slice(0, count), true);
+}
+
+let filteredData = [], selectedIds = new Set(), pdfPanelOpen = false;
+
+function applyFilters() {
+  const status = document.getElementById('filterStatus').value || '';
+  const urgency = document.getElementById('filterUrgency').value || '';
+  const type = document.getElementById('filterType').value || '';
+  const venue = (document.getElementById('filterVenue') || {}).value || '';
+  const search = (document.getElementById('searchInput').value || '').toLowerCase();
+  const df = document.getElementById('filterDateFrom').value || '';
+  const dt = document.getElementById('filterDateTo').value || '';
+  filteredData = allData.filter(r => {
+    if (status && (r.status || 'รอดำเนินการ') !== status) return false;
+    if (urgency && r.urgency !== urgency) return false;
+    if (type && r.requesterType !== type) return false;
+    if (venue && (venue === '__legacy' ? !!r.venue : r.venue !== venue)) return false;
+    if (search && !((r.refCode || '').toLowerCase().includes(search) || ((r.fname || '') + ' ' + (r.lname || '')).toLowerCase().includes(search) || (r.purpose || '').toLowerCase().includes(search) || (r.serviceOfficerName || '').toLowerCase().includes(search) || (r.locations || '').toLowerCase().includes(search))) return false;
+    const rd = createdKey(r);
+    if (df && rd && rd < df) return false;
+    if (dt && rd && rd > dt) return false;
+    return true;
+  });
+  filteredData.sort((a, b) => (safeTimestamp(b.timestamp) || 0) - (safeTimestamp(a.timestamp) || 0));
+  renderRequestTable();
+  updatePdfCounts();
+  const oc = filteredData.filter(isOverdue).length;
+  const bn = document.getElementById('overdueBannerReq');
+  if (oc > 0) { bn.classList.add('show'); document.getElementById('overdueTextReq').textContent = 'มี ' + oc + ' เคส' + session.policy.label + ' ยังไม่ปิดงาน!'; }
+  else bn.classList.remove('show');
+}
+function clearFilters() {
+  ['filterStatus', 'filterUrgency', 'filterType', 'filterVenue', 'filterDateFrom', 'filterDateTo', 'searchInput'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  applyFilters();
+}
+function renderRequestTable() { document.getElementById('fullTableWrap').innerHTML = renderTable(filteredData, false); }
+
+function renderTable(data, compact) {
+  if (!data.length) return '<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">📭</div><p>ไม่พบข้อมูล</p></div>';
+  const showCheck = pdfPanelOpen && !compact;
+  let lastDate = '', even = false; const groupEven = {};
+  data.forEach(r => { const d = createdKey(r); if (d !== lastDate) { lastDate = d; even = !even; groupEven[d] = even; } });
+  return '<table><thead><tr>' +
+    (showCheck ? '<th style="width:32px;"><input type="checkbox" onchange="toggleSelectAll(this.checked)" style="accent-color:var(--gold);"></th>' : '') +
+    '<th>เลขอ้างอิง</th><th>วันที่</th><th>ชื่อ-สกุล</th><th>ประเภท</th><th>สถานที่</th><th>วัตถุประสงค์</th><th>เจ้าหน้าที่</th><th>เร่งด่วน</th><th>สถานะ</th><th></th>' +
+    '</tr></thead><tbody>' +
+    data.map(r => {
+      const idx = allData.indexOf(r);
+      const closed = r.status === 'ปิดเคส';
+      const overdue = isOverdue(r);
+      let cls = closed ? 'row-closed' : '';
+      if (!closed && groupEven[createdKey(r)]) cls += ' date-group-even';
+      if (overdue) cls += ' row-overdue';
+      const st = r.status || 'รอดำเนินการ';
+      return '<tr class="' + cls.trim() + '">' +
+        (showCheck ? '<td><input type="checkbox" class="row-check" data-idx="' + idx + '" ' + (selectedIds.has(r.refCode) ? 'checked' : '') + ' onchange="toggleSelectIdx(this)"></td>' : '') +
+        '<td style="font-family:monospace;font-size:11px;color:var(--gold);">' + esc(r.refCode || '—') + (overdue ? '<br><span class="overdue-badge">⚠️ ' + esc(session.policy.label) + '</span>' : '') + '</td>' +
+        '<td style="white-space:nowrap;font-size:12px;">' + (r.timestamp ? safeDate(r.timestamp) : '—') + '</td>' +
+        '<td>' + esc([r.prefix, r.fname, r.lname].filter(Boolean).join(' ')) + '</td>' +
+        '<td><span class="badge" style="background:rgba(52,152,219,0.15);color:#3498db;font-size:10px;">' + esc(r.requesterType || '—') + '</span></td>' +
+        '<td style="font-size:12px;' + (r.venue ? '' : 'color:var(--text-muted);') + '">' + esc(venueLabel(r.venue || '')) + '</td>' +
+        '<td style="font-size:12px;">' + esc(r.purpose || '—') + '</td>' +
+        '<td style="font-size:11px;color:var(--text-muted);">' + esc(officerText(r) || '—') + '</td>' +
+        '<td><span class="badge ' + (urgencyBadge[r.urgency] || 'badge-pending') + '">' + esc(r.urgency || 'ปกติ') + '</span></td>' +
+        '<td><span class="badge ' + (statusBadge[st] || 'badge-pending') + '">' + esc(st) + '</span></td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button onclick="openModal(' + idx + ')" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);padding:4px 8px;border-radius:5px;cursor:pointer;font-size:11px;margin-right:3px;">รายละเอียด</button>' +
+          (!compact ? '<button onclick="exportSinglePDF(' + idx + ')" style="background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.4);color:var(--red);padding:4px 8px;border-radius:5px;cursor:pointer;font-size:11px;">PDF</button>' : '') +
+        '</td></tr>';
+    }).join('') + '</tbody></table>';
+}
+
+// ===== PDF =====
+function togglePdfPanel() { pdfPanelOpen = !pdfPanelOpen; document.getElementById('pdfPanel').classList.toggle('show', pdfPanelOpen); selectedIds.clear(); renderRequestTable(); updatePdfCounts(); }
+function toggleSelectAll(checked) {
+  filteredData.forEach(r => { if (checked) selectedIds.add(r.refCode); else selectedIds.delete(r.refCode); });
   renderRequestTable(); updatePdfCounts();
-  const cb=document.getElementById('selectAll'); if(cb)cb.checked=checked;
+  const cb = document.getElementById('selectAll'); if (cb) cb.checked = checked;
 }
-function toggleSelect(rc,checked){if(checked)selectedIds.add(rc);else selectedIds.delete(rc);updatePdfCounts();}
-function updatePdfCounts(){
-  const fc=document.getElementById('filteredCount');const sc=document.getElementById('selectedCount');
-  if(fc)fc.textContent=filteredData.length;if(sc)sc.textContent=selectedIds.size;
-}
-function exportSinglePDF(idx){generatePDF([allData[idx]]);}
-function exportSelectedPDF(){
-  if(!selectedIds.size){alert('กรุณาเลือกรายการก่อนค่ะ');return;}
-  generatePDF(filteredData.filter(r=>selectedIds.has(r.refCode)));
+function toggleSelectIdx(el) { const r = allData[+el.getAttribute('data-idx')]; if (!r) return; if (el.checked) selectedIds.add(r.refCode); else selectedIds.delete(r.refCode); updatePdfCounts(); }
+function updatePdfCounts() { document.getElementById('filteredCount').textContent = filteredData.length; document.getElementById('selectedCount').textContent = selectedIds.size; }
+function exportSinglePDF(idx) { if (allData[idx]) generatePDF([allData[idx]]); }
+function exportSelectedPDF() { if (!selectedIds.size) { alert('กรุณาเลือกรายการก่อน'); return; } generatePDF(filteredData.filter(r => selectedIds.has(r.refCode))); }
+function periodText(r) {
+  const ds = formatDateDisplay(r.dateStart), ts = formatTimeDisplay(r.timeStart), de = formatDateDisplay(r.dateEnd || r.dateStart), te = formatTimeDisplay(r.timeEnd);
+  if (ds === '—' && !ts) return '—';
+  return ds + (ts ? ' เวลา ' + ts : '') + ' → ' + de + (te ? ' เวลา ' + te : '');
 }
 function buildPdfPage(r) {
-  const statusCls = r.status==='ปิดเคส'||r.status==='เสร็จสิ้น'?'pdf-badge-green':r.status==='ปฏิเสธ'?'pdf-badge-red':'pdf-badge-yellow';
-  const urgCls = r.urgency==='ฉุกเฉิน'?'pdf-badge-red':r.urgency==='เร่งด่วน'?'pdf-badge-orange':'pdf-badge-green';
-  const thDate = r.timestamp ? new Date(r.timestamp).toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'}) : '-';
-  const now = new Date().toLocaleString('th-TH');
-
-  function row(label, val) {
-    if(!val||val==='-') return '';
-    return `<tr><td>${label}</td><td>${val}</td></tr>`;
-  }
-
-  return `<div class="pdf-page pdf-doc">
-    <div class="pdf-header">
-      <div class="pdf-header-right">
-        <div style="font-size:10pt;color:#c9d8f0;">Ref:</div>
-        <div style="font-family:monospace;font-size:12pt;font-weight:800;color:#c9a84c;">${r.refCode||'-'}</div>
-        <div style="font-size:9pt;color:#c9d8f0;margin-top:4px;">${thDate}</div>
-      </div>
-      <h1>CCTV Request | มหาวิทยาลัยมหิดล</h1>
-      <p>งานจราจรและความปลอดภัย | กองกายภาพและสิ่งแวดล้อม | วิทยาเขตศาลายา</p>
-    </div>
-    <div class="pdf-header-gold"></div>
-
-    <div class="pdf-badges">
-      <span class="pdf-badge ${statusCls}">${r.status||'รอดำเนินการ'}</span>
-      <span class="pdf-badge ${urgCls}">ความเร่งด่วน: ${r.urgency||'ปกติ'}</span>
-    </div>
-
-    <div class="pdf-section">
-      <div class="pdf-section-title">[ 1 ] ข้อมูลผู้ขอดูกล้องวงจรปิด</div>
-      <table class="pdf-table">
-        ${row('ชื่อ-นามสกุล',`${r.prefix||''} ${r.fname||''} ${r.lname||''}`)}
-        ${row('เพศ', r.gender)}
-        ${row('ประเภทผู้ขอ', r.requesterType)}
-        ${row('เลขบัตร/รหัส', r.idCard)}
-        ${row('คณะ/หน่วยงาน', r.faculty||r.officialOrg)}
-        ${row('อีเมลมหาวิทยาลัย', r.muEmail)}
-        ${row('โทรศัพท์', r.phone)}
-        ${row('อีเมลติดต่อ', r.email)}
-        ${row('หน่วยงานราชการ', r.officialOrg)}
-        ${row('เลขหนังสือราชการ', r.officialDoc)}
-      </table>
-    </div>
-
-    <div class="pdf-section">
-      <div class="pdf-section-title">[ 2 ] วัตถุประสงค์และรายละเอียดเหตุการณ์</div>
-      <table class="pdf-table">
-        ${row('วัตถุประสงค์', `<strong>${r.purpose||'-'}</strong>`)}
-        ${row('ช่วงเวลาเกิดเหตุ', (()=>{const ds=formatDateDisplay(r.dateStart),ts=formatTimeDisplay(r.timeStart),de=formatDateDisplay(r.dateEnd||r.dateStart),te=formatTimeDisplay(r.timeEnd);return (ds+'  '+(ts?'เวลา '+ts:'')+' → '+de+'  '+(te?'เวลา '+te:'')).trim();})())}
-        ${row('จุดที่ขอดูกล้อง', `<strong>${r.locations||'-'}</strong>`)}
-        ${row('ยานพาหนะ', r.vehiclePlate?`${r.vehiclePlate} ${r.vehicleDesc||''}`:'—')}
-        ${row('หลักฐานที่ต้องการ', r.evidenceTypes)}
-      </table>
-      ${r.purposeDetail?`<div class="pdf-detail-box"><strong>รายละเอียดเหตุการณ์:</strong><br>${r.purposeDetail}</div>`:''}
-    </div>
-
-    <div class="pdf-section">
-      <div class="pdf-section-title">[ 3 ] การขอรับข้อมูล / ไฟล์ภาพ</div>
-      <table class="pdf-table">
-        ${row('ขอรับไฟล์ภาพ', (r.requestFile||'')+(r.deliveryMethod?' ('+r.deliveryMethod+')':'')+(r.gdriveEmail?' — ส่งที่: '+r.gdriveEmail:''))}
-        ${row('เหตุผลขอไฟล์', r.fileReason)}
-        ${row('รูปแบบรับ', r.deliveryMethod)}
-        ${row('เอกสารที่นำมา', r.docs)}
-        ${row('ไฟล์แนบ', r.attachedFiles ? r.attachedFiles.replace(/\[(.+?)\]\((.+?)\)/g, '$1: $2') : '')}
-        ${row('หมายเหตุ', r.additionalNote)}
-      </table>
-    </div>
-
-    <div class="pdf-section">
-      <div class="pdf-section-title">[ 4 ] เจ้าหน้าที่และผลการดำเนินการ</div>
-      <table class="pdf-table">
-        ${row('เจ้าหน้าที่ผู้ให้บริการ', `<strong style="color:#003087;">${r.serviceOfficerName||'-'}</strong>`)}
-        ${row('เจ้าหน้าที่ผู้รับเรื่อง', r.officerName)}
-        ${row('ผลการตรวจสอบ', r.footageFound)}
-        ${row('มอบไฟล์ให้', r.fileGiven)}
-        ${row('การดำเนินการ', r.actionTaken)}
-        ${row('วันที่ปิดเคส', r.closedDate)}
-      </table>
-      ${r.officerNote?`<div class="pdf-detail-box"><strong>บันทึกของเจ้าหน้าที่:</strong><br>${r.officerNote}</div>`:''}
-    </div>
-
-    <div class="pdf-footer">
-      <span>ระบบ CCTV Request | งานจราจรและความปลอดภัย มหาวิทยาลัยมหิดล</span>
-      <span>พิมพ์เมื่อ: ${now}</span>
-    </div>
-  </div>`;
+  const statusCls = r.status === 'ปิดเคส' || r.status === 'เสร็จสิ้น' ? 'pdf-badge-green' : r.status === 'ปฏิเสธ' ? 'pdf-badge-red' : 'pdf-badge-yellow';
+  const urgCls = r.urgency === 'ฉุกเฉิน' ? 'pdf-badge-red' : r.urgency === 'เร่งด่วน' ? 'pdf-badge-orange' : 'pdf-badge-green';
+  const thDate = r.timestamp ? new Date(safeTimestamp(r.timestamp)).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Bangkok' }) : '-';
+  const now = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+  const row = (label, val, strong) => (!val || val === '-' || val === '—') ? '' : '<tr><td>' + esc(label) + '</td><td>' + (strong ? '<strong>' + escBr(val) + '</strong>' : escBr(val)) + '</td></tr>';
+  const atts = r._attachments ? r._attachments.map(a => a.label).join(', ') : (r._attachmentCount ? r._attachmentCount + ' ไฟล์ (เปิดได้เฉพาะผู้ดูแลระบบ)' : '');
+  return '<div class="pdf-page pdf-doc">' +
+    '<div class="pdf-header"><div class="pdf-header-right"><div style="font-size:10pt;color:#c9d8f0;">Ref:</div>' +
+    '<div style="font-family:monospace;font-size:12pt;font-weight:800;color:#c9a84c;">' + esc(r.refCode || '-') + '</div>' +
+    '<div style="font-size:9pt;color:#c9d8f0;margin-top:4px;">' + esc(thDate) + '</div></div>' +
+    '<h1>CCTV Request | มหาวิทยาลัยมหิดล</h1><p>งานจราจรและความปลอดภัย | กองกายภาพและสิ่งแวดล้อม | วิทยาเขตศาลายา</p></div>' +
+    '<div class="pdf-header-gold"></div>' +
+    '<div class="pdf-badges"><span class="pdf-badge ' + statusCls + '">' + esc(r.status || 'รอดำเนินการ') + '</span><span class="pdf-badge ' + urgCls + '">ความเร่งด่วน: ' + esc(r.urgency || 'ปกติ') + '</span></div>' +
+    '<div class="pdf-section"><div class="pdf-section-title">[ 1 ] ข้อมูลผู้ขอดูกล้องวงจรปิด</div><table class="pdf-table">' +
+      row('ชื่อ-นามสกุล', [r.prefix, r.fname, r.lname].filter(Boolean).join(' ')) + row('เพศ', r.gender) + row('ประเภทผู้ขอ', r.requesterType) +
+      row('เลขบัตร/รหัส (ข้อมูลเดิม)', r.idCard) + row('คณะ/หน่วยงาน', r.faculty) + row('อีเมลมหาวิทยาลัย', r.muEmail) + row('โทรศัพท์', r.phone) +
+      row('อีเมลติดต่อ', r.email) + row('หน่วยงานราชการ', r.officialOrg) + row('เลขหนังสือราชการ', r.officialDoc) +
+    '</table></div>' +
+    '<div class="pdf-section"><div class="pdf-section-title">[ 2 ] วัตถุประสงค์และรายละเอียดเหตุการณ์</div><table class="pdf-table">' +
+      row('วัตถุประสงค์', r.purpose, true) + row('ช่วงเวลาเกิดเหตุ', periodText(r)) + row('สถานที่/อาคาร', venueLabel(r.venue || ''), true) + row('จุดที่ขอดูกล้อง', r.locations, true) +
+      row('ยานพาหนะ', [r.vehiclePlate, r.vehicleDesc].filter(Boolean).join(' ')) + row('หลักฐานที่ต้องการ', r.evidenceTypes) +
+    '</table>' + (r.purposeDetail ? '<div class="pdf-detail-box"><strong>รายละเอียดเหตุการณ์:</strong><br>' + escBr(r.purposeDetail) + '</div>' : '') + '</div>' +
+    '<div class="pdf-section"><div class="pdf-section-title">[ 3 ] การขอรับข้อมูล / ไฟล์ภาพ</div><table class="pdf-table">' +
+      row('ขอรับไฟล์ภาพ', r.requestFile) + row('เหตุผลขอไฟล์', r.fileReason) + row('รูปแบบรับ', r.deliveryMethod) + row('อีเมลรับลิงก์', r.gdriveEmail) +
+      row('เอกสาร', [r.docs, r.exportDocs].filter(Boolean).join(', ')) + row('ไฟล์แนบ', atts) + row('หมายเหตุ', r.additionalNote) +
+    '</table></div>' +
+    '<div class="pdf-section"><div class="pdf-section-title">[ 4 ] เจ้าหน้าที่และผลการดำเนินการ</div><table class="pdf-table">' +
+      row('เจ้าหน้าที่ผู้ให้บริการ', officerText(r), true) + row('เจ้าหน้าที่ผู้รับเรื่อง', r.officerName) + row('ผลการตรวจสอบ', r.footageFound) +
+      row('มอบไฟล์ให้', r.fileGiven) + row('การดำเนินการ', r.actionTaken) + row('วันที่ปิดเคส', r.closedDate ? formatDateDisplay(r.closedDate) : '') +
+    '</table>' + (r.officerNote ? '<div class="pdf-detail-box"><strong>บันทึกของเจ้าหน้าที่:</strong><br>' + escBr(r.officerNote) + '</div>' : '') + '</div>' +
+    '<div class="pdf-footer"><span>ระบบ CCTV Request | งานจราจรและความปลอดภัย มหาวิทยาลัยมหิดล</span><span>พิมพ์เมื่อ: ' + esc(now) + '</span></div></div>';
 }
-
 function generatePDF(records) {
-  if(!records.length) return;
-  const pages = records.map(r => buildPdfPage(r)).join('');
-  const printArea = document.getElementById('printArea');
-  printArea.innerHTML = pages;
-  // แจ้งจำนวนเคสและ filename ใน title
+  if (!records.length) return;
+  document.getElementById('printArea').innerHTML = records.map(buildPdfPage).join('');
   const origTitle = document.title;
-  document.title = records.length===1
-    ? `CCTV_${records[0].refCode}_${new Date().toISOString().slice(0,10)}`
-    : `CCTV_Export_${records.length}cases_${new Date().toISOString().slice(0,10)}`;
+  const day = session.today || bkkKey(Date.now());
+  document.title = records.length === 1 ? 'CCTV_' + records[0].refCode + '_' + day : 'CCTV_Export_' + records.length + 'cases_' + day;
   window.print();
   document.title = origTitle;
 }
 
-// ===== TEST OVERDUE (ทดสอบส่งแจ้งเตือนเคสค้าง) =====
-async function testOverdueAlert() {
-  const url = config.scriptUrl;
-  const resultEl = document.getElementById('testEmailResult');
-  if (!url) {
-    resultEl.style.display='block';resultEl.style.background='rgba(231,76,60,0.1)';resultEl.style.color='var(--red)';
-    resultEl.innerHTML='❌ กรุณากรอก Web App URL ก่อน'; return;
-  }
-  resultEl.style.display='block';resultEl.style.background='rgba(241,196,15,0.1)';resultEl.style.color='var(--yellow)';
-  resultEl.innerHTML='⏳ กำลังทดสอบแจ้งเตือนเคสค้าง...';
-  try {
-    const res = await fetch(url + '?action=testOverdue');
-    const json = await res.json();
-    if (json.success) {
-      resultEl.style.background='rgba(46,204,113,0.1)';resultEl.style.color='var(--green)';
-      resultEl.innerHTML=`✅ ส่งอีเมลทดสอบเคสค้างสำเร็จ! (ส่งไปยัง ${json.sentTo||'อีเมลที่ตั้งค่าไว้'})`;
-    } else {
-      resultEl.style.background='rgba(231,76,60,0.1)';resultEl.style.color='var(--red)';
-      resultEl.innerHTML='❌ เกิดข้อผิดพลาด: '+(json.error||'Unknown');
-    }
-  } catch(e) {
-    resultEl.style.background='rgba(231,76,60,0.1)';resultEl.style.color='var(--red)';
-    resultEl.innerHTML='❌ ไม่สามารถเชื่อมต่อได้';
-  }
-}
-
-function renderTable(data, compact) {
-  if(!data.length)return`<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">📭</div><p>ไม่พบข้อมูล</p></div>`;
-  const showCheck=pdfPanelOpen&&!compact;
-  let lastDate='',even=false,groupEven={};
-  data.forEach(r=>{const d=(r.timestamp||'').slice(0,10);if(d!==lastDate){lastDate=d;even=!even;groupEven[d]=even;}});
-  return`<table><thead><tr>
-    ${showCheck?'<th style="width:32px;"><input type="checkbox" onchange="toggleSelectAll(this.checked)" style="accent-color:var(--gold);"></th>':''}
-    <th>เลขอ้างอิง</th><th>วันที่</th><th>ชื่อ-สกุล</th><th>ประเภท</th><th>วัตถุประสงค์</th><th>เจ้าหน้าที่</th><th>เร่งด่วน</th><th>สถานะ</th><th></th>
-  </tr></thead><tbody>`+
-  data.map(r=>{
-    const d=(r.timestamp||'').slice(0,10);
-    const closed=r.status==='ปิดเคส';
-    const overdue=isOverdue(r);
-    let cls=closed?'row-closed':'';
-    if(!closed&&groupEven[d])cls+=' date-group-even';
-    if(overdue)cls+=' row-overdue';
-    const idx=allData.indexOf(r);
-    return`<tr class="${cls.trim()}">
-      ${showCheck?`<td><input type="checkbox" class="row-check" value="${r.refCode}" ${selectedIds.has(r.refCode)?'checked':''} onchange="toggleSelect('${r.refCode}',this.checked)"></td>`:''}
-      <td style="font-family:monospace;font-size:11px;color:var(--gold);">${r.refCode||'—'}${overdue?'<br><span class="overdue-badge">⚠️ เกิน 2 วัน</span>':''}</td>
-      <td style="white-space:nowrap;font-size:12px;">${r.timestamp?safeDate(r.timestamp):'—'}</td>
-      <td>${r.prefix||''} ${r.fname||''} ${r.lname||''}</td>
-      <td><span class="badge" style="background:rgba(52,152,219,0.15);color:#3498db;font-size:10px;">${r.requesterType||'—'}</span></td>
-      <td style="font-size:12px;">${r.purpose||'—'}</td>
-      <td style="font-size:11px;color:var(--text-muted);">${r.serviceOfficerName||r.officerName||'—'}</td>
-      <td><span class="badge ${urgencyBadge[r.urgency]||'badge-pending'}">${r.urgency||'ปกติ'}</span></td>
-      <td><span class="badge ${statusBadge[r.status||'รอดำเนินการ']}">${r.status||'รอดำเนินการ'}</span></td>
-      <td style="white-space:nowrap;">
-        <button onclick="openModal(${idx})" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);padding:4px 8px;border-radius:5px;cursor:pointer;font-size:11px;margin-right:3px;">รายละเอียด</button>
-        ${!compact&&(currentRole==='admin'||currentRole==='closer')?`<button onclick="exportSinglePDF(${idx})" style="background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.4);color:var(--red);padding:4px 8px;border-radius:5px;cursor:pointer;font-size:11px;">PDF</button>`:''}
-      </td>
-    </tr>`;
-  }).join('')+`</tbody></table>`;
-}
-
 // ===== MODAL =====
-function openModal(idx){
-  const r=allData[idx];if(!r)return;
-  document.getElementById('modalTitle').textContent=`${r.prefix||''} ${r.fname} ${r.lname}`;
-  document.getElementById('modalRef').textContent=(r.refCode||'')+'  |  '+(r.timestamp?safeDateTime(r.timestamp):'');
-  document.getElementById('modalBody').innerHTML=`
-    <div class="detail-grid">
-      <div class="detail-item"><label>ประเภทผู้ขอ</label><div class="val">${r.requesterType||'—'}</div></div>
-      <div class="detail-item"><label>เพศ</label><div class="val">${r.gender||'—'}</div></div>
-      <div class="detail-item"><label>โทรศัพท์</label><div class="val">${r.phone||'—'}</div></div>
-      <div class="detail-item"><label>อีเมล</label><div class="val">${r.email||'—'}</div></div>
-      <div class="detail-item"><label>คณะ/หน่วยงาน</label><div class="val">${r.faculty||r.officialOrg||'—'}</div></div>
-      <div class="detail-item"><label>ความเร่งด่วน</label><div class="val"><span class="badge ${urgencyBadge[r.urgency]||'badge-pending'}">${r.urgency||'ปกติ'}</span></div></div>
-      <div class="detail-item detail-full"><label>วัตถุประสงค์</label><div class="val">${r.purpose||'—'}</div></div>
-      <div class="detail-item detail-full"><label>รายละเอียดเหตุการณ์</label><div class="val" style="white-space:pre-wrap;background:var(--surface2);padding:10px;border-radius:8px;">${r.purposeDetail||'—'}</div></div>
-      <div class="detail-item"><label>ช่วงเวลา</label><div class="val">${(()=>{
-        const ds = formatDateDisplay(r.dateStart);
-        const ts = formatTimeDisplay(r.timeStart);
-        const de = formatDateDisplay(r.dateEnd||r.dateStart);
-        const te = formatTimeDisplay(r.timeEnd);
-        const start = ds + (ts ? ' เวลา ' + ts : '');
-        const end   = de + (te ? ' เวลา ' + te : '');
-        return (ds==='—'&&!ts) ? '—' : start + ' → ' + end;
-      })()}</div></div>
-      <div class="detail-item"><label>จุดที่ขอดูกล้อง</label><div class="val">${r.locations||'—'}</div></div>
-      <div class="detail-item"><label>ยานพาหนะ</label><div class="val">${r.vehiclePlate||'—'} ${r.vehicleDesc||''}</div></div>
-      <div class="detail-item detail-full">
-        <label>ขอรับไฟล์</label>
-        <div class="val">${(()=>{
-          const rf = r.requestFile||'';
-          if(rf==='ต้องการไฟล์') {
-            const dm = r.deliveryMethod||'';
-            const ge = r.gdriveEmail||'';
-            let badge = '<span style="background:rgba(231,76,60,0.15);color:#e74c3c;border:1.5px solid #e74c3c;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:800;letter-spacing:0.02em;">📁 ขอรับสำเนาไฟล์ภาพ</span>';
-            let extra = '';
-            if(dm) extra += '<span style="font-size:12px;color:var(--text-muted);margin-left:8px;">ช่องทาง: '+escHtml(dm)+'</span>';
-            if(ge) extra += '<div style="margin-top:8px;background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.4);border-radius:8px;padding:8px 12px;font-size:13px;">📧 <strong style="color:#3498db;">ส่งไฟล์ไปที่:</strong> <a href="mailto:'+escHtml(ge)+'" style="color:#c9a84c;font-weight:700;">'+escHtml(ge)+'</a></div>';
-            return badge + extra;
-          } else if(rf==='ดูอย่างเดียว') {
-            return '<span style="background:rgba(46,204,113,0.12);color:#2ecc71;border:1.5px solid #2ecc71;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:800;letter-spacing:0.02em;">👁️ ดูอย่างเดียว</span>';
-          }
-          return escHtml(rf)||'—';
-        })()}</div>
-      </div>
-      <div class="detail-item"><label>เอกสารที่นำมา</label><div class="val">${r.docs||r.exportDocs||'—'}</div></div>
-      ${r.attachedFiles?`<div class="detail-item detail-full"><label>ไฟล์แนบ</label><div class="val">${formatFileLinks(r.attachedFiles)}</div></div>`:''}
-      <div class="detail-item detail-full"><label>หมายเหตุ</label><div class="val">${r.additionalNote||'—'}</div></div>
-    </div>
-    <hr class="modal-divider">
-        ${buildOfficerForm(r, idx)}  `;
-  document.getElementById('modalOverlay').style.display='flex';
+const EMAIL_STATUS_TH = { sent: '✅ ส่งแล้ว', partial: '⚠️ ส่งได้บางคน', failed: '❌ ส่งไม่สำเร็จ', pending: '⏳ ยังไม่ทราบผล', skipped: '— ไม่มีผู้รับ' };
+function detailItem(label, html, full) { return '<div class="detail-item' + (full ? ' detail-full' : '') + '"><label>' + esc(label) + '</label><div class="val">' + html + '</div></div>'; }
+function attachmentsHtml(r, idx) {
+  const atts = r._attachments || [];
+  if (!atts.length) return '';
+  return atts.map((a, k) => {
+    const drive = safeUrl(a.url);
+    return '<div style="margin-bottom:6px;">📎 ' + esc(a.label) +
+      (a.fileId ? ' <button type="button" data-idx="' + idx + '" data-k="' + k + '" onclick="openAttachment(this)" style="margin-left:6px;background:var(--gold);color:var(--navy);border:none;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;cursor:pointer;">เปิดไฟล์</button>' : ' <span style="color:var(--text-muted);font-size:12px;">(ไม่มีลิงก์)</span>') +
+      (drive ? ' <a href="' + esc(drive) + '" target="_blank" rel="noopener noreferrer" style="color:var(--text-muted);font-size:12px;margin-left:6px;">Google Drive ↗</a>' : '') +
+      '</div>';
+  }).join('');
+}
+function openModal(idx) {
+  const r = allData[idx]; if (!r) return;
+  document.getElementById('modalTitle').textContent = [r.prefix, r.fname, r.lname].filter(Boolean).join(' ');
+  document.getElementById('modalRef').textContent = (r.refCode || '') + '  |  ' + (r.timestamp ? safeDateTime(r.timestamp) : '') + (r._createdApprox ? '  (วันที่จากเลขอ้างอิง)' : '');
+  let fileHtml;
+  if (r.requestFile === 'ต้องการไฟล์') {
+    fileHtml = '<span style="background:rgba(231,76,60,0.15);color:#e74c3c;border:1.5px solid #e74c3c;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:800;">📁 ขอรับสำเนาไฟล์ภาพ</span>' +
+      (r.deliveryMethod ? '<span style="font-size:12px;color:var(--text-muted);margin-left:8px;">ช่องทาง: ' + esc(r.deliveryMethod) + '</span>' : '') +
+      (r.fileReason ? '<div style="font-size:12px;color:var(--text-muted);margin-top:6px;">เหตุผล: ' + esc(r.fileReason) + '</div>' : '') +
+      (r.gdriveEmail ? '<div style="margin-top:8px;background:rgba(52,152,219,0.1);border:1px solid rgba(52,152,219,0.4);border-radius:8px;padding:8px 12px;font-size:13px;">📧 <strong style="color:#3498db;">ส่งไฟล์ไปที่:</strong> <a href="mailto:' + esc(r.gdriveEmail) + '" style="color:#c9a84c;font-weight:700;">' + esc(r.gdriveEmail) + '</a></div>' : '');
+  } else if (r.requestFile === 'ดูอย่างเดียว') {
+    fileHtml = '<span style="background:rgba(46,204,113,0.12);color:#2ecc71;border:1.5px solid #2ecc71;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:800;">👁️ ดูอย่างเดียว</span>';
+  } else fileHtml = esc(r.requestFile || '—');
+  const emailLine = r.emailStatus ? esc(EMAIL_STATUS_TH[r.emailStatus] || r.emailStatus) + emailDetailHtml(r) +
+    (currentRole === 'admin' && r.emailStatus !== 'sent' ? ' <button type="button" onclick="resendEmail(' + idx + ')" style="margin-left:6px;background:var(--surface3);color:var(--gold);border:1px solid var(--gold);border-radius:6px;padding:2px 10px;font-size:11px;cursor:pointer;">ส่งถึงผู้รับที่ยังไม่สำเร็จ</button>' : '') : '—';
+  document.getElementById('modalBody').innerHTML =
+    '<div class="detail-grid">' +
+    detailItem('ประเภทผู้ขอ', esc(r.requesterType || '—')) + detailItem('เพศ', esc(r.gender || '—')) +
+    (r.idCard ? detailItem('เลขบัตร/รหัส (ข้อมูลเดิม)', esc(r.idCard)) : '') + detailItem('โทรศัพท์', esc(r.phone || '—')) +
+    detailItem('อีเมล', esc(r.email || '—')) + detailItem('คณะ/หน่วยงาน', esc(r.faculty || r.officialOrg || '—') + (r.officialDoc ? ' (' + esc(r.officialDoc) + ')' : '')) +
+    detailItem('ความเร่งด่วน', '<span class="badge ' + (urgencyBadge[r.urgency] || 'badge-pending') + '">' + esc(r.urgency || 'ปกติ') + '</span>') +
+    detailItem('ภาษาแบบฟอร์ม', esc(r.formLang === 'en' ? 'English' : r.formLang === 'legacy' ? 'ฟอร์มรุ่นเก่า' : 'ไทย')) +
+    detailItem('วัตถุประสงค์', esc(r.purpose || '—'), true) +
+    detailItem('รายละเอียดเหตุการณ์', '<div style="white-space:pre-wrap;background:var(--surface2);padding:10px;border-radius:8px;">' + esc(r.purposeDetail || '—') + '</div>', true) +
+    detailItem('สถานที่/อาคาร', esc(venueLabel(r.venue || ''))) + detailItem('ช่วงเวลา', esc(periodText(r))) +
+    detailItem('จุดที่ขอดูกล้อง', '<div style="white-space:pre-wrap;">' + esc(r.locations || '—') + '</div>', true) +
+    detailItem('ยานพาหนะ', esc([r.vehiclePlate, r.vehicleDesc].filter(Boolean).join(' ') || '—')) + detailItem('หลักฐานที่ต้องการ', esc(r.evidenceTypes || '—')) +
+    detailItem('ขอรับไฟล์', fileHtml, true) +
+    detailItem('เอกสาร', esc([r.docs, r.exportDocs].filter(Boolean).join(', ') || '—'), true) +
+    ((r._attachments || []).length ? detailItem('ไฟล์แนบ (ไม่เปิดสาธารณะ — กด "เปิดไฟล์")', attachmentsHtml(r, idx), true) : '') +
+    (!r._attachments && r._attachmentCount ? detailItem('ไฟล์แนบ', esc(r._attachmentCount + ' ไฟล์ — เปิดได้เฉพาะผู้ดูแลระบบ (admin)'), true) : '') +
+    detailItem('หมายเหตุ', esc(r.additionalNote || '—'), true) +
+    detailItem('อีเมลแจ้งเตือนเจ้าหน้าที่', emailLine, true) +
+    (currentRole === 'admin' && r.clientInfo ? detailItem('อุปกรณ์ที่ใช้ส่ง', esc(r.clientInfo), true) : '') +
+    (currentRole === 'admin' && (r.requestFile === 'ต้องการไฟล์' || r.deliverySharedAt || r.deliveryRevokedAt) ? detailItem('สิทธิ์ไฟล์ส่งมอบ (เวลาไทย ที่เจ้าหน้าที่บันทึก)', esc('แชร์: ' + (r.deliverySharedAt ? r.deliverySharedAt.replace('T', ' ') : 'ยังไม่บันทึก') + '  |  ยกเลิก: ' + (r.deliveryRevokedAt ? r.deliveryRevokedAt.replace('T', ' ') : 'ยังไม่บันทึก')), true) : '') +
+    '</div><hr class="modal-divider">' + buildOfficerForm(r, idx);
+  document.getElementById('modalOverlay').style.display = 'flex';
 }
 function buildOfficerForm(r, idx) {
-  if (currentRole !== 'admin' && currentRole !== 'closer') return '';
   const isAdmin = currentRole === 'admin';
   const isClosed = r.status === 'ปิดเคส';
-  const today = new Date().toISOString().slice(0,10);
-
+  const isFinished = CLOSED_SET.indexOf(r.status) >= 0;
+  const today = session.today || bkkKey(Date.now());
+  // ค่าเดิมที่ไม่อยู่ในรายการ (ข้อมูลเก่า) ต้องแสดงและถูกเลือกไว้ เพื่อไม่ให้ถูกเขียนทับโดยไม่ตั้งใจ
+  const opt = (list, cur) => ((cur && list.indexOf(cur) < 0) ? list.concat([cur]) : list)
+    .map(s => '<option' + (cur === s ? ' selected' : '') + ' value="' + esc(s) + '">' + esc(s || '—') + (cur === s && list.indexOf(s) < 0 ? ' (ค่าเดิม)' : '') + '</option>').join('');
   let adminFields = '';
   if (isAdmin) {
-    const statusOpts = ['รอดำเนินการ','กำลังดำเนินการ','เสร็จสิ้น','ปฏิเสธ','ปิดเคส']
-      .map(s => '<option'+(r.status===s?' selected':'')+'>'+s+'</option>').join('');
-    const foundOpts = ['พบภาพ','ไม่พบภาพ','ภาพไม่ชัด','ไม่อยู่ในช่วงบันทึก']
-      .map(s => '<option'+(r.footageFound===s?' selected':'')+'>'+s+'</option>').join('');
-    adminFields = `
-      <div class="officer-row"><label>สถานะ</label>
-        <select id="of-status">${statusOpts}</select></div>
-      <div class="officer-row"><label>ผลการตรวจสอบ</label>
-        <select id="of-found">${foundOpts}</select></div>
-      <div class="officer-row"><label>มอบไฟล์ให้</label>
-        <select id="of-file">
-          <option value="">—</option>
-          <option${r.fileGiven==='ใช่'?' selected':''}>ใช่</option>
-          <option${r.fileGiven==='ไม่'?' selected':''}>ไม่</option>
-        </select></div>
-      <div class="officer-row"><label>เจ้าหน้าที่ผู้รับเรื่อง</label>
-        <input type="text" id="of-officer" value="${escHtml(r.officerName||'')}" placeholder="ชื่อเจ้าหน้าที่"></div>`;
-  } else {
-    // closer — hidden fields เพื่อให้ updateRecord ทำงานได้
     adminFields =
-      '<input type="hidden" id="of-status" value="'+escHtml(r.status||'รอดำเนินการ')+'">' +
-      '<input type="hidden" id="of-found" value="'+escHtml(r.footageFound||'')+'">'+
-      '<input type="hidden" id="of-file" value="'+escHtml(r.fileGiven||'')+'">'+
-      '<input type="hidden" id="of-officer" value="'+escHtml(r.officerName||'')+'">'+
-      '<input type="hidden" id="of-officer-closer" value="">';
+      '<div class="officer-row"><label>สถานะ</label><select id="of-status" data-initial="' + esc(r.status || 'รอดำเนินการ') + '">' + opt(['รอดำเนินการ', 'กำลังดำเนินการ', 'เสร็จสิ้น', 'ปฏิเสธ', 'ปิดเคส'], r.status || 'รอดำเนินการ') + '</select></div>' +
+      '<div class="officer-row"><label>ผลการตรวจสอบ</label><select id="of-found" data-initial="' + esc(r.footageFound || '') + '">' + opt(['', 'พบภาพ', 'ไม่พบภาพ', 'ภาพไม่ชัด', 'ไม่อยู่ในช่วงบันทึก'], r.footageFound || '') + '</select></div>' +
+      '<div class="officer-row"><label>มอบไฟล์ให้</label><select id="of-file" data-initial="' + esc(r.fileGiven || '') + '">' + opt(['', 'ใช่', 'ไม่'], r.fileGiven || '') + '</select></div>' +
+      '<div class="officer-row"><label>เจ้าหน้าที่ผู้รับเรื่อง</label><input type="text" id="of-officer" maxlength="200" value="' + esc(r.officerName || '') + '" placeholder="ชื่อเจ้าหน้าที่"></div>';
+    if (r.requestFile === 'ต้องการไฟล์' || r.deliverySharedAt || r.deliveryRevokedAt) {
+      // เวลาเปิด/ยกเลิกสิทธิ์ไฟล์ส่งมอบใน Google Drive (ใช้นับ 48 ชม. ในการตรวจ "ตรวจสิทธิ์ไฟล์ส่งมอบ") — บันทึกเวลาไทย ไม่ใช่เวลาสร้างไฟล์
+      const dt = (id, label, v) => '<div class="officer-row"><label>' + label + '</label><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' +
+        '<input type="datetime-local" id="' + id + '" data-initial="' + esc(v || '') + '" value="' + esc(v || '') + '" max="' + esc(bkkNowMinute()) + '" style="flex:1;min-width:190px;">' +
+        '<button type="button" onclick="document.getElementById(\'' + id + '\').value=bkkNowMinute()" style="background:var(--surface3);color:var(--gold);border:1px solid var(--gold);border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;">เวลานี้</button>' +
+        '<button type="button" onclick="document.getElementById(\'' + id + '\').value=\'\'" style="background:none;color:var(--text-muted);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;">ล้าง</button></div></div>';
+      adminFields += dt('of-shared', 'เวลาแชร์ไฟล์ให้ผู้ขอ (เวลาไทย) <span style="color:var(--text-muted);font-weight:400;">— ใส่เมื่อเปิดสิทธิ์ใน Drive แล้ว</span>', r.deliverySharedAt) +
+        dt('of-revoked', 'เวลายกเลิกสิทธิ์ (เวลาไทย) <span style="color:var(--text-muted);font-weight:400;">— ใส่เมื่อปิดสิทธิ์ใน Drive แล้ว</span>', r.deliveryRevokedAt);
+    }
   }
-
-  const closedStatus = isClosed
-    ? '<div style="padding:10px 16px;background:rgba(46,204,113,0.1);border:1px solid var(--green);border-radius:8px;color:var(--green);font-size:13px;font-weight:700;">&#10003; ปิดเคสแล้ว เมื่อ '+(r.closedDate||'')+'</div>'
-    : '<button class="btn-close-case" onclick="closeCase('+idx+')">&#128274; ปิดเคสนี้</button>';
-
-  return `
-    <div class="officer-form">
-      <h4>${isAdmin ? '🔧 บันทึกผลการดำเนินการ' : '🔒 ปิดเคส'}</h4>
-      <div class="officer-row"><label>เจ้าหน้าที่ผู้ให้บริการ</label>
-        <div style="padding:8px 12px;background:var(--surface);border-radius:6px;font-size:13px;color:var(--gold);">${escHtml(r.serviceOfficerName||'ไม่ระบุ')}</div>
-      </div>
-      ${adminFields}
-      <div class="officer-row">
-        <label>วันที่ปิดเคส${isAdmin ? '' : ' <span style="color:var(--red);">*</span>'}</label>
-        <input type="date" id="of-closed" value="${r.closedDate||today}">
-      </div>
-      <div class="officer-row">
-        <label>${isAdmin ? 'บันทึกของเจ้าหน้าที่' : 'เหตุผลการปิดเคส'}</label>
-        <textarea id="of-note" rows="3" placeholder="${isAdmin ? '' : 'ระบุเหตุผลการปิดเคส...'}">${escHtml(r.officerNote||'')}</textarea>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
-        ${isAdmin ? '<button class="btn-update" onclick="updateRecord('+idx+')">&#128190; บันทึกผล</button>' : ''}
-        ${closedStatus}
-        <button onclick="exportSinglePDF(${idx})" style="background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.4);color:var(--red);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">&#128196; Export PDF</button>
-      </div>
-    </div>`;
+  const lockedForCloser = !isAdmin && isFinished;
+  const closedStatus = (isClosed || lockedForCloser)
+    ? '<div style="padding:10px 16px;background:rgba(46,204,113,0.1);border:1px solid var(--green);border-radius:8px;color:var(--green);font-size:13px;font-weight:700;">✓ ' + esc(r.status) + (r.closedDate ? ' เมื่อ ' + esc(formatDateDisplay(r.closedDate)) : '') + '</div>'
+    : '<button class="btn-close-case" id="btnCloseCase" onclick="closeCase(' + idx + ')">🔒 ปิดเคสนี้</button>';
+  const canEditClosedFields = isAdmin || !lockedForCloser;
+  return '<div class="officer-form"><h4>' + (isAdmin ? '🔧 บันทึกผลการดำเนินการ' : '🔒 ปิดเคส') + '</h4>' +
+    '<div class="officer-row"><label>เจ้าหน้าที่ผู้ให้บริการ</label><div style="padding:8px 12px;background:var(--surface);border-radius:6px;font-size:13px;color:var(--gold);">' + esc(officerText(r) || 'ไม่ระบุ') + '</div></div>' +
+    adminFields +
+    (canEditClosedFields ?
+      '<div class="officer-row"><label>วันที่ปิดเคส' + (isAdmin ? ' <span style="color:var(--text-muted);font-weight:400;">(เว้นว่างได้ — ใส่ให้อัตโนมัติเมื่อสถานะเป็นปิด/เสร็จสิ้น/ปฏิเสธ)</span>' : ' <span style="color:var(--red);">*</span>') + '</label><input type="date" id="of-closed" max="' + esc(today) + '" value="' + esc(isAdmin ? (r.closedDate || '') : (r.closedDate || today)) + '"></div>' +
+      '<div class="officer-row"><label>' + (isAdmin ? 'บันทึกของเจ้าหน้าที่' : 'เหตุผลการปิดเคส <span style="color:var(--red);">*</span>') + '</label><textarea id="of-note" rows="3" maxlength="3000" placeholder="' + (isAdmin ? '' : 'ระบุเหตุผลการปิดเคส...') + '">' + esc(r.officerNote || '') + '</textarea></div>' : '') +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">' +
+      (isAdmin ? '<button class="btn-update" id="btnUpdate" onclick="updateRecord(' + idx + ')">💾 บันทึกผล</button>' : '') +
+      closedStatus +
+      '<button onclick="exportSinglePDF(' + idx + ')" style="background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.4);color:var(--red);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">📄 Export PDF</button>' +
+    '</div><p id="officerFormMsg" style="font-size:12px;margin-top:8px;color:var(--text-muted);"></p></div>';
 }
+function rowHint(r) { return { refCode: r.refCode, row: r._row, ts: r.timestamp, rev: r._rev === undefined ? '' : r._rev }; }
+// ผลอีเมลรายผู้รับ (เฉพาะ admin — server ไม่ส่ง emailLog ให้ closer)
+const EMAIL_ONE_TH = { sent: '✅', error: '❌ ไม่ยืนยัน', pending: '⏳ ยังไม่ส่ง' };
+function emailDetailHtml(r) {
+  let log = null;
+  try { log = r.emailLog ? JSON.parse(r.emailLog) : null; } catch (e) { log = null; }
+  if (!log || !log.new) return '';
+  const parts = Object.keys(log.new).map(e => esc(e.split('@')[0]) + ' ' + esc(EMAIL_ONE_TH[log.new[e]] || log.new[e]));
+  return ' <span style="color:var(--text-muted);font-size:11px;">(' + parts.join(' · ') + (log.at ? ' — ' + esc(log.at) : '') + ')</span>';
+}
+// ถูกแก้โดยผู้อื่นระหว่างเปิดอยู่ → โหลดข้อมูลล่าสุดและเปิดเคสเดิมอีกครั้ง (ไม่เขียนทับ)
+async function reopenAfterStale(r, msg) {
+  await loadData();
+  const i = allData.findIndex(x => x.refCode === r.refCode && x._row === r._row);
+  const j = i >= 0 ? i : allData.findIndex(x => x.refCode === r.refCode);
+  if (j >= 0) { openModal(j); formMsg(msg, true); }
+}
+const CLOSED_SET = ['ปิดเคส', 'เสร็จสิ้น', 'ปฏิเสธ'];
+// เวลาไทยปัจจุบัน รูปแบบ yyyy-MM-ddTHH:mm (ไม่ขึ้นกับเขตเวลาของเครื่อง)
+function bkkNowMinute() { return new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 16); }
+function closeModal() { const m = document.getElementById('modalOverlay'); if (m) m.style.display = 'none'; }
+function formMsg(text, isErr) { const el = document.getElementById('officerFormMsg'); if (el) { el.textContent = text; el.style.color = isErr ? 'var(--red)' : 'var(--text-muted)'; } }
+function setBusy(id, on) { const b = document.getElementById(id); if (b) b.disabled = on; }
 
-function closeModal(){ document.getElementById('modalOverlay').style.display='none'; }
-async function saveToSheet(refCode, payload) {
-  if (!config.scriptUrl) return; // ถ้าไม่มี URL ข้ามไป
+async function updateRecord(idx) {
+  const r = allData[idx]; if (!r) return;
+  const fields = {
+    officerName: document.getElementById('of-officer').value,
+    closedDate: document.getElementById('of-closed').value, officerNote: document.getElementById('of-note').value
+  };
+  // ตัวเลือก: ส่งเฉพาะเมื่อผู้ใช้เปลี่ยนจากค่าเดิมจริง
+  [['of-status', 'status'], ['of-found', 'footageFound'], ['of-file', 'fileGiven'], ['of-shared', 'deliverySharedAt'], ['of-revoked', 'deliveryRevokedAt']].forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el && el.value !== el.getAttribute('data-initial')) fields[key] = /^delivery/.test(key) ? el.value.slice(0, 16) : el.value; // datetime-local อาจมีวินาที → ตัดเหลือ yyyy-MM-ddTHH:mm
+  });
+  setBusy('btnUpdate', true); formMsg('กำลังบันทึก...');
   try {
-    await fetch(config.scriptUrl + '?action=updateRecord&payload=' + encodeURIComponent(JSON.stringify({refCode, ...payload})));
-  } catch(e) {
-    console.warn('saveToSheet error:', e);
-  }
+    const res = await api('update', Object.assign(rowHint(r), { fields: fields }));
+    Object.assign(r, res.saved || fields);
+    await loadData();
+    closeModal();
+    alert('✅ บันทึกผลการดำเนินการแล้ว (ยืนยันจากระบบ)');
+  } catch (e) {
+    if (e.code === 'stale') { await reopenAfterStale(r, '⚠️ ' + errText(e)); return; }
+    formMsg('❌ บันทึกไม่สำเร็จ: ' + errText(e) + ' — ข้อมูลในระบบยังเป็นค่าเดิม', true);
+  } finally { setBusy('btnUpdate', false); }
+}
+async function closeCase(idx) {
+  const r = allData[idx]; if (!r) return;
+  const note = (document.getElementById('of-note') || {}).value || '';
+  if (currentRole !== 'admin' && !note.trim()) { formMsg('กรุณากรอกเหตุผลการปิดเคส', true); return; }
+  if (!confirm('ยืนยันปิดเคส ' + r.refCode + ' ?')) return;
+  const payload = Object.assign(rowHint(r), { closedDate: (document.getElementById('of-closed') || {}).value || '', officerNote: note });
+  if (currentRole === 'admin' && document.getElementById('of-officer')) payload.officerName = document.getElementById('of-officer').value;
+  setBusy('btnCloseCase', true); formMsg('กำลังปิดเคส...');
+  try {
+    await api('close', payload);
+    await loadData();
+    closeModal();
+    alert('🔒 ปิดเคสสำเร็จแล้ว (ยืนยันจากระบบ)');
+  } catch (e) {
+    if (e.code === 'stale') { await reopenAfterStale(r, '⚠️ ' + errText(e)); return; }
+    formMsg('❌ ปิดเคสไม่สำเร็จ: ' + errText(e), true);
+  } finally { setBusy('btnCloseCase', false); }
+}
+async function resendEmail(idx) {
+  const r = allData[idx]; if (!r) return;
+  if (!confirm('ส่งอีเมลแจ้งเตือนคำขอ ' + r.refCode + ' อีกครั้ง "เฉพาะผู้รับที่ยังไม่สำเร็จ"?\n(ผู้ที่ได้รับแล้วจะไม่ได้รับซ้ำ / ผู้ที่ผลไม่ยืนยัน อาจได้รับซ้ำ)')) return;
+  try {
+    const res = await api('resendEmail', rowHint(r));
+    alert((res.email === 'sent' ? '✅ ' : '⚠️ ผล: ' + res.email + '\n') +
+      'ส่งสำเร็จ: ' + ((res.sentTo || []).join(', ') || '-') + '\nยังไม่สำเร็จ: ' + ((res.failed || []).join(', ') || '-') + '\nได้รับแล้ว (ไม่ส่งซ้ำ): ' + ((res.skipped || []).join(', ') || '-'));
+    await loadData(); openModal(allData.findIndex(x => x.refCode === r.refCode));
+  } catch (e) { alert('❌ ' + errText(e)); }
+}
+async function openAttachment(btn) {
+  const r = allData[+btn.getAttribute('data-idx')]; if (!r) return;
+  const a = (r._attachments || [])[+btn.getAttribute('data-k')]; if (!a) return;
+  const w = window.open('', '_blank');
+  if (w) { try { w.document.write('<p style="font-family:sans-serif;padding:20px;">กำลังโหลดไฟล์ ' + esc(a.label) + ' ...</p>'); } catch (e) {} }
+  btn.disabled = true; const old = btn.textContent; btn.textContent = 'กำลังโหลด...';
+  try {
+    const res = await api('attachment', Object.assign(rowHint(r), { fileId: a.fileId }));
+    const bin = atob(res.base64); const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const safe = SAFE_VIEW_MIME.indexOf(res.mimeType) >= 0;
+    const blob = new Blob([bytes], { type: safe ? res.mimeType : 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    if (safe && w) { w.location.href = url; }
+    else {
+      if (w) w.close();
+      const link = document.createElement('a'); link.href = url; link.download = res.name || 'file'; document.body.appendChild(link); link.click(); link.remove();
+    }
+    setTimeout(() => URL.revokeObjectURL(url), 120000);
+  } catch (e) {
+    if (w) w.close();
+    alert('เปิดไฟล์ไม่ได้: ' + errText(e) + (e.code === 'file_too_large' && safeUrl(a.url) ? '\nให้เปิดผ่าน Google Drive แทน (ต้องมีสิทธิ์ในโฟลเดอร์)' : ''));
+  } finally { btn.disabled = false; btn.textContent = old; }
 }
 
-function updateRecord(idx) {
-  const r = allData[idx];
-  r.status        = document.getElementById('of-status').value;
-  r.footageFound  = document.getElementById('of-found').value;
-  r.fileGiven     = document.getElementById('of-file').value;
-  r.officerName   = document.getElementById('of-officer').value;
-  r.closedDate    = document.getElementById('of-closed').value;
-  r.officerNote   = document.getElementById('of-note').value;
-  saveToSheet(r.refCode, {
-    status: r.status, footageFound: r.footageFound,
-    fileGiven: r.fileGiven, officerName: r.officerName,
-    closedDate: r.closedDate, officerNote: r.officerNote
-  });
-  closeModal(); renderAll();
-  alert('\u2705 บันทึกผลการดำเนินการแล้ว');
+// ===== ตั้งค่าระบบ (อ่านอย่างเดียวจาก backend) =====
+function renderConfigInfo() {
+  const s = session.cfg || {};
+  const info = document.getElementById('sysInfo');
+  if (info) info.innerHTML =
+    '<div style="font-size:13px;line-height:2;">ผู้ใช้: <b>' + esc(s.user) + '</b> (' + esc(s.role) + ')<br>' +
+    'ระบบหลังบ้าน: v' + esc(s.version) + (s.build ? ' (build ' + esc(s.build) + ')' : '') + ' — <b style="color:' + (s.env === 'TEST' ? 'var(--yellow)' : 'var(--green)') + ';">' + esc(s.env === 'TEST' ? 'TEST (อีเมลไปผู้รับทดสอบเท่านั้น)' : s.env === 'PROD' ? 'ใช้งานจริง' : 'ยังไม่ได้ตั้งค่า') + '</b>' + (s.maintenance ? ' — <b style="color:var(--red);">ปิดรับคำขอชั่วคราว</b>' : '') + '<br>' +
+    'admin01 (closer): ทุกอาคาร เห็นเลขบัตรเดิมแบบปิดบางส่วน, ' + (s.closerCanViewAttachments ? 'เปิดไฟล์แนบได้' : 'ไม่เข้าถึงไฟล์แนบ') + ' (กรองที่ระบบหลังบ้าน)<br>' +
+    'บัญชีเจ้าหน้าที่อาคาร: เห็น/ปิดเฉพาะคำขอของอาคารที่ผูกไว้ ไม่เห็นไฟล์แนบ ไม่เห็นข้อมูลเดิมที่ไม่ระบุอาคาร (สร้าง/ผูกอาคารจากเมนูใน Google Sheet)<br>' +
+    'เกณฑ์เคสค้าง: ' + esc((s.policy || {}).label || '') + ' (นับตามวันที่ปฏิทินไทย)<br>' +
+    'พื้นที่ส่วนกลาง — ส่งอีเมลคำขอใหม่ถึงเจ้าหน้าที่ที่ผู้ขอเลือก: ' + (s.notifySelectedOfficer ? 'ใช่ (เฉพาะรายชื่อทางการ)' : 'ไม่ (ผู้รับหลักเท่านั้น)') + ' | อาคาร: ดูตารางผู้รับตามสถานที่ด้านล่าง<br>' +
+    'วันนี้ (เวลาไทย): ' + esc(s.today) + '</div>';
+  const list = document.getElementById('emailList');
+  if (list) list.innerHTML = (s.notifyEmails || []).length
+    ? s.notifyEmails.map(e => '<div class="email-item"><span>' + esc(e) + '</span><span class="email-toggle active" style="flex:0;">✓ รับแจ้งเตือน</span></div>').join('')
+    : '<p style="font-size:13px;color:var(--text-muted);">—</p>';
+  renderRoutingTable(s);
 }
-
-function closeCase(idx) {
-  const note = document.getElementById('of-note')?.value || '';
-  if (currentRole === 'closer' && !note.trim()) {
-    alert('กรุณากรอกเหตุผลการปิดเคสด้วยค่ะ');
-    return;
-  }
-  if (!confirm('ยืนยันปิดเคสนี้?')) return;
-  const r = allData[idx];
-  const closedDate = document.getElementById('of-closed')?.value || new Date().toISOString().slice(0,10);
-  r.status     = 'ปิดเคส';
-  r.closedDate = closedDate;
-  if (note) r.officerNote = note;
-  if (document.getElementById('of-officer')?.value) r.officerName = document.getElementById('of-officer').value;
-  saveToSheet(r.refCode, {
-    status: 'ปิดเคส',
-    closedDate: closedDate,
-    officerNote: r.officerNote || '',
-    officerName: r.officerName || ''
-  });
-  closeModal(); renderAll();
-  alert('\uD83D\uDD12 ปิดเคสสำเร็จแล้ว');
+// ตารางผู้รับอีเมลตามสถานที่ (นโยบายของระบบจริง — ใน TEST ทุกเหตุการณ์ส่งถึงผู้รับทดสอบเท่านั้น)
+function renderRoutingTable(s) {
+  const el = document.getElementById('routingTable'); if (!el) return;
+  const rows = s.routing || [];
+  if (!rows.length) { el.innerHTML = ''; return; }
+  el.innerHTML = '<p style="font-size:12px;color:var(--text-muted);margin:6px 0 8px;">นโยบายคำขอใหม่ของอาคาร: <b>' + esc(s.venuePolicy || '-') + '</b>' +
+    (s.env === 'TEST' ? ' — <b style="color:var(--yellow);">ตอนนี้เป็น TEST: ทุกอีเมลส่งถึงผู้รับทดสอบเท่านั้น</b> (ตารางนี้คือเส้นทางเมื่อใช้งานจริง)' : '') + '</p>' +
+    '<div style="overflow-x:auto;"><table><thead><tr><th>สถานที่</th><th>เจ้าหน้าที่ในรายชื่อ</th><th>คำขอใหม่</th><th>เคสค้าง</th></tr></thead><tbody>' +
+    rows.map(r => '<tr><td>' + esc(r.label) + (r.status === 'pending' ? '<br><span style="color:var(--yellow);font-size:11px;">รอกำหนดเจ้าหน้าที่</span>' : '') + '</td>' +
+      '<td style="font-size:12px;">' + (r.staff && r.staff.length ? r.staff.map(esc).join('<br>') : (r.status === 'common' ? 'รายชื่อส่วนกลางเดิม' : '—')) + '</td>' +
+      '<td style="font-size:12px;">' + esc(r.newRequest) + '</td><td style="font-size:12px;">' + esc(r.overdue) + '</td></tr>').join('') +
+    '</tbody></table></div><p style="font-size:12px;color:var(--text-muted);margin-top:6px;">ผู้รับหลัก: ' + esc(((rows[0] || {}).main || []).join(', ')) + '</p>';
 }
-
-// ===== EMAIL MANAGEMENT =====
-function renderEmailList(){
-  const el=document.getElementById('emailList');
-  if(!el)return;
-  el.innerHTML=emailList.map((item,i)=>`
-    <div class="email-item">
-      <span>${item.email}</span>
-      <button class="email-toggle ${item.active?'active':'inactive'}" onclick="toggleEmail(${i})">${item.active?'✓ เปิด':'✗ ปิด'}</button>
-      <button class="email-delete" onclick="deleteEmail(${i})">✕</button>
-    </div>`).join('');
-}
-function toggleEmail(i){ emailList[i].active=!emailList[i].active; renderEmailList(); }
-function deleteEmail(i){ if(confirm('ลบ '+emailList[i].email+'?')){ emailList.splice(i,1); renderEmailList(); } }
-function addEmail(){
-  const v=document.getElementById('newEmailInput').value.trim();
-  if(!v||!v.includes('@')){ alert('กรุณากรอกอีเมลที่ถูกต้อง'); return; }
-  if(emailList.find(e=>e.email===v)){ alert('มีอีเมลนี้แล้ว'); return; }
-  emailList.push({email:v,active:true});
-  document.getElementById('newEmailInput').value='';
-  renderEmailList();
-}
-function saveEmails(){
-  localStorage.setItem('notify_emails',JSON.stringify(emailList));
-  const active=emailList.filter(e=>e.active).map(e=>e.email);
-  alert('✅ บันทึกแล้ว!\n\nอีเมลที่เปิดอยู่:\n'+active.join('\n')+'\n\n⚠️ อย่าลืมอัปเดต NOTIFY_EMAILS ใน Code.gs ด้วยนะคะ');
-}
-
-// ===== PRESET LOCATIONS =====
-function renderPresetList(){
-  const el=document.getElementById('presetList');
-  if(!el)return;
-  el.innerHTML=presetLocations.length?presetLocations.map((p,i)=>`
-    <div class="preset-item"><span>📍 ${p}</span><button onclick="deletePreset(${i})">✕</button></div>`).join('')
-    :`<p style="font-size:13px;color:var(--text-muted);">ยังไม่มีจุดที่ตั้งไว้</p>`;
-}
-function addPreset(){
-  const v=document.getElementById('newPresetInput').value.trim();
-  if(!v)return;
-  if(!presetLocations.includes(v)) presetLocations.push(v);
-  document.getElementById('newPresetInput').value='';
-  renderPresetList();
-}
-function deletePreset(i){ presetLocations.splice(i,1); renderPresetList(); }
-function savePresets(){
-  localStorage.setItem('cctv_preset_locations',JSON.stringify(presetLocations));
-  alert('✅ บันทึกจุด CCTV แล้ว จะแสดงในหน้าแบบฟอร์มทันที');
-}
-
-// ===== CONFIG =====
-function loadConfig(){
-  document.getElementById('cfgScriptUrl').value=config.scriptUrl;
-  document.getElementById('cfgSheetId').value=config.sheetId;
+function showTestResult(ok, html) {
+  const el = document.getElementById('testEmailResult');
+  el.style.display = 'block';
+  el.style.background = ok === null ? 'rgba(241,196,15,0.1)' : ok ? 'rgba(46,204,113,0.1)' : 'rgba(231,76,60,0.1)';
+  el.style.color = ok === null ? 'var(--yellow)' : ok ? 'var(--green)' : 'var(--red)';
+  el.innerHTML = html;
 }
 async function testEmail() {
-  const url = config.scriptUrl;
-  const resultEl = document.getElementById('testEmailResult');
-  if (!url || url === '') {
-    resultEl.style.display = 'block';
-    resultEl.style.background = 'rgba(231,76,60,0.1)';
-    resultEl.style.color = 'var(--red)';
-    resultEl.innerHTML = '❌ กรุณากรอก Web App URL ก่อนทดสอบ';
-    return;
-  }
-  resultEl.style.display = 'block';
-  resultEl.style.background = 'rgba(241,196,15,0.1)';
-  resultEl.style.color = 'var(--yellow)';
-  resultEl.innerHTML = '⏳ กำลังส่งอีเมลทดสอบ...';
-  try {
-    const res = await fetch(url + '?action=testEmail');
-    const json = await res.json();
-    if (json.success) {
-      resultEl.style.background = 'rgba(46,204,113,0.1)';
-      resultEl.style.color = 'var(--green)';
-      resultEl.innerHTML = '✅ ส่งอีเมลทดสอบสำเร็จ! กรุณาตรวจสอบกล่องอีเมล';
-    } else {
-      resultEl.style.background = 'rgba(231,76,60,0.1)';
-      resultEl.style.color = 'var(--red)';
-      resultEl.innerHTML = '❌ เกิดข้อผิดพลาด: ' + (json.error || 'Unknown error');
-    }
-  } catch(e) {
-    resultEl.style.background = 'rgba(231,76,60,0.1)';
-    resultEl.style.color = 'var(--red)';
-    resultEl.innerHTML = '❌ ไม่สามารถเชื่อมต่อได้ กรุณาตรวจสอบ URL และ Deploy ใหม่';
-  }
+  if (!confirm('ส่งอีเมลทดสอบ "คำขอใหม่" ถึงผู้รับในรายการ?')) return;
+  showTestResult(null, '⏳ กำลังส่งอีเมลทดสอบ...');
+  try { const r = await api('testEmail'); showTestResult(true, '✅ ส่งอีเมลทดสอบแล้วถึง: ' + esc((r.sentTo || []).join(', '))); }
+  catch (e) { showTestResult(false, '❌ ' + esc(errText(e))); }
+}
+async function testOverdueAlert() {
+  if (!confirm('ส่งอีเมลทดสอบ "แจ้งเคสค้าง" ถึงผู้รับหลัก?')) return;
+  showTestResult(null, '⏳ กำลังทดสอบแจ้งเตือนเคสค้าง...');
+  try { const r = await api('testOverdue'); showTestResult(true, '✅ ส่งอีเมลทดสอบเคสค้างแล้วถึง: ' + esc((r.sentTo || []).join(', '))); }
+  catch (e) { showTestResult(false, '❌ ' + esc(errText(e))); }
 }
 
-function saveConfig(){
-  config.scriptUrl=document.getElementById('cfgScriptUrl').value;
-  config.sheetId=document.getElementById('cfgSheetId').value;
-  const np=document.getElementById('cfgPassword').value;
-  if(np)config.password=np;
-  localStorage.setItem('script_url',config.scriptUrl);
-  localStorage.setItem('sheet_id',config.sheetId);
-  localStorage.setItem('admin_password',config.password);
-  alert('✅ บันทึกการตั้งค่าแล้ว');
-}
+// ลบค่าที่หน้าเวอร์ชันเก่าเคยเก็บไว้ในเบราว์เซอร์ (รหัสผ่าน/URL/อีเมล) — ไม่ใช้แล้ว
+try { ['admin_password', 'script_url', 'sheet_id', 'notify_emails'].forEach(k => localStorage.removeItem(k)); } catch (e) {}
 </script>
 <div id="printArea"></div>
 </body>

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- CCTV Request Form v3.2.1 (en) build 3.2.1-20261123a -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -86,6 +87,9 @@
   /* DATETIME */
   .datetime-range { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; }
   .datetime-arrow { color: var(--text-muted); font-size: 20px; text-align: center; }
+  .datetime-range { grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); }
+  .datetime-range input { width: 100%; min-width: 0; }
+  @media(max-width:480px){ .datetime-range { grid-template-columns: 1fr; gap: 6px; } .datetime-arrow { transform: rotate(90deg); line-height: 1; } }
 
   /* LOCATION TAGS */
   .location-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
@@ -196,6 +200,7 @@
 
 <main class="main">
 <form id="cctvForm" novalidate>
+<div aria-hidden="true" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;"><label>Leave empty<input type="text" id="cctvHp" name="cctv_hp" tabindex="-1" autocomplete="off"></label></div>
 
   <!-- PDPA -->
   <div class="pdpa-notice">
@@ -273,13 +278,8 @@
         </div>
       </div>
 
-      <div class="form-row" style="margin-bottom:16px;">
-        <div class="form-group">
-          <label for="idCard">National ID / Student ID / Employee ID <span class="required">*</span></label>
-          <input type="text" id="idCard" name="idCard" placeholder="Enter ID number" required>
-          <span class="form-hint">Used for identity verification under PDPA only.</span>
-          <p class="error-msg" id="idCardError">Please enter your ID number.</p>
-        </div>
+      <!-- Phone (v3.2: no ID-number field) -->
+      <div class="form-row single" style="margin-bottom:16px;">
         <div class="form-group">
           <label for="phone">Phone Number <span class="required">*</span></label>
           <input type="tel" id="phone" name="phone" placeholder="0xx-xxx-xxxx" required>
@@ -328,7 +328,7 @@
 
   <!-- SECTION 2: Purpose -->
   <div class="card">
-    <div class="card-header"><div class="step-num">2</div><h2>Purpose of Request</h2></div>
+    <div class="card-header"><div class="step-num">2</div><h2>Purpose &amp; Location of Request</h2></div>
     <div class="card-body">
       <div class="form-group" style="margin-bottom:16px;">
         <label>Main Purpose <span class="required">*</span></label>
@@ -357,6 +357,30 @@
           <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="Vehicle Image"> 🚗 Vehicle Image</div>
           <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="Direction of Movement"> 🗺️ Direction of Movement</div>
           <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox" name="evidence" value="Entry/Exit Timestamp"> ⏰ Entry / Exit Timestamp</div>
+        </div>
+      </div>
+      <hr class="section-divider">
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Venue / Building <span class="required">*</span></label>
+        <div class="radio-group" id="venueGroup">
+          <div class="radio-item" onclick="selectVenue('common',this)"><input type="radio" name="venue" value="common"> 🏞️ Common area</div>
+          <div class="radio-item" onclick="selectVenue('mlc',this)"><input type="radio" name="venue" value="mlc"> 🏢 Mahidol Learning Center (MLC)</div>
+          <div class="radio-item" onclick="selectVenue('sirivithaya',this)"><input type="radio" name="venue" value="sirivithaya"> 🏢 Sirivithaya Building</div>
+          <div class="radio-item" onclick="selectVenue('mahidol_hall',this)"><input type="radio" name="venue" value="mahidol_hall"> 🏛️ Prince Mahidol Hall (Mahidol Sitthakarn)</div>
+        </div>
+        <span class="form-hint">Choose the venue first; Section 6 will then list the officers of that venue.</span>
+        <p class="error-msg" id="venueError">Please choose the venue / building.</p>
+      </div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label for="locations">Camera Point(s) to Review <span class="required">*</span></label>
+        <textarea id="locations" name="locations" maxlength="3000" placeholder="Describe the camera point(s) clearly, e.g., front entrance on the 1st floor, car park behind the building (several points allowed)" oninput="if(this.value.trim()){var e=document.getElementById('locationError');if(e)e.classList.remove('show');}"></textarea>
+        <p class="error-msg" id="locationError">Please describe the camera point(s) to review.</p>
+      </div>
+      <div class="form-group">
+        <label>Vehicle Information (if applicable)</label>
+        <div class="form-row" style="margin-bottom:0;">
+          <input type="text" id="vehiclePlate" name="vehiclePlate" placeholder="License Plate">
+          <input type="text" id="vehicleDesc" name="vehicleDesc" placeholder="Model / Color, e.g., Toyota Yaris White">
         </div>
       </div>
     </div>
@@ -403,7 +427,7 @@
 
   <!-- SECTION 3: Date / Location -->
   <div class="card">
-    <div class="card-header"><div class="step-num">3</div><h2>Date, Time &amp; Camera Location</h2></div>
+    <div class="card-header"><div class="step-num">3</div><h2>Date &amp; Time to Review</h2></div>
     <div class="card-body">
       <div class="info-box">📅 CCTV footage retention varies per camera location. Please specify the time frame as accurately as possible.</div>
       <div class="form-group" style="margin-bottom:16px;">
@@ -414,30 +438,6 @@
           <div><div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">End</div><input type="date" id="dateEnd" name="dateEnd"><input type="time" id="timeEnd" name="timeEnd" style="margin-top:6px;"></div>
         </div>
         <p class="error-msg" id="dateError">Please specify the incident date.</p>
-      </div>
-      <hr class="section-divider">
-      <div class="form-group" style="margin-bottom:12px;">
-        <label for="locationInput">Camera Location(s) <span class="required">*</span></label>
-        <div style="display:flex;gap:8px;position:relative;align-items:flex-start;">
-          <div style="flex:1;position:relative;">
-            <input type="text" id="locationInput" placeholder="🔍 Type location name, e.g., Gate, Dormitory, Faculty..." style="width:100%;"
-              oninput="locationSearch(this)" onkeydown="locationKeydown(event)" onfocus="locationSearch(this)" onblur="setTimeout(()=>locationHide(),200)">
-            <div id="locationDrop" style="position:absolute;top:100%;left:0;right:0;z-index:9999;background:white;border:1.5px solid var(--mu-blue);border-top:none;border-radius:0 0 10px 10px;max-height:240px;overflow-y:auto;box-shadow:0 8px 24px rgba(26,39,68,0.13);display:none;"></div>
-          </div>
-          <button type="button" onclick="addLocation()" style="background:var(--mu-navy);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;white-space:nowrap;flex-shrink:0;">+ Add</button>
-          <div style="background:#fff0f0;border:1.5px solid #e74c3c;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;color:#c0392b;white-space:nowrap;align-self:center;flex-shrink:0;">⬅️ Click to add</div>
-        </div>
-        <div id="presetWrap" style="margin-top:6px;"></div>
-        <div class="location-tags" id="locationTags"></div>
-        <input type="hidden" id="locations" name="locations">
-        <p class="error-msg" id="locationError">Please specify at least one camera location.</p>
-      </div>
-      <div class="form-group">
-        <label>Vehicle Information (if applicable)</label>
-        <div class="form-row" style="margin-bottom:0;">
-          <input type="text" id="vehiclePlate" name="vehiclePlate" placeholder="License Plate">
-          <input type="text" id="vehicleDesc" name="vehicleDesc" placeholder="Model / Color, e.g., Toyota Yaris White">
-        </div>
       </div>
     </div>
   </div>
@@ -717,8 +717,9 @@
                   <input type="checkbox" id="gdriveConsent" name="gdriveConsent"
                     style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:#d97706;">
                   <span>
-                    I acknowledge that I must download the file to my own device, as the system will
-                    <strong>delete the link within 48 hours</strong> after email delivery for data security purposes.
+                    I acknowledge that the officer will share the footage <strong>only with the email address above</strong>
+                    and will <strong>revoke access to the link within 48 hours</strong> of sending it, for data security.
+                    I must download the file to my own device within that time.
                   </span>
                 </label>
                 <span id="gdriveConsentError" style="display:none;font-size:12px;color:#c0392b;margin-top:6px;display:block;">⚠️ Please confirm acknowledgement of file delivery terms before submitting.</span>
@@ -735,8 +736,10 @@
   <div class="card">
     <div class="card-header"><div class="step-num">6</div><h2>Assigned CCTV Officer</h2></div>
     <div class="card-body">
-      <div class="info-box">👮 Please specify the CCTV officer serving you today.</div>
-      <div class="form-row" style="margin-bottom:16px;">
+      <div class="info-box" id="officerVenueStatus" aria-live="polite"></div>
+      <p class="error-msg" id="officerVenueError"></p>
+
+      <div class="form-row" id="officerModeRow" style="margin-bottom:16px;display:none;">
         <div class="form-group">
           <label>Serving Officer <span class="required">*</span></label>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
@@ -753,7 +756,7 @@
 
       <div class="conditional-section" id="officerKnownSection">
         <div class="form-group">
-          <label for="officerNameInput">Search Officer Name <span class="required">*</span></label>
+          <label for="officerNameInput"><span id="officerSearchLabel">Search Officer Name</span> <span class="required">*</span></label>
           <div class="autocomplete-wrap">
             <input type="text" id="officerNameInput" name="officerNameInput"
               placeholder="Type officer's name..." autocomplete="off"
@@ -805,12 +808,14 @@
   <p style="color:var(--text-muted);font-size:14px;max-width:400px;margin:0 auto 16px;line-height:1.7;">Your request has been recorded. The officer will review and respond within 24–48 hours.</p>
   <p style="font-size:13px;color:var(--text-muted);">Reference Number:</p>
   <div class="ref-code" id="refCode">CCTV-XXXXXXXX</div>
-  <p style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">A notification has been sent to the assigned officer.</p>
+  <p id="successEmailNote" style="font-size:13px;color:var(--text-muted);margin-bottom:10px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.7;"></p>
+  <p id="successDupNote" style="display:none;font-size:13px;color:#b45309;margin-bottom:10px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.7;"></p>
+  <p style="font-size:12px;color:var(--text-muted);margin-bottom:24px;">Please note down the reference number or take a screenshot of this page.</p>
   <button class="btn-new" onclick="resetForm()">+ Submit New Request</button>
 </div>
 </main>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // ===== EMERGENCY MODE =====
 function setEmergencyMode(on) {
   document.getElementById('emergencyBanner').style.display = on ? 'block' : 'none';
@@ -844,182 +849,49 @@ function toggleDocUpload(checkEl, uploadId) {
   const zone = document.getElementById(uploadId);
   if(zone) zone.style.display = (cb && cb.checked) ? 'block' : 'none';
 }
-function triggerDocUpload(inputId) { const el = document.getElementById(inputId); if(el) el.click(); }
-function handleDocFile(input, inputId) {
-  const files = Array.from(input.files);
-  if(!docFiles[inputId]) docFiles[inputId] = [];
-  files.forEach(f => {
-    if(f.size > 10*1024*1024){ alert('File "'+f.name+'" exceeds 10MB limit.'); return; }
-    docFiles[inputId].push(f);
-  });
-  renderDocFileList(inputId);
+
+function triggerDocUpload(inputId) {
+  const el = document.getElementById(inputId);
+  if(el) el.click();
 }
+
+// ตรวจชนิด/ขนาดไฟล์ทันทีที่เลือก (ดูจากเนื้อไฟล์จริง) — ไฟล์ที่ไม่ผ่านจะไม่ถูกเพิ่ม และแจ้งเหตุผลชัดเจน
+async function handleDocFile(input, inputId) {
+  const files = Array.from(input.files || []);
+  input.value = '';
+  if(!docFiles[inputId]) docFiles[inputId] = [];
+  for (const f of files) {
+    if (countAllDocFiles() >= SUBMIT_LIMITS.maxFiles) { alert(T.tooManyFiles); break; }
+    const problem = await checkSelectedFile(f);
+    if (problem) { alert(problem); continue; }
+    docFiles[inputId].push(f);
+  }
+  renderDocFileList(inputId);
+  updateIdUploadBtn();
+}
+
 function renderDocFileList(inputId) {
   const listId = inputId.replace('file-','list-');
   const el = document.getElementById(listId);
   if(!el) return;
   const files = docFiles[inputId] || [];
   el.innerHTML = files.map((f,i) =>
-    `<div class="file-mini-item">✅ ${f.name} <span style="color:#666;">(${(f.size/1024).toFixed(0)} KB)</span>
+    `<div class="file-mini-item">✅ ${escHtml(f.name)} <span style="color:#666;">(${(f.size/1024).toFixed(0)} KB)</span>
      <span onclick="removeDocFile('${inputId}',${i})" style="margin-left:auto;cursor:pointer;color:#c0392b;">✕</span></div>`
   ).join('');
 }
-function removeDocFile(inputId, idx) { if(docFiles[inputId]) { docFiles[inputId].splice(idx,1); renderDocFileList(inputId); } }
+
+function removeDocFile(inputId, idx) {
+  if(docFiles[inputId]) { docFiles[inputId].splice(idx,1); renderDocFileList(inputId); updateIdUploadBtn(); }
+}
+
 function updateIdUploadBtn() {
   const files = docFiles['file-export-id'] || [];
   const btn = document.getElementById('uploadIdBtn');
   if(btn) btn.style.borderColor = files.length > 0 ? '#27ae60' : '';
 }
-function getAllDocFiles() {
-  const all = [];
-  Object.values(docFiles).forEach(arr => arr.forEach(f => all.push(f)));
-  return all;
-}
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVfwqmg24QmG37NbdIpn5w90_TWzbilayADz2QdG29CY2qFH_fuD0FhZRinslAQL4I1Q/exec';
-
-// ===== LOCATION DATABASE (Thai names + English searchable) =====
-const LOCATION_DB = [
-  'กองกฎหมาย','กองกิจการนักศึกษา','กองกายภาพและสิ่งแวดล้อม','กองคลัง',
-  'กองทรัพยากรบุคคล','กองเทคโนโลยีสารสนเทศ','กองบริหารการศึกษา',
-  'กองบริหารงานทั่วไป','กองบริหารงานวิจัย','กองแผนงาน','กองพัฒนาคุณภาพ','กองวิเทศสัมพันธ์',
-  'คณะกายภาพบำบัด','คณะทันตแพทยศาสตร์','คณะเทคนิคการแพทย์',
-  'คณะเทคโนโลยีสารสนเทศและการสื่อสาร','คณะพยาบาลศาสตร์','คณะเภสัชศาสตร์',
-  'คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี','คณะแพทยศาสตร์ศิริราชพยาบาล',
-  'คณะวิทยาศาสตร์','คณะวิศวกรรมศาสตร์','คณะเวชศาสตร์เขตร้อน',
-  'คณะศิลปศาสตร์','คณะสังคมศาสตร์และมนุษยศาสตร์','คณะสัตวแพทยศาสตร์',
-  'คณะสาธารณสุขศาสตร์','คณะสิ่งแวดล้อมและทรัพยากรศาสตร์',
-  'งานจราจรและความปลอดภัย',
-  'ถนนกันภัยมหิดล','ถนนการุณยมิตร','ถนนจิตตสมาน','ถนนชนนีประทาน',
-  'ถนนถิ่นวิทยาการ','ถนนดำรงวิจัย','ถนนเทิดจักรี','ถนนปัญญาแผ่นดิน',
-  'ถนนผสานเทศไทย','ถนนพูนผลประชา','ถนนมานะมั่นคง','ถนนวิชาชื่นชน',
-  'ถนนวิถีปัญญา','ถนนสานสัตยา','ถนนส่องไทยทัศน์','ถนนสาย D',
-  'ทางเข้าเรือนไทย','ทางเข้าอาคารเตรียมอุดมดนตรี',
-  'บัณฑิตวิทยาลัย',
-  'ประตู 1','ประตู 2','ประตู 3','ประตู 4','ประตู 5',
-  'ประตู 6','ประตู 7','ประตู 8',
-  'ประตูคณะพยาบาลศาสตร์','ประตูวิทยาลัยดุริยางคศิลป์',
-  'โรงเรียนสาธิตนานาชาติ','เรือนเพาะชำ',
-  'วิทยาเขตกาญจนบุรี','วิทยาลัยการจัดการ','วิทยาลัยดุริยางคศิลป์',
-  'วิทยาลัยนานาชาติ','วิทยาลัยวิทยาศาสตร์และเทคโนโลยีการกีฬา','วิทยาลัยศาสนศึกษา',
-  'ศูนย์การแพทย์กาญจนาภิเษก','ศูนย์จิตตปัญญาศึกษา',
-  'ศูนย์ธรรมาภิบาลข้อมูลและยุทธศาสตร์อัจฉริยะ',
-  'ศูนย์บริหารความปลอดภัย อาชีวอนามัยและสภาพแวดล้อมในการทำงาน',
-  'ศูนย์บริหารจัดการความเสี่ยง','ศูนย์บริหารสินทรัพย์',
-  'ศูนย์สัตว์ทดลองแห่งชาติ','หอสมุดและคลังความรู้มหาวิทยาลัยมหิดล',
-  'หอพักนักศึกษา 1','หอพักนักศึกษา 2','หอพักนักศึกษา 3','หอพักนักศึกษา 4',
-  'หอพักนักศึกษา 5','หอพักนักศึกษา 6','หอพักนักศึกษา 7','หอพักนักศึกษา 8',
-  'หอพักนักศึกษา 9','หอพักนักศึกษา 10','หอพักนักศึกษา 11',
-  'อาคารเจรจานวัตกรรม','อาคารชุดพักอาศัย ม.มหิดล',
-  'อาคารเตรียมอุดมดนตรี','อาคารสิริวิทยา',
-  'ลานจอดรถ P1','ลานจอดรถ P2','ลานจอดรถ P3','ลานจอดรถ P4','ลานจอดรถ P5',
-  'ลานจอดรถ อาคารเจรจานวัตกรรม','ลานจอดรถเรือนไทย'
-];
-
-function getLocationIcon(name) {
-  if (name.startsWith('ประตู')) return '🚪';
-  if (name.startsWith('ถนน')) return '🛣️';
-  if (name.startsWith('ทางเข้า')) return '🔑';
-  if (name.startsWith('หอพัก')) return '🏠';
-  if (name.startsWith('ลานจอดรถ')) return '🅿️';
-  if (name.startsWith('คณะ')) return '🏛️';
-  if (name.startsWith('กอง')) return '🏢';
-  if (name.startsWith('อาคาร')) return '🏗️';
-  if (name.startsWith('ศูนย์')) return '🔬';
-  if (name.startsWith('สถาบัน')) return '📚';
-  if (name.startsWith('วิทยาลัย') || name.startsWith('วิทยาเขต')) return '🎓';
-  if (name.startsWith('หอสมุด')) return '📖';
-  return '📍';
-}
-
-let locDropActiveIdx = -1;
-
-function locationSearch(input) {
-  const q = input.value.trim();
-  const drop = document.getElementById('locationDrop');
-  locDropActiveIdx = -1;
-  const results = q.length === 0
-    ? LOCATION_DB.slice(0, 10)
-    : LOCATION_DB.filter(l => l.toLowerCase().includes(q.toLowerCase())).slice(0, 12);
-  if (!results.length) { drop.style.display = 'none'; return; }
-  drop.innerHTML = results.map(r =>
-    `<div class="autocomplete-item" data-val="${r}"
-      onmousedown="selectLocation('${r.replace(/'/g,"\\'")}')"
-      style="padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;transition:background 0.1s;">
-      <span style="font-size:16px;flex-shrink:0;">${getLocationIcon(r)}</span>
-      <span>${r}</span>
-    </div>`
-  ).join('') + (results.length >= 12 ? `<div style="padding:6px 14px;font-size:11px;color:var(--text-muted);background:var(--surface2);">Type more to filter results</div>` : '');
-  drop.style.display = 'block';
-}
-
-function selectLocation(val) {
-  document.getElementById('locationInput').value = val;
-  document.getElementById('locationDrop').style.display = 'none';
-  addLocation();
-}
-
-function locationHide() {
-  const drop = document.getElementById('locationDrop');
-  if (drop) drop.style.display = 'none';
-  locDropActiveIdx = -1;
-}
-
-function locationKeydown(e) {
-  const drop = document.getElementById('locationDrop');
-  if (!drop || drop.style.display === 'none') {
-    if (e.key === 'Enter') { e.preventDefault(); addLocation(); }
-    return;
-  }
-  const items = drop.querySelectorAll('[data-val]');
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    locDropActiveIdx = Math.min(locDropActiveIdx + 1, items.length - 1);
-    items.forEach((el, i) => el.style.background = i === locDropActiveIdx ? '#eef2fb' : '');
-    items[locDropActiveIdx]?.scrollIntoView({ block: 'nearest' });
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    locDropActiveIdx = Math.max(locDropActiveIdx - 1, 0);
-    items.forEach((el, i) => el.style.background = i === locDropActiveIdx ? '#eef2fb' : '');
-    items[locDropActiveIdx]?.scrollIntoView({ block: 'nearest' });
-  } else if (e.key === 'Enter') {
-    e.preventDefault();
-    if (locDropActiveIdx >= 0 && items[locDropActiveIdx]) {
-      selectLocation(items[locDropActiveIdx].dataset.val);
-    } else {
-      addLocation();
-    }
-  } else if (e.key === 'Escape') {
-    locationHide();
-  }
-}
-
-function loadPresets() {
-  const presets = JSON.parse(localStorage.getItem('cctv_preset_locations') || '[]');
-  const wrap = document.getElementById('presetWrap');
-  if (!presets.length) { wrap.innerHTML = ''; return; }
-  wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Common Locations (set by Admin):</div><div class="preset-locations">' +
-    presets.map(p => `<button type="button" class="preset-btn" onclick="addPreset('${p}')">${p}</button>`).join('') + '</div>';
-}
-function addPreset(name) { document.getElementById('locationInput').value = name; addLocation(); }
-
-let locationList = [];
-function addLocation() {
-  const input = document.getElementById('locationInput');
-  const val = input.value.trim();
-  locationHide();
-  if (!val || locationList.includes(val)) { input.value = ''; return; }
-  locationList.push(val);
-  renderLocationTags();
-  input.value = '';
-  document.getElementById('locations').value = locationList.join(', ');
-}
-document.getElementById('locationInput').addEventListener('keydown', locationKeydown);
-function removeLocation(idx) { locationList.splice(idx,1); renderLocationTags(); document.getElementById('locations').value = locationList.join(', '); }
-function renderLocationTags() {
-  document.getElementById('locationTags').innerHTML = locationList.map((loc,i) =>
-    `<div class="location-tag">📍 ${loc} <span class="remove" onclick="removeLocation(${i})">✕</span></div>`).join('');
-}
 
 let uploadedFiles = [];
 function getAllDocFilesLegacy() { return []; }
@@ -1065,9 +937,9 @@ function toggleGDriveEmail(show) {
 }
 
 function updateProgress() {
-  const required = ['fname','lname','requesterType','idCard','phone','dateStart','locations'];
+  const required = ['fname','lname','requesterType','phone','dateStart','locations'];
   const filled = required.filter(id => { const el=document.getElementById(id); return el&&el.value.trim(); }).length;
-  const extras = (document.querySelector('input[name="purpose"]:checked')?1:0) + (document.querySelector('input[name="urgency"]:checked')?1:0) + (document.getElementById('pdpaConsent').checked?1:0);
+  const extras = (document.querySelector('input[name="purpose"]:checked')?1:0) + (document.querySelector('input[name="urgency"]:checked')?1:0) + (document.getElementById('pdpaConsent').checked?1:0) + (document.querySelector('input[name="venue"]:checked')?1:0);
   document.getElementById('progressBar').style.width = Math.round(((filled+extras)/10)*100)+'%';
 }
 document.addEventListener('change', updateProgress);
@@ -1089,14 +961,17 @@ function validate() {
   check(document.getElementById('pdpaConsent').checked, 'pdpaConsentError', 'Please consent to PDPA data collection (top section).');
   check(!!document.getElementById('fname').value.trim(), 'fnameError', 'Please enter your first name.');
   check(!!document.getElementById('lname').value.trim(), 'lnameError', 'Please enter your last name.');
+  check(!!document.getElementById('prefix').value, 'prefixError', 'Please select a title.');
+  check(!!document.getElementById('gender').value, 'genderError', 'Please select your gender.');
   check(!!document.getElementById('requesterType').value, 'requesterTypeError', 'Please select requester type.');
-  check(!!document.getElementById('idCard').value.trim(), 'idCardError', 'Please enter your ID number.');
   check(!!document.getElementById('phone').value.trim(), 'phoneError', 'Please enter your phone number.');
+  { const em = document.getElementById('email').value.trim(); check(!em || isValidEmail(em), 'emailError', 'Contact email format is invalid (Section 1).'); }
   check(!!document.querySelector('input[name="purpose"]:checked'), 'purposeError', 'Please select a purpose (Section 2).');
   check(!!document.getElementById('purposeDetail').value.trim(), 'purposeDetailError', 'Please provide incident details (Section 2).');
+  check(!!document.querySelector('input[name="venue"]:checked'), 'venueError', 'Please choose the venue / building (Section 2).');
+  check(!!document.getElementById('locations').value.trim(), 'locationError', 'Please describe the camera point(s) to review (Section 2).');
   check(!!document.querySelector('input[name="urgency"]:checked'), 'urgencyError', 'Please select an urgency level.');
   check(!!document.getElementById('dateStart').value, 'dateError', 'Please specify the incident date (Section 3).');
-  check(!!document.getElementById('locations').value, 'locationError', 'Please specify at least one camera location and click "+ Add" (Section 3).');
   check(document.getElementById('pdpaFileConsent').checked, 'pdpaFileConsentError', 'Please confirm PDPA acknowledgement in Section 4.1.');
 
   const rfEl = document.querySelector('input[name="requestFile"]:checked');
@@ -1122,7 +997,7 @@ function validate() {
 
     if (dmEl && dmEl.value === 'Receive via Google Drive Link') {
       const gEmail = document.getElementById('gdriveEmail');
-      check(!!(gEmail && gEmail.value.includes('@')), 'gdriveEmailError', 'Please enter a valid email for Google Drive link (Section 5.5).');
+      check(!!(gEmail && isValidEmail(gEmail.value)), 'gdriveEmailError', 'Please enter a valid email for Google Drive link (Section 5.5).');
       const gc = document.getElementById('gdriveConsent');
       const gcErr = document.getElementById('gdriveConsentError');
       if (!gc || !gc.checked) {
@@ -1138,7 +1013,10 @@ function validate() {
   }
 
   const mode = currentOfficerMode;
-  check(!!mode, 'officerModeError', 'Please select the serving officer type (Section 6).');
+  const vProblem = officerVenueProblem();
+  { const ve = document.getElementById('officerVenueError'); if (ve) ve.textContent = vProblem || ''; }
+  check(!vProblem, 'officerVenueError', vProblem);
+  if (!vProblem && officerStateForVenue() === 'common') check(!!mode, 'officerModeError', 'Please select the serving officer type (Section 6).');
   if (mode === 'known') {
     const ov = document.getElementById('officerName').value;
     if (!ov) {
@@ -1153,7 +1031,7 @@ function validate() {
   }
   if (mode === 'other') {
     check(!!document.getElementById('officerOtherName').value.trim(), 'officerOtherNameError', "Please enter the officer's full name (Section 6).");
-    check(!!document.getElementById('officerOtherEmail').value.trim(), 'officerOtherEmailError', "Please enter the officer's email (Section 6).");
+    check(isValidEmail(document.getElementById('officerOtherEmail').value), 'officerOtherEmailError', "Please enter a valid officer email (Section 6).");
   }
 
   if (!valid && errors.length > 0) showValidationPopup(errors);
@@ -1207,119 +1085,635 @@ function showValidationPopup(errors) {
   overlay.addEventListener('click', closePopup);
 }
 
-function generateRefCode() {
-  const date = new Date().toISOString().slice(0,10).replace(/-/g,'');
-  return `CCTV-${date}-${Math.random().toString(36).substr(2,4).toUpperCase()}`;
+// ===== SUBMISSION v3.2 — แสดง "สำเร็จ" เฉพาะเมื่อ server ยืนยันการบันทึก + ตัวตนคำขอ =====
+const FORM_LANG = "en";
+const T = {
+  fileEmpty: n => 'File "' + n + '" is empty. Please choose again.',
+  fileUnreadable: n => 'File "' + n + '" cannot be read (it may be damaged or still downloading from iCloud/Google Drive). Please choose again.',
+  fileType: n => 'File "' + n + '" is not a real JPG, PNG or PDF. Please choose a JPG/PNG image or a PDF file.',
+  fileTooLarge: n => 'File "' + n + '" is too large (PDF max 10 MB; images are resized automatically). Please rescan at a lower resolution or take a photo instead.',
+  heic: n => 'This device cannot convert the HEIC photo "' + n + '". Please pick it again from the Photos app, take a screenshot of it, or set the camera format to "Most Compatible".',
+  tooManyFiles: 'You can attach up to 8 files per request.',
+  totalTooLarge: 'Attachments exceed 15 MB in total. Please attach fewer files or use a lower-resolution PDF scan.',
+  prepareFailed: 'Could not prepare the attachments. Please choose the files again.',
+  preparingFile: (i, n) => 'Preparing file ' + i + '/' + n + ' (resizing if needed)...',
+  sending: mb => 'Submitting (' + mb + ' MB) — please do not close or switch away from this page',
+  elapsed: s => s + ' seconds elapsed',
+  checking: 'Checking whether the system has received your request...',
+  checkingAttempt: n => 'Check #' + n,
+  failedTitle: 'Submission failed',
+  notSaved: 'This request has NOT been saved. Your entries are still in the form — fix them and submit again.',
+  fileProblemTitle: 'Attachment problem',
+  unconfirmedTitle: 'Submission not confirmed yet',
+  unconfirmedLines: [
+    'The connection dropped or was too slow, so we cannot yet confirm whether your request was received.',
+    'It is safe to press "Submit again" — the same data is resent under the same request ID. If the first attempt was saved, you will see the same reference number and no duplicate is created.',
+    'If you edit the form before submitting again, the system checks the earlier attempt first. If it was saved, your edits are NOT sent (please tell the officer instead).',
+    'Try moving to a stronger signal, or open this link in Safari/Chrome instead of inside the LINE app. If it still fails, call 02-4414400 ext. 0.'
+  ],
+  checkingPrevious: 'Checking the result of your previous attempt...',
+  previousSavedTitle: 'Previous request was saved',
+  previousSaved: ref => 'The request you submitted before reloading this page was saved. Reference number ' + ref + ' — no need to submit again.',
+  previousMissingTitle: 'Previous request not found',
+  previousMissing: 'The request you submitted before reloading this page was NOT saved. Please fill in and submit it again.',
+  previousPending: 'The result of your previous attempt cannot be confirmed yet. Please press "Check status again" before submitting again, to avoid a duplicate.',
+  dupSame: 'This request was already saved from an earlier attempt — no duplicate was created.',
+  dupConflict: 'Your original request was saved, but edits made after the first attempt were NOT saved — please tell the officer, quoting this reference number.',
+  backend: {
+    unreachable: 'Cannot reach the request system yet, so nothing was sent. Please check your connection and submit again, or call 02-4414400 ext. 0.',
+    not_configured: 'Online requests are not available yet (system not configured). Please call 02-4414400 ext. 0.',
+    env_mismatch: 'This page is connected to the wrong system (TEST/production) and will not send data. Please inform the administrator.',
+    version_mismatch: 'This form is outdated. Please reload the page and try again.',
+    backend_outdated: 'The request system has not been updated to the version this form needs (v3.2), so nothing was sent. Please inform the administrator or call 02-4414400 ext. 0.',
+    maintenance: 'Online requests are temporarily closed. Please call 02-4414400 ext. 0 or visit the office.',
+    unknown_backend: 'The system is being updated, so nothing was sent. Please try again shortly, or call 02-4414400 ext. 0.'
+  },
+  btnCheckAgain: 'Check status again', btnResend: 'Submit again (same data, no duplicate)', btnClose: 'Close (your entries are kept)', btnFix: 'OK — go back and fix',
+  emailSent: 'A notification has been sent to the officers.',
+  emailFailed: 'Your request has been saved, but the email notification to officers failed. Officers will still see it in the system. If urgent, call 02-4414400 ext. 0 with your reference number.',
+  emailUnknown: 'Your request has been saved. Officers will review it in the system.',
+  errors: {
+    validation: 'Some fields are invalid or incomplete:',
+    too_large: 'The data and attachments are too large. Please reduce the number or size of files.',
+    total_too_large: 'Attachments exceed 15 MB in total. Please reduce the number or size of files.',
+    file_too_large: 'A file is larger than 10 MB:',
+    too_many_files: 'You can attach up to 8 files.',
+    file_type: 'A file is not a real JPG/PNG/PDF:',
+    bad_file: 'A file could not be read:',
+    upload_failed: 'File storage is temporarily unavailable. Please submit again.',
+    save_failed: 'Saving is temporarily unavailable. Please submit again.',
+    busy: 'Many requests are being submitted at once. Please submit again.',
+    server: 'A temporary system error occurred. Please submit again or call 02-4414400 ext. 0.',
+    bad_json: 'The submitted data was incomplete. Please submit again.',
+    empty: 'The submitted data was incomplete. Please submit again.',
+    gone: 'The back-end has not been updated to match this form. Please call 02-4414400 ext. 0.',
+    unknown_action: 'The back-end has not been updated to match this form. Please call 02-4414400 ext. 0.',
+    not_configured: 'Online requests are not available yet. Please call 02-4414400 ext. 0.',
+    maintenance: 'Online requests are temporarily closed. Please call 02-4414400 ext. 0.',
+    env_mismatch: 'This page is connected to the wrong system (TEST/production). Please inform the administrator.',
+    privacy_check_failed: 'Attachments cannot be stored securely right now, so the request was not accepted. Please call 02-4414400 ext. 0.',
+    rate_limited: 'An unusually high number of requests is being received; submissions are paused. Please try later or call 02-4414400 ext. 0.',
+    conflict: 'Your original request was saved, but later edits were not saved.',
+    client_outdated: 'This form does not match the system version. Please reload the page and fill it in again — nothing has been saved.'
+  },
+  fieldLabels: {
+    requestId: 'Request ID (please reload the page)', pdpaConsent: 'PDPA consent (top section)', prefix: 'Title', fname: 'First name', lname: 'Last name', gender: 'Gender',
+    requesterType: 'Requester type', phone: 'Phone number', email: 'Contact email (invalid format)', venue: 'Venue / building (Section 2)',
+    purpose: 'Purpose', purposeDetail: 'Incident details', evidenceTypes: 'Evidence type', dateStart: 'Incident date (start)',
+    timeStart: 'Start time', dateEnd: 'End date', timeEnd: 'End time', locations: 'Camera point(s) (Section 2)', urgency: 'Urgency level',
+    requestFile: 'Request type (4.2)', pdpaFileConsent: 'PDPA acknowledgement (4.1)', fileReason: 'Reason for copy (4.3)',
+    deliveryMethod: 'Delivery method (5.5)', gdriveEmail: 'Email for Google Drive link (5.5)', gdriveConsent: 'Link delivery terms (5.5)', hp: 'Invalid submission — please reload the page',
+    docs: 'Documents brought', exportDocs: 'Supporting documents', officerMode: 'Officer type (Section 6)',
+    serviceOfficerName: 'Officer name (Section 6)', serviceOfficerEmail: 'Officer (Section 6) — must be chosen from the list of the selected venue. The latest list has been reloaded; please choose the officer again (reload the page if no list appears)',
+    file_id_copy: 'ID card copy file (Section 5)', file_police_copy: 'Police report / daily record file (Section 5)'
+  }
+};
+const FORM_VALUE_MAP = {"prefix": {"Mr.": "นาย", "Mrs.": "นาง", "Miss": "นางสาว", "Dr.": "ดร.", "Assoc.Prof.": "รศ.", "Asst.Prof.": "ผศ.", "Prof.": "ศ.", "Other": "อื่นๆ"}, "gender": {"Male": "ชาย", "Female": "หญิง", "Not specified": "ไม่ระบุ"}, "requesterType": {"Student": "นักศึกษา", "Staff / Personnel": "บุคลากร", "External Officer": "เจ้าหน้าที่ภายนอก", "General Public": "บุคคลทั่วไป", "Private Organization": "หน่วยงานเอกชน"}, "purpose": {"Lost Property Tracking": "ติดตามทรัพย์สินสูญหาย", "Vehicle Tracking": "ติดตามยานพาหนะ", "Accident / Emergency": "อุบัติเหตุ/เหตุฉุกเฉิน", "Criminal Investigation": "การสอบสวนคดี", "Complaint / Dispute": "ร้องเรียน/พิพาท", "Other": "อื่นๆ"}, "evidence": {"Person Image": "ภาพบุคคล", "Vehicle Image": "ภาพยานพาหนะ", "Direction of Movement": "ทิศทางการเคลื่อนที่", "Entry/Exit Timestamp": "เวลาเข้า-ออกสถานที่"}, "urgency": {"Normal": "ปกติ", "Urgent": "เร่งด่วน", "Emergency": "ฉุกเฉิน"}, "requestFile": {"View Only": "ดูอย่างเดียว", "Request Footage Copy": "ต้องการไฟล์"}, "fileReason": {"Evidence for legal proceedings / police complaint": "ใช้เป็นหลักฐานประกอบคดีความ/แจ้งความร้องทุกข์", "Police investigation / government agency inquiry": "ใช้ประกอบการสอบสวนของเจ้าพนักงานตำรวจ/หน่วยงานรัฐ", "Insurance claim compensation": "ใช้ประกอบการเรียกร้องค่าสินไหมทดแทนจากบริษัทประกันภัย"}, "deliveryMethod": {"Bring Flash Drive on pickup day": "นำ Flash Drive มาเองในวันรับไฟล์", "Receive via Google Drive Link": "รับผ่านลิงก์ Google Drive"}, "docs": {"National ID Card": "บัตรประชาชน", "Student / Employee ID": "บัตรนักศึกษา/พนักงาน", "Police Report": "ใบแจ้งความ", "Power of Attorney": "หนังสือมอบอำนาจ", "Official Government Letter": "หนังสือราชการ", "Court Order": "คำสั่งศาล"}};
+const REQUEST_FILE_EXPORT_VALUE = "Request Footage Copy";
+const OTHER_VALUE = "Other";
+const POA_EXPORT_VALUE = "Power of Attorney";
+const VIEW_DOC_INPUTS = {"file-doc-id": "National ID Card", "file-doc-student": "Student / Employee ID", "file-doc-police": "Police Report", "file-doc-poa": "Power of Attorney", "file-doc-official": "Official Government Letter", "file-doc-court": "Court Order"};
+// หน้า TEST ถูกสร้างให้เป็น env: 'TEST' | contract = สัญญาข้อมูล v3.2 (มี venue, ไม่มีเลขบัตร) — ระบบหลังบ้านต้องตอบตรงกันจึงจะส่ง
+const BACKEND_EXPECT = { env: 'PROD', version: '3.2.1', contract: 'cctv-3.2' };
+const DOC_INPUT_TYPES = {
+  'file-doc-id': 'บัตรประชาชน', 'file-doc-student': 'บัตรนักศึกษา/พนักงาน', 'file-doc-police': 'ใบแจ้งความ',
+  'file-doc-poa': 'หนังสือมอบอำนาจ', 'file-doc-official': 'หนังสือราชการ', 'file-doc-court': 'คำสั่งศาล',
+  'file-export-id': 'สำเนาบัตรประชาชน/บัตรนักศึกษา/บัตรพนักงาน',
+  'file-export-police': 'สำเนาบันทึกประจำวัน/ใบแจ้งความ',
+  'file-export-poa': 'หนังสือมอบอำนาจ'
+};
+const SUBMIT_LIMITS = {
+  maxFiles: 8,                       // ต้องตรงกับ Code.gs
+  maxFileBytes: 10 * 1024 * 1024,    // ต่อไฟล์ หลังย่อรูป (ต้องตรงกับ Code.gs)
+  maxTotalBytes: 15 * 1024 * 1024,   // รวมทุกไฟล์ หลังย่อรูป (ต้องตรงกับ Code.gs)
+  maxPickBytes: 30 * 1024 * 1024,    // รูปต้นฉบับใหญ่สุดที่ยอมให้เลือก (จะถูกย่อก่อนส่ง)
+  imageMaxDim: 2400, compressAbove: 1200 * 1024, jpegQuality: 0.85
+};
+// requestId + เนื้อหาที่ "แช่แข็ง" ไว้ของการส่งครั้งล่าสุด (อยู่ในหน่วยความจำเท่านั้น)
+// phase: idle | unknown (ยังไม่รู้ผล → ส่งซ้ำได้เฉพาะเนื้อหาเดิม) | rejected (server ปฏิเสธชัดเจน → ไม่มีอะไรถูกบันทึก)
+const SUBMIT_STATE = { requestId: null, body: null, fingerprint: null, phase: 'idle', busy: false };
+// เก็บข้ามการ reload เฉพาะรหัสคำขอ + เวลา (ไม่เก็บข้อมูลฟอร์ม/ไฟล์) — ใช้ตรวจผลคำขอค้างก่อนเริ่มใหม่
+const PENDING_KEY = 'cctv_pending_v1';
+const REF_RE = /^CCTV-\d{8}-[A-Z0-9]{4}$/;
+let BACKEND_STATE = { checked: false, ok: true, reason: '' };
+
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+function isValidEmail(s) { return /^[^\s@<>"',;]+@[^\s@<>"',;]+\.[^\s@<>"',;]+$/.test(String(s || '').trim()); }
+function mapVal(field, v) { const m = FORM_VALUE_MAP[field]; return (m && Object.prototype.hasOwnProperty.call(m, v)) ? m[v] : v; }
+function sleepMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function formatMB(n) { return (n / 1024 / 1024).toFixed(n > 10 * 1024 * 1024 ? 0 : 1); }
+
+function randomBytes(n) {
+  const a = new Uint8Array(n);
+  const c = window.crypto || window.msCrypto;
+  if (c && c.getRandomValues) c.getRandomValues(a); else for (let i = 0; i < n; i++) a[i] = Math.floor(Math.random() * 256);
+  return a;
+}
+function newRequestId() {
+  if (window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  return Array.from(randomBytes(16), b => b.toString(16).padStart(2, '0')).join('');
+}
+function clientInfo() {
+  const ua = navigator.userAgent || '';
+  let os = 'อื่นๆ', m;
+  if ((m = ua.match(/(iPhone|iPad|iPod).*? OS (\d+)[_.](\d+)/))) os = 'iOS ' + m[2] + '.' + m[3];
+  else if ((m = ua.match(/Android (\d+(?:\.\d+)?)/))) os = 'Android ' + m[1];
+  else if (/Windows NT/.test(ua)) os = 'Windows';
+  else if (/Mac OS X/.test(ua)) os = navigator.maxTouchPoints > 1 ? 'iPadOS' : 'macOS';
+  let app = '';
+  if (/\bLine\//i.test(ua)) app = 'LINE in-app';
+  else if (/FBAN|FBAV|FB_IAB/.test(ua)) app = 'Facebook in-app';
+  else if (/Instagram/.test(ua)) app = 'Instagram in-app';
+  let br = 'อื่นๆ';
+  if (/EdgA?\//.test(ua)) br = 'Edge'; else if (/SamsungBrowser/.test(ua)) br = 'Samsung Internet';
+  else if (/CriOS|Chrome\//.test(ua)) br = 'Chrome'; else if (/FxiOS|Firefox\//.test(ua)) br = 'Firefox';
+  else if (/Safari\//.test(ua)) br = 'Safari';
+  return [os, app || br, (window.innerWidth || 0) + 'px'].join(' / ');
 }
 
-function collectData(refCode) {
-  const get = id => (document.getElementById(id)||{}).value||'';
-  const getChecked = name => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(e=>e.value).join(', ');
-  const getRadio = name => { const el=document.querySelector(`input[name="${name}"]:checked`); return el?el.value:''; };
+// ---------- ตรวจไฟล์ (ดูจากเนื้อไฟล์จริง ไม่เชื่อนามสกุล) ----------
+function readHead(file, n) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(new Uint8Array(r.result));
+    r.onerror = () => reject(new Error('read'));
+    r.readAsArrayBuffer(file.slice(0, n));
+  });
+}
+function sniffBytes(b) {
+  if (b.length >= 3 && b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF) return 'image/jpeg';
+  if (b.length >= 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47 && b[4] === 0x0D && b[5] === 0x0A && b[6] === 0x1A && b[7] === 0x0A) return 'image/png';
+  for (let i = 0; i < Math.min(b.length - 5, 1024); i++) {
+    if (b[i] === 0x25 && b[i + 1] === 0x50 && b[i + 2] === 0x44 && b[i + 3] === 0x46 && b[i + 4] === 0x2D) return 'application/pdf';
+  }
+  if (b.length >= 12 && String.fromCharCode(b[4], b[5], b[6], b[7]) === 'ftyp') {
+    const brand = String.fromCharCode(b[8], b[9], b[10], b[11]);
+    if (/^(heic|heix|hevc|hevx|heim|heis|mif1|msf1)$/.test(brand)) return 'image/heic';
+  }
+  return '';
+}
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('decode')); };
+    img.src = url;
+  });
+}
+async function compressImage(file) {
+  const img = await loadImage(file);
+  const w = img.naturalWidth, h = img.naturalHeight;
+  if (!w || !h) throw new Error('decode');
+  const scale = Math.min(1, SUBMIT_LIMITS.imageMaxDim / Math.max(w, h));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(w * scale));
+  canvas.height = Math.max(1, Math.round(h * scale));
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', SUBMIT_LIMITS.jpegQuality));
+  canvas.width = 0; canvas.height = 0; // คืนหน่วยความจำ (สำคัญบน iPhone)
+  if (!blob) throw new Error('encode');
+  return blob;
+}
+async function checkSelectedFile(f) {
+  if (!f || !f.size) return T.fileEmpty(f ? f.name : '');
+  let type;
+  try { type = sniffBytes(await readHead(f, 1100)); } catch (e) { return T.fileUnreadable(f.name); }
+  if (!type) return T.fileType(f.name);
+  if (type === 'application/pdf' && f.size > SUBMIT_LIMITS.maxFileBytes) return T.fileTooLarge(f.name);
+  if (f.size > SUBMIT_LIMITS.maxPickBytes) return T.fileTooLarge(f.name);
+  if (type === 'image/heic') { try { await loadImage(f); } catch (e) { return T.heic(f.name); } }
+  return '';
+}
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(',')[1] || '');
+    r.onerror = () => reject(new Error('read'));
+    r.readAsDataURL(blob);
+  });
+}
+function userErr(msg) { const e = new Error(msg); e.userMessage = msg; return e; }
+
+async function prepareFile(item) {
+  const f = item.file;
+  let type;
+  try { type = sniffBytes(await readHead(f, 1100)); } catch (e) { throw userErr(T.fileUnreadable(f.name)); }
+  if (!type) throw userErr(T.fileType(f.name));
+  let blob = f, mime = type, name = f.name || 'file';
+  const isImg = type === 'image/jpeg' || type === 'image/png' || type === 'image/heic';
+  if (isImg && (type === 'image/heic' || f.size > SUBMIT_LIMITS.compressAbove)) {
+    try {
+      const c = await compressImage(f);
+      if (type === 'image/heic' || c.size < f.size) { blob = c; mime = 'image/jpeg'; name = name.replace(/\.[^.]*$/, '') + '.jpg'; }
+    } catch (e) {
+      if (type === 'image/heic') throw userErr(T.heic(f.name));
+    }
+  }
+  if (blob.size > SUBMIT_LIMITS.maxFileBytes) throw userErr(T.fileTooLarge(f.name));
+  let b64;
+  try { b64 = await blobToBase64(blob); } catch (e) { throw userErr(T.fileUnreadable(f.name)); }
+  return { docType: item.docType, fileName: name, mimeType: mime, base64Data: b64, size: blob.size };
+}
+
+// ไฟล์ที่จะส่ง = เฉพาะของโหมดที่เลือกอยู่ (ดูอย่างเดียว / ขอรับสำเนา) และเฉพาะรายการที่ติ๊กไว้
+function getActiveDocFiles() {
+  const rf = document.querySelector('input[name="requestFile"]:checked');
+  const isExport = !!rf && rf.value === REQUEST_FILE_EXPORT_VALUE;
+  const out = [];
+  const add = id => (docFiles[id] || []).forEach(f => out.push({ file: f, docType: DOC_INPUT_TYPES[id], inputId: id }));
+  if (isExport) {
+    add('file-export-id'); add('file-export-police');
+    const poa = document.querySelector('input[name="exportDocs"][value="' + POA_EXPORT_VALUE + '"]');
+    if (poa && poa.checked) add('file-export-poa');
+  } else {
+    Object.keys(VIEW_DOC_INPUTS).forEach(id => {
+      const cb = document.querySelector('input[name="docs"][value="' + VIEW_DOC_INPUTS[id] + '"]');
+      if (cb && cb.checked) add(id);
+    });
+  }
+  return out;
+}
+function getAllDocFiles() { return getActiveDocFiles().map(x => x.file); }
+function countAllDocFiles() { return Object.keys(docFiles).reduce((n, k) => n + (docFiles[k] || []).length, 0); }
+
+function collectData() {
+  const get = id => String((document.getElementById(id) || {}).value || '').trim();
+  const getChecked = name => Array.from(document.querySelectorAll('input[name="' + name + '"]:checked')).map(e => e.value);
+  const getRadio = name => { const el = document.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ''; };
+  const shown = id => { const el = document.getElementById(id); return !!el && el.classList.contains('show'); };
+  const rf = getRadio('requestFile');
+  const isExport = rf === REQUEST_FILE_EXPORT_VALUE;
+  const purposeRaw = getRadio('purpose');
+  let docs = '', exportDocs = '';
+  if (isExport) {
+    const list = [];
+    if ((docFiles['file-export-id'] || []).length) list.push(DOC_INPUT_TYPES['file-export-id']);
+    if ((docFiles['file-export-police'] || []).length) list.push(DOC_INPUT_TYPES['file-export-police']);
+    const poa = document.querySelector('input[name="exportDocs"][value="' + POA_EXPORT_VALUE + '"]');
+    if (poa && poa.checked) list.push('หนังสือมอบอำนาจ');
+    exportDocs = list.join(', ');
+  } else {
+    const d = getChecked('docs').filter(v => v !== OTHER_VALUE).map(v => mapVal('docs', v));
+    if (getChecked('docs').indexOf(OTHER_VALUE) >= 0) d.push('อื่นๆ: ' + (get('docsOther') || '-'));
+    docs = d.join(', ');
+  }
+  const dm = isExport ? mapVal('deliveryMethod', getRadio('deliveryMethod')) : '';
+  const isGDrive = dm === 'รับผ่านลิงก์ Google Drive';
+  const mode = currentOfficerMode; // known | other (เฉพาะพื้นที่ส่วนกลาง) | pending (อาคารรอกำหนดเจ้าหน้าที่) | ''
   return {
-    refCode, timestamp: new Date().toISOString(), pdpaConsent:'Consented',
-    prefix: get('prefix'), fname: get('fname'), lname: get('lname'),
-    gender: get('gender'), requesterType: get('requesterType'), idCard: get('idCard'),
-    faculty: get('faculty'), officialOrg: get('officialOrg'), officialDoc: get('officialDoc'),
+    pdpaConsent: document.getElementById('pdpaConsent').checked === true,
+    prefix: mapVal('prefix', get('prefix')), fname: get('fname'), lname: get('lname'),
+    gender: mapVal('gender', get('gender')), requesterType: mapVal('requesterType', get('requesterType')), // v3.2: ไม่มีเลขบัตรแล้ว
+    faculty: shown('muSection') ? get('faculty') : '',
+    officialOrg: shown('officialSection') ? get('officialOrg') : '',
+    officialDoc: shown('officialSection') ? get('officialDoc') : '',
     phone: get('phone'), email: get('email'),
-    purpose: getRadio('purpose')==='Other' ? ('Other: '+get('purposeOther')) : getRadio('purpose'),
-    purposeDetail: get('purposeDetail'), evidenceTypes: getChecked('evidence'),
+    purpose: purposeRaw === OTHER_VALUE ? ('อื่นๆ: ' + get('purposeOther')) : mapVal('purpose', purposeRaw),
+    purposeDetail: get('purposeDetail'),
+    evidenceTypes: getChecked('evidence').map(v => mapVal('evidence', v)).join(', '),
     dateStart: get('dateStart'), timeStart: get('timeStart'), dateEnd: get('dateEnd'), timeEnd: get('timeEnd'),
+    venue: getRadio('venue'), // รหัสสถานที่ (common | mlc | sirivithaya | mahidol_hall) เหมือนกันทั้งฟอร์มไทย/อังกฤษ
     locations: get('locations'), vehiclePlate: get('vehiclePlate'), vehicleDesc: get('vehicleDesc'),
-    requestFile: getRadio('requestFile'), fileReason: getRadio('fileReason'),
-    deliveryMethod: getRadio('deliveryMethod'), exportDocs: getChecked('exportDocs'),
-    gdriveEmail: get('gdriveEmail'),
-    pdpaFileConsent: document.getElementById('pdpaFileConsent')?.checked ? 'Acknowledged and Consented' : '',
-    gdriveConsent: document.getElementById('gdriveConsent')?.checked ? 'Acknowledged-link-expires-48hrs' : '',
-    docs: getChecked('docs') + (get('docsOther') ? ', Other: '+get('docsOther') : ''),
-    additionalNote: get('additionalNote'), urgency: getRadio('urgency'),
-    attachedFiles: '',
-    serviceOfficerName: currentOfficerMode==='known' ? (document.getElementById('officerName').value||'') : (document.getElementById('officerOtherName').value||''),
-    serviceOfficerEmail: currentOfficerMode==='known' ? (document.getElementById('officerEmail').value||'') : (document.getElementById('officerOtherEmail').value||''),
-    officerMode: currentOfficerMode,
-    officerName:'', cctvResult:'', footageFound:'', fileGiven:'', actionTaken:'', closedDate:'', satisfactionScore:'', officerNote:'', status:''
+    requestFile: mapVal('requestFile', rf),
+    fileReason: isExport ? mapVal('fileReason', getRadio('fileReason')) : '',
+    deliveryMethod: dm,
+    exportDocs: exportDocs, docs: docs,
+    gdriveEmail: isGDrive ? get('gdriveEmail') : '',
+    gdriveConsent: isGDrive ? document.getElementById('gdriveConsent').checked === true : '',
+    pdpaFileConsent: document.getElementById('pdpaFileConsent').checked === true,
+    additionalNote: get('additionalNote'), urgency: mapVal('urgency', getRadio('urgency')),
+    serviceOfficerName: mode === 'known' ? get('officerName') : mode === 'other' ? get('officerOtherName') : '',
+    serviceOfficerEmail: mode === 'known' ? get('officerEmail') : mode === 'other' ? get('officerOtherEmail') : '',
+    officerMode: mode
   };
 }
 
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => resolve(e.target.result.split(',')[1]);
-    reader.onerror = () => reject(new Error('Cannot read file: ' + file.name));
-    reader.readAsDataURL(file);
-  });
+// ลายนิ้วมือของสิ่งที่ผู้ใช้กรอก/เลือก (ใช้ตรวจว่ามีการแก้ไขหลังการส่งที่ยังไม่รู้ผลหรือไม่)
+function formFingerprint() {
+  const files = getActiveDocFiles().map(x => [x.docType, x.file.name, x.file.size, x.file.lastModified || 0]);
+  return JSON.stringify([collectData(), files]);
 }
 
-document.getElementById('cctvForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  if(!validate()) return;
-
-  const refCode = generateRefCode();
-  document.getElementById('loadingOverlay').style.display='flex';
-  document.getElementById('submitBtn').disabled=true;
-
-  try {
-    document.getElementById('loadingText').textContent = 'Preparing data...';
-    const filesData = [];
-    const allFiles4Upload = getAllDocFiles();
-    for (let i = 0; i < allFiles4Upload.length; i++) {
-      document.getElementById('loadingText').textContent = 'Preparing file ' + (i+1) + '/' + allFiles4Upload.length + '...';
-      const file = allFiles4Upload[i];
-      const base64 = await fileToBase64(file);
-      filesData.push({ fileName: file.name, mimeType: file.type || 'application/octet-stream', base64Data: base64 });
-    }
-
-    const data = collectData(refCode);
-    if (filesData.length > 0) {
-      data.filesToUpload = filesData;
-      data.attachedFiles = filesData.map((f,i) => {
-        const ext = f.fileName.includes('.') ? '.' + f.fileName.split('.').pop() : '';
-        return i === 0 ? refCode + ext : refCode + '_' + (i+1) + ext;
-      }).join(', ');
-    }
-
-    document.getElementById('loadingText').textContent = 'Submitting...';
-
-    try {
-      await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-        body: JSON.stringify(data)
-      });
-    } catch(fetchErr) {
-      console.warn('fetch error (ignored):', fetchErr);
-    }
-
-    showSuccess(refCode);
-
-  } catch(err) {
-    document.getElementById('loadingOverlay').style.display='none';
-    document.getElementById('submitBtn').disabled=false;
-    alert('An error occurred. Please try again.');
-    console.error(err);
+async function buildPayload(onStep, requestId) {
+  const items = getActiveDocFiles();
+  if (items.length > SUBMIT_LIMITS.maxFiles) throw userErr(T.tooManyFiles);
+  const files = [];
+  let total = 0;
+  for (let i = 0; i < items.length; i++) {
+    onStep(T.preparingFile(i + 1, items.length));
+    const p = await prepareFile(items[i]);
+    total += p.size;
+    if (total > SUBMIT_LIMITS.maxTotalBytes) throw userErr(T.totalTooLarge);
+    files.push({ docType: p.docType, fileName: p.fileName, mimeType: p.mimeType, base64Data: p.base64Data });
   }
+  const hp = document.getElementById('cctvHp');
+  return Object.assign(
+    { action: 'submit', v: '3.2', expectEnv: BACKEND_EXPECT.env, requestId: requestId, formLang: FORM_LANG, clientInfo: clientInfo(), hp: hp ? hp.value : '' },
+    collectData(),
+    { filesToUpload: files }
+  );
+}
+
+// ---------- ติดตามคำขอข้าม reload (เฉพาะรหัสคำขอ) ----------
+function pendingGet() {
+  try { const o = JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null'); return (o && typeof o.rid === 'string' && Date.now() - o.at < 86400000) ? o : null; } catch (e) { return null; }
+}
+function pendingSet(rid) { try { sessionStorage.setItem(PENDING_KEY, JSON.stringify({ rid: rid, at: Date.now() })); } catch (e) {} }
+function pendingClear() { try { sessionStorage.removeItem(PENDING_KEY); } catch (e) {} }
+
+// ---------- ส่ง + ยืนยันผล ----------
+// ใช้ fetch แบบ simple request (body เป็นข้อความ, ไม่ตั้ง header เอง, ไม่ติดตาม upload progress)
+// เพราะการตั้ง header หรือฟัง upload progress จะทำให้เบราว์เซอร์ส่ง preflight ซึ่ง Apps Script ไม่รองรับ
+async function sendPayload(bodyStr) {
+  const ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+  const timeoutMs = Math.min(330000, 90000 + Math.round(bodyStr.length / 40));
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: bodyStr, redirect: 'follow', cache: 'no-store', signal: ctrl ? ctrl.signal : undefined });
+    const text = await res.text();
+    try { return { kind: 'json', json: JSON.parse(text) }; } catch (e) { return { kind: 'unreadable', status: res.status }; }
+  } catch (e) {
+    return { kind: (e && e.name === 'AbortError') ? 'timeout' : 'network' };
+  } finally { if (timer) clearTimeout(timer); }
+}
+function jsonpCall(query) {
+  return new Promise(resolve => {
+    const cb = '__cctvCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+    const s = document.createElement('script');
+    let done = false;
+    const finish = v => {
+      if (done) return; done = true; clearTimeout(t);
+      try { delete window[cb]; } catch (e) { window[cb] = undefined; }
+      if (s.parentNode) s.parentNode.removeChild(s);
+      resolve(v);
+    };
+    window[cb] = d => finish(d || null);
+    s.onerror = () => finish(null);
+    const t = setTimeout(() => finish(null), 15000);
+    s.src = APPS_SCRIPT_URL + '?' + query + '&prefix=' + cb + '&_=' + Date.now();
+    document.head.appendChild(s);
+  });
+}
+function jsonpStatus(rid) { return jsonpCall('action=status&rid=' + encodeURIComponent(rid)); }
+// ผลจาก server ที่ถือว่า "บันทึกแล้ว": ok + saved + requestId ตรงกับที่ส่ง + refCode รูปแบบถูกต้อง (มาจาก server เท่านั้น)
+function isSavedResponse(j, rid) { return !!j && j.ok === true && j.saved === true && j.requestId === rid && REF_RE.test(String(j.refCode || '')); }
+function isFoundStatus(r, rid) { return !!r && r.ok === true && r.found === true && r.requestId === rid && REF_RE.test(String(r.refCode || '')); }
+async function pollStatus(rid, maxMs, onTick) {
+  let deadline = Date.now() + maxMs, extended = false, n = 0;
+  while (Date.now() < deadline) {
+    n++; if (onTick) onTick(n);
+    const r = await jsonpStatus(rid);
+    // sameContent = รหัสคำขอนี้ถูกจับคู่กับคำขอเนื้อหาเดียวกันที่บันทึกไว้แล้ว (ไม่มีแถว/อีเมลใหม่) — v3.1.1
+    if (isFoundStatus(r, rid)) return { found: true, refCode: r.refCode, email: r.email, sameContent: r.sameContent === true };
+    if (r && r.ok && r.processing && !extended) { extended = true; deadline += 150000; }
+    await sleepMs(5000);
+  }
+  return { found: false };
+}
+
+// ---------- ตรวจ backend ก่อนใช้งาน (environment / เวอร์ชัน / ปิดรับชั่วคราว) ----------
+async function checkBackend() {
+  const r = await jsonpCall('action=ping');
+  // ตรวจ backend ไม่ได้ = ไม่ส่ง (กันส่งไปยัง backend รุ่นเก่า/ผิดชุดในช่วงเปลี่ยนระบบ)
+  if (!r) { BACKEND_STATE = { checked: false, ok: false, reason: 'unreachable' }; return BACKEND_STATE; }
+  let reason = '';
+  if (r.service !== 'cctv') reason = 'unknown_backend';
+  else if (!r.configured) reason = 'not_configured';
+  else if (r.env !== BACKEND_EXPECT.env) reason = 'env_mismatch';
+  else if (r.contract !== BACKEND_EXPECT.contract || String(r.version || '').split('.').slice(0, 2).join('.') !== BACKEND_EXPECT.version.split('.').slice(0, 2).join('.')) {
+    // ไม่ดูแค่เลขรุ่นขึ้นต้น 3: ต้องเป็นสัญญาข้อมูล v3.2 เท่านั้น (v3.1.x ยังเรียกร้องเลขบัตร/ไม่รู้จัก venue)
+    const parts = String(r.version || '0').split('.').map(n => parseInt(n, 10) || 0), want = BACKEND_EXPECT.version.split('.').map(Number);
+    const older = parts[0] < want[0] || (parts[0] === want[0] && parts[1] < want[1]);
+    reason = (older || !r.contract) ? 'backend_outdated' : 'version_mismatch';
+  }
+  else if (r.maintenance) reason = 'maintenance';
+  BACKEND_STATE = { checked: true, ok: !reason, reason: reason };
+  return BACKEND_STATE;
+}
+function showBackendBanner(reason) {
+  let el = document.getElementById('backendBanner');
+  if (!reason) { if (el) el.remove(); return; }
+  if (!el) {
+    el = document.createElement('div'); el.id = 'backendBanner'; el.setAttribute('role', 'alert');
+    el.style.cssText = 'margin:12px auto;max-width:860px;background:#fef3c7;border:1px solid #f59e0b;color:#78350f;border-radius:10px;padding:12px 16px;font-size:14px;line-height:1.7;';
+    const form = document.getElementById('cctvForm'); form.parentNode.insertBefore(el, form);
+  }
+  el.textContent = T.backend[reason] || T.backend.unknown_backend;
+}
+
+function beforeUnloadGuard(e) { e.preventDefault(); e.returnValue = ''; return ''; }
+function setSubmitting(on) {
+  document.getElementById('loadingOverlay').style.display = on ? 'flex' : 'none';
+  document.getElementById('submitBtn').disabled = on;
+  if (on) window.addEventListener('beforeunload', beforeUnloadGuard);
+  else window.removeEventListener('beforeunload', beforeUnloadGuard);
+}
+function setLoading(msg) { document.getElementById('loadingText').textContent = msg; }
+function setLoadingSub(msg) {
+  let el = document.getElementById('loadingSub');
+  if (!el) {
+    el = document.createElement('p'); el.id = 'loadingSub';
+    el.style.cssText = 'color:var(--text-muted);font-size:12px;margin-top:6px;';
+    document.getElementById('loadingText').after(el);
+  }
+  el.textContent = msg;
+}
+
+function showStatusPopup(opt) {
+  document.getElementById('validationPopup')?.remove();
+  document.getElementById('validationOverlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'validationOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9998;';
+  const popup = document.createElement('div');
+  popup.id = 'validationPopup';
+  popup.setAttribute('role', 'alertdialog');
+  popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:92vw;width:440px;max-height:85vh;overflow-y:auto;';
+  const color = opt.color || '#c0392b';
+  popup.innerHTML =
+    '<div style="background:' + color + ';color:white;padding:16px 20px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px;">' +
+      '<span style="font-size:24px;">' + (opt.icon || '⚠️') + '</span>' +
+      '<div style="font-size:15px;font-weight:800;">' + escHtml(opt.title) + '</div></div>' +
+    '<div style="padding:16px 20px 20px;">' +
+      (opt.lines || []).map(l => '<p style="font-size:13px;color:#1a2744;line-height:1.7;margin:0 0 10px;">' + escHtml(l) + '</p>').join('') +
+      (opt.items && opt.items.length ? '<ul style="margin:0 0 6px;padding-left:18px;font-size:13px;color:#7f1d1d;line-height:1.7;">' + opt.items.map(i => '<li>' + escHtml(i) + '</li>').join('') + '</ul>' : '') +
+      '<div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">' +
+        (opt.buttons || []).map((b, i) => '<button type="button" data-i="' + i + '" style="padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;' +
+          (b.primary ? 'background:#003087;color:white;border:none;' : 'background:white;color:#003087;border:1.5px solid #003087;') + '">' + escHtml(b.label) + '</button>').join('') +
+      '</div></div>';
+  document.body.append(overlay, popup);
+  const close = () => { popup.remove(); overlay.remove(); };
+  popup.querySelectorAll('button[data-i]').forEach(btn => btn.addEventListener('click', () => {
+    const b = opt.buttons[+btn.getAttribute('data-i')]; close(); if (b && b.onClick) b.onClick();
+  }));
+  if (opt.dismissible !== false) overlay.addEventListener('click', close);
+}
+
+function resetSubmitState() { SUBMIT_STATE.requestId = null; SUBMIT_STATE.body = null; SUBMIT_STATE.fingerprint = null; SUBMIT_STATE.phase = 'idle'; }
+function onConfirmed(refCode, email, kind) {
+  pendingClear(); resetSubmitState();
+  setSubmitting(false);
+  window.removeEventListener('beforeunload', beforeUnloadGuard);
+  showSuccess(refCode, email, kind);
+}
+// server ปฏิเสธชัดเจน = ไม่มีอะไรถูกบันทึก → ครั้งต่อไปเป็นคำขอใหม่ (รหัสใหม่)
+function onRejected(j) {
+  pendingClear(); resetSubmitState();
+  const code = j.code || 'server';
+  const msg = T.errors[code] || T.errors.server;
+  const items = code === 'validation' ? (j.fields || []).map(f => T.fieldLabels[f] || f) : (j.detail && code !== 'not_configured' ? [j.detail] : []);
+  showStatusPopup({ title: T.failedTitle, lines: [msg, T.notSaved], items: items, buttons: [{ label: T.btnFix, primary: true }] });
+  // v3.2.1: server ไม่รับเจ้าหน้าที่ (เช่น หน้าเปิดค้างก่อนอาคารได้รายชื่อ / รายชื่อเปลี่ยน) → ล้างค่าที่เลือก แล้วโหลดรายชื่อล่าสุดให้เลือกใหม่
+  if (code === 'validation' && (j.fields || []).indexOf('serviceOfficerEmail') >= 0 && typeof loadVenueDirectory === 'function') {
+    if (typeof clearOfficer === 'function') clearOfficer();
+    loadVenueDirectory();
+  }
+}
+function onUnconfirmed() {
+  SUBMIT_STATE.phase = 'unknown';
+  showStatusPopup({
+    title: T.unconfirmedTitle, color: '#b45309', icon: '⏳', dismissible: false,
+    lines: T.unconfirmedLines,
+    buttons: [
+      { label: T.btnCheckAgain, primary: true, onClick: checkAgain },
+      { label: T.btnResend, onClick: () => doSubmit() },
+      { label: T.btnClose }
+    ]
+  });
+}
+async function checkAgain() {
+  const rid = SUBMIT_STATE.requestId || (pendingGet() || {}).rid;
+  if (SUBMIT_STATE.busy || !rid) return;
+  SUBMIT_STATE.busy = true; setSubmitting(true); setLoading(T.checking); setLoadingSub('');
+  try {
+    const st = await pollStatus(rid, 20000, n => setLoadingSub(T.checkingAttempt(n)));
+    if (st.found) return onConfirmed(st.refCode, st.email, st.sameContent ? 'duplicate' : 'new');
+    setSubmitting(false); onUnconfirmed();
+  } finally { SUBMIT_STATE.busy = false; }
+}
+
+function handleServerJson(j, rid) {
+  if (isSavedResponse(j, rid)) { onConfirmed(j.refCode, j.email || '', j.duplicate ? 'duplicate' : 'new'); return true; }
+  if (j && j.ok === false && j.code === 'conflict' && j.requestId === rid && REF_RE.test(String(j.refCode || ''))) {
+    onConfirmed(j.refCode, '', 'conflict'); return true; // คำขอเดิมบันทึกแล้ว ส่วนที่แก้ภายหลังไม่ถูกบันทึก
+  }
+  if (j && j.ok === false && j.code && ['processing', 'save_unknown', 'busy'].indexOf(j.code) < 0) { setSubmitting(false); onRejected(j); return true; }
+  return false; // ยังไม่รู้ผล → ตรวจสถานะด้วยรหัสคำขอเดิม
+}
+
+async function doSubmit() {
+  if (SUBMIT_STATE.busy) return;
+  SUBMIT_STATE.busy = true;
+  setSubmitting(true); setLoadingSub('');
+  try {
+    if (!BACKEND_STATE.checked || !BACKEND_STATE.ok) await checkBackend();
+    if (!BACKEND_STATE.ok) { setSubmitting(false); showBackendBanner(BACKEND_STATE.reason); showStatusPopup({ title: T.failedTitle, lines: [T.backend[BACKEND_STATE.reason] || T.backend.unknown_backend, T.notSaved], buttons: [{ label: T.btnClose, primary: true }] }); return; }
+    const fp = formFingerprint();
+    // คำขอก่อนหน้า (ในแท็บนี้หรือก่อน reload) ยังไม่รู้ผล → ตรวจก่อนเสมอ
+    const pend = pendingGet();
+    const prevRid = (SUBMIT_STATE.phase === 'unknown' && SUBMIT_STATE.requestId) || (pend && pend.rid);
+    if (prevRid && !(SUBMIT_STATE.body && SUBMIT_STATE.requestId === prevRid && SUBMIT_STATE.fingerprint === fp)) {
+      setLoading(T.checkingPrevious);
+      const st = await jsonpStatus(prevRid);
+      if (isFoundStatus(st, prevRid)) {
+        const changed = SUBMIT_STATE.fingerprint && SUBMIT_STATE.fingerprint !== fp;
+        return onConfirmed(st.refCode, st.email, changed ? 'conflict' : 'previous');
+      }
+      if (st && st.ok && st.processing) { setSubmitting(false); return onUnconfirmed(); }
+      if (!st) { setSubmitting(false); return onUnconfirmed(); } // ยังตรวจไม่ได้ — ไม่เริ่มคำขอใหม่ทับ
+      pendingClear(); resetSubmitState(); // ยืนยันจาก server แล้วว่าไม่มีคำขอเดิม → เริ่มคำขอใหม่ได้
+    }
+    let body;
+    if (SUBMIT_STATE.body && SUBMIT_STATE.fingerprint === fp && SUBMIT_STATE.phase === 'unknown') {
+      body = SUBMIT_STATE.body; // ส่งซ้ำ "เนื้อหาเดิมทุกไบต์" ด้วยรหัสคำขอเดิม
+    } else {
+      const rid = newRequestId();
+      let payload;
+      try { payload = await buildPayload(msg => setLoading(msg), rid); }
+      catch (err) {
+        setSubmitting(false);
+        showStatusPopup({ title: T.fileProblemTitle, lines: [err.userMessage || T.prepareFailed, T.notSaved], buttons: [{ label: T.btnFix, primary: true }] });
+        return;
+      }
+      body = JSON.stringify(payload);
+      payload = null;
+      SUBMIT_STATE.requestId = rid; SUBMIT_STATE.body = body; SUBMIT_STATE.fingerprint = fp; SUBMIT_STATE.phase = 'unknown';
+    }
+    const rid = SUBMIT_STATE.requestId;
+    pendingSet(rid);
+    setLoading(T.sending(formatMB(body.length)));
+    const startedAt = Date.now();
+    const ticker = setInterval(() => setLoadingSub(T.elapsed(Math.round((Date.now() - startedAt) / 1000))), 1000);
+    let res;
+    try { res = await sendPayload(body); } finally { clearInterval(ticker); setLoadingSub(''); }
+    if (res.kind === 'json' && handleServerJson(res.json || {}, rid)) return;
+    // อ่านผลไม่ได้ / หมดเวลา / เครือข่ายหลุด / ยังไม่แน่ชัด → ถามสถานะจากระบบด้วยรหัสคำขอเดิม
+    setLoading(T.checking);
+    const st = await pollStatus(rid, 60000, n => setLoadingSub(T.checkingAttempt(n)));
+    if (st.found) return onConfirmed(st.refCode, st.email, st.sameContent ? 'duplicate' : 'new');
+    setSubmitting(false);
+    onUnconfirmed();
+  } finally {
+    SUBMIT_STATE.busy = false;
+  }
+}
+
+document.getElementById('cctvForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  if (SUBMIT_STATE.busy) return;
+  if (!validate()) return;
+  doSubmit();
 });
 
-function showSuccess(refCode) {
-  document.getElementById('loadingOverlay').style.display='none';
-  document.getElementById('cctvForm').style.display='none';
-  document.getElementById('refCode').textContent=refCode;
-  document.getElementById('successScreen').style.display='block';
-  document.getElementById('progressBar').style.width='100%';
-  window.scrollTo({top:0,behavior:'smooth'});
+// เปิดหน้า/โหลดใหม่: ตรวจ backend + ตรวจคำขอที่ค้างจากก่อน reload (ไม่มีข้อมูลส่วนบุคคลใน storage)
+(async function initSubmitModule() {
+  const st = await checkBackend();
+  if (st.checked && !st.ok) showBackendBanner(st.reason);
+  if (st.reason === 'unreachable' && BACKEND_EXPECT.env === 'TEST') showBackendBanner('unreachable');
+  const pend = pendingGet();
+  if (!pend) return;
+  const r = await jsonpStatus(pend.rid);
+  if (isFoundStatus(r, pend.rid)) {
+    pendingClear();
+    showStatusPopup({ title: T.previousSavedTitle, color: '#1a5c38', icon: '✅', lines: [T.previousSaved(r.refCode)], buttons: [{ label: T.btnClose, primary: true }] });
+  } else if (r && r.ok && r.found === false && !r.processing) {
+    pendingClear();
+    showStatusPopup({ title: T.previousMissingTitle, color: '#b45309', icon: 'ℹ️', lines: [T.previousMissing], buttons: [{ label: T.btnClose, primary: true }] });
+  } else {
+    showStatusPopup({ title: T.unconfirmedTitle, color: '#b45309', icon: '⏳', lines: [T.previousPending], buttons: [{ label: T.btnCheckAgain, primary: true, onClick: checkAgain }, { label: T.btnClose }] });
+  }
+})();
+
+function showSuccess(refCode, email, kind) {
+  document.getElementById('loadingOverlay').style.display = 'none';
+  document.getElementById('cctvForm').style.display = 'none';
+  document.getElementById('backendBanner')?.remove();
+  document.getElementById('refCode').textContent = refCode;
+  const note = document.getElementById('successEmailNote');
+  if (note) {
+    const ok = email === 'sent' || email === 'partial';
+    note.textContent = ok ? T.emailSent : (email === 'failed' ? T.emailFailed : T.emailUnknown);
+    note.style.color = email === 'failed' ? '#b45309' : '';
+  }
+  const dup = document.getElementById('successDupNote');
+  if (dup) {
+    const msg = kind === 'conflict' ? T.dupConflict : (kind === 'duplicate' || kind === 'previous') ? T.dupSame : '';
+    dup.textContent = msg; dup.style.display = msg ? 'block' : 'none';
+  }
+  document.getElementById('successScreen').style.display = 'block';
+  document.getElementById('progressBar').style.width = '100%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function resetForm() {
-  document.getElementById('cctvForm').reset();
-  document.getElementById('cctvForm').style.display='block';
-  document.getElementById('successScreen').style.display='none';
-  locationList=[]; uploadedFiles=[]; renderLocationTags();
-  document.querySelectorAll('.radio-item,.check-item').forEach(el=>el.classList.remove('selected'));
-  document.querySelectorAll('.conditional-section').forEach(el=>el.classList.remove('show'));
-  document.getElementById('submitBtn').disabled=false;
-  document.getElementById('progressBar').style.width='0%';
-  window.scrollTo({top:0,behavior:'smooth'});
+  // เริ่มคำขอใหม่แบบสะอาด (ล้างไฟล์แนบ/สถานะทั้งหมด และได้รหัสคำขอใหม่)
+  pendingClear();
+  window.location.replace(window.location.pathname + window.location.search);
 }
 
 function toggleOtherPurpose(show) {
@@ -1332,7 +1726,6 @@ function toggleOtherDoc(el) {
   if (!checked) document.getElementById('docsOther').value = '';
 }
 
-loadPresets();
 
 // ===== OFFICER DATABASE =====
 const OFFICER_DB = [
@@ -1362,52 +1755,210 @@ const OFFICER_DB = [
   {name:'Mr. Amnart Maenprom',        email:'amnartmaen90@gmail.com'}
 ];
 
-function selectOfficerMode(mode) {
-  currentOfficerMode = mode;
-  document.getElementById('officerKnownSection').classList.toggle('show', mode==='known');
-  document.getElementById('officerOtherSection').classList.toggle('show', mode==='other');
-  document.getElementById('officerKnownBtn').classList.toggle('selected', mode==='known');
-  document.getElementById('officerOtherBtn').classList.toggle('selected', mode==='other');
-  document.querySelector(`input[name="officerMode"][value="${mode}"]`).checked = true;
-  if (mode==='known') { document.getElementById('officerOtherName').value=''; document.getElementById('officerOtherEmail').value=''; }
-  else { document.getElementById('officerName').value=''; document.getElementById('officerEmail').value=''; document.getElementById('officerNameInput').value=''; document.getElementById('officerSelectedHint').style.display='none'; }
+// ===== v3.2: สถานที่/อาคาร (ส่วนที่ 2) + เจ้าหน้าที่ตามอาคาร (ส่วนที่ 6) =====
+// - รายชื่อเจ้าหน้าที่ "ของแต่ละอาคาร" โหลดจากระบบหลังบ้าน (action=directory) — เพิ่ม/แก้ชื่อภายหลังแก้เฉพาะ Code.gs จุดเดียว
+// - พื้นที่ส่วนกลาง: ใช้รายชื่อเดิม (OFFICER_DB ด้านบน) และพิมพ์ชื่อเองได้เหมือน v3.1.1
+// - อาคารที่ยังรอกำหนดเจ้าหน้าที่: ไม่มีรายชื่อให้เลือก (ไม่ยืมรายชื่ออาคารอื่น) → ส่งเข้าผู้ดูแลส่วนกลาง
+// - เปลี่ยนอาคาร = ล้างเจ้าหน้าที่ที่เลือกไว้และค่าที่ซ่อนอยู่ทันที (server ตรวจซ้ำว่าเจ้าหน้าที่อยู่ในอาคารนั้นจริง)
+const VTXT = { labels: {"common": "Common area", "mlc": "Mahidol Learning Center (MLC)", "sirivithaya": "Sirivithaya Building", "mahidol_hall": "Prince Mahidol Hall (Mahidol Sitthakarn)"},
+  needVenue: 'Please choose the "Venue / Building" in Section 2 first; the officers of that venue will then be listed here.',
+  loading: 'Loading the officer list of the selected venue...',
+  loadFailed: 'Could not load the officer list of this venue (nothing has been sent). Press Retry or call 02-4414400 ext. 0.',
+  retry: 'Retry',
+  pendingTitle: v => v + ': officers to be assigned',
+  pendingText: 'This venue has no assigned officer list yet. No need to choose an officer — your request goes to the central administrators, who will assign one (pending assignment).',
+  readyText: v => 'Choose the serving officer of ' + v + ' (search by name or email) — only this venue\'s officers are listed.',
+  commonText: '👮 Please specify the CCTV officer serving you today (common area).',
+  searchLabelVenue: v => 'Search officers of ' + v,
+  searchLabelCommon: 'Search Officer Name',
+  searchPlaceholderVenue: 'Type the officer\'s name or email...',
+  searchPlaceholderCommon: 'Type officer\'s name...',
+  noMatch: 'No officer of the selected venue matches this text.',
+  errNeedVenue: 'Please choose the venue / building (Section 2) before the officer (Section 6).',
+  errLoading: 'The officer list of the selected venue is still loading. Please wait a moment and submit again (Section 6).',
+  errLoadFailed: 'Could not load the officer list of the selected venue — press "Retry" in Section 6.'
+};
+let currentVenue = '';
+const VENUE_DIR = { state: 'idle', venues: [], p: null }; // idle | loading | ready | error
+let OFFICER_RESULTS = [];
+
+function loadVenueDirectory() {
+  if (VENUE_DIR.state === 'loading' && VENUE_DIR.p) return VENUE_DIR.p;
+  VENUE_DIR.state = 'loading';
+  renderOfficerSection();
+  VENUE_DIR.p = jsonpCall('action=directory').then(r => {
+    const ok = !!r && r.ok === true && r.contract === BACKEND_EXPECT.contract && Array.isArray(r.venues);
+    if (ok) {
+      VENUE_DIR.venues = r.venues.filter(v => v && typeof v.id === 'string').map(v => ({
+        id: v.id, status: String(v.status || ''),
+        staff: Array.isArray(v.staff) ? v.staff.filter(o => o && typeof o.name === 'string' && o.name.trim() && isValidEmail(o.email)).map(o => ({ name: o.name.trim(), email: String(o.email).trim() })) : []
+      }));
+      VENUE_DIR.state = 'ready';
+    } else {
+      VENUE_DIR.state = 'error';
+    }
+    VENUE_DIR.p = null;
+    renderOfficerSection();
+  });
+  return VENUE_DIR.p;
+}
+function venueDirEntry(id) { return VENUE_DIR.venues.filter(v => v.id === id)[0] || null; }
+// สถานะของส่วนที่ 6 ตามอาคารที่เลือก: none | common | loading | error | ready | pending
+function officerStateForVenue() {
+  if (!currentVenue) return 'none';
+  if (currentVenue === 'common') return 'common';
+  if (VENUE_DIR.state !== 'ready') return VENUE_DIR.state === 'error' ? 'error' : 'loading';
+  const e = venueDirEntry(currentVenue);
+  if (!e) return 'error';
+  return e.staff.length ? 'ready' : 'pending';
+}
+function officerListNow() {
+  const st = officerStateForVenue();
+  if (st === 'common') return OFFICER_DB;
+  if (st === 'ready') return venueDirEntry(currentVenue).staff;
+  return [];
+}
+function selectVenue(id, el) {
+  selectRadio('venue', id, el);
+  if (id !== currentVenue) { currentVenue = id; clearOfficer(); }
+  const err = document.getElementById('venueError'); if (err) err.classList.remove('show');
+  renderOfficerSection();
+}
+function clearOfficer() {
+  currentOfficerMode = '';
+  ['officerName', 'officerEmail', 'officerNameInput', 'officerOtherName', 'officerOtherEmail'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const hint = document.getElementById('officerSelectedHint'); if (hint) hint.style.display = 'none';
+  const sel = document.getElementById('officerSelectedName'); if (sel) sel.textContent = '';
+  document.querySelectorAll('input[name="officerMode"]').forEach(r => { r.checked = false; });
+  ['officerKnownBtn', 'officerOtherBtn'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('selected'); });
+  OFFICER_RESULTS = [];
+  acHide('officerDrop');
+}
+function renderOfficerSection() {
+  const st = officerStateForVenue();
+  const box = document.getElementById('officerVenueStatus');
+  const row = document.getElementById('officerModeRow');
+  const known = document.getElementById('officerKnownSection');
+  const other = document.getElementById('officerOtherSection');
+  if (!box || !row || !known || !other) return;
+  const vname = currentVenue ? (VTXT.labels[currentVenue] || currentVenue) : '';
+  let html = '', tone = 'info';
+  if (st === 'none') html = escHtml(VTXT.needVenue);
+  else if (st === 'loading') html = escHtml(VTXT.loading);
+  else if (st === 'error') { html = escHtml(VTXT.loadFailed) + ' <button type="button" id="venueDirRetry" style="margin-left:6px;padding:4px 12px;border-radius:8px;border:1.5px solid #003087;background:#fff;color:#003087;font:inherit;font-weight:700;cursor:pointer;">' + escHtml(VTXT.retry) + '</button>'; tone = 'warn'; }
+  else if (st === 'pending') { html = '<strong>' + escHtml(VTXT.pendingTitle(vname)) + '</strong><br>' + escHtml(VTXT.pendingText); tone = 'warn'; }
+  else if (st === 'ready') html = escHtml(VTXT.readyText(vname));
+  else html = escHtml(VTXT.commonText);
+  box.innerHTML = html;
+  box.style.background = tone === 'warn' ? '#fff8e7' : '';
+  box.style.borderColor = tone === 'warn' ? '#f59e0b' : '';
+  const retry = document.getElementById('venueDirRetry');
+  if (retry) retry.addEventListener('click', () => loadVenueDirectory());
+  row.style.display = st === 'common' ? '' : 'none';
+  if (st === 'ready') currentOfficerMode = 'known';
+  else if (st === 'pending') currentOfficerMode = 'pending';
+  else if (st !== 'common') currentOfficerMode = '';
+  else if (currentOfficerMode === 'pending') currentOfficerMode = '';
+  known.classList.toggle('show', currentOfficerMode === 'known' && (st === 'common' || st === 'ready'));
+  other.classList.toggle('show', currentOfficerMode === 'other' && st === 'common');
+  const lab = document.getElementById('officerSearchLabel');
+  if (lab) lab.textContent = st === 'ready' ? VTXT.searchLabelVenue(vname) : VTXT.searchLabelCommon;
+  const inp = document.getElementById('officerNameInput');
+  if (inp) inp.placeholder = st === 'ready' ? VTXT.searchPlaceholderVenue : VTXT.searchPlaceholderCommon;
+  if (['common', 'ready', 'pending'].indexOf(st) >= 0) { const e = document.getElementById('officerVenueError'); if (e) e.classList.remove('show'); }
 }
 
+function selectOfficerMode(mode) {
+  if (officerStateForVenue() !== 'common') return; // เลือก "พิมพ์เอง" ได้เฉพาะพื้นที่ส่วนกลาง
+  currentOfficerMode = mode;
+  document.getElementById('officerKnownSection').classList.toggle('show', mode === 'known');
+  document.getElementById('officerOtherSection').classList.toggle('show', mode === 'other');
+  document.getElementById('officerKnownBtn').classList.toggle('selected', mode === 'known');
+  document.getElementById('officerOtherBtn').classList.toggle('selected', mode === 'other');
+  document.querySelector('input[name="officerMode"][value="' + mode + '"]').checked = true;
+  if (mode === 'known') {
+    document.getElementById('officerOtherName').value = '';
+    document.getElementById('officerOtherEmail').value = '';
+  } else {
+    document.getElementById('officerName').value = '';
+    document.getElementById('officerEmail').value = '';
+    document.getElementById('officerNameInput').value = '';
+    document.getElementById('officerSelectedHint').style.display = 'none';
+  }
+}
+
+function hlSafe(text, q) {
+  const t = escHtml(text);
+  if (!q) return t;
+  const re = new RegExp('(' + escHtml(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return t.replace(re, '<mark>$1</mark>');
+}
 function officerKeydown(e) {
   const drop = document.getElementById('officerDrop');
   const items = drop.querySelectorAll('.autocomplete-item');
   if (!drop.classList.contains('show') || !items.length) return;
-  if (e.key==='ArrowDown'){ e.preventDefault(); acActiveIdx=Math.min(acActiveIdx+1,items.length-1); items.forEach((el,i)=>el.classList.toggle('active',i===acActiveIdx)); items[acActiveIdx]?.scrollIntoView({block:'nearest'}); }
-  else if (e.key==='ArrowUp'){ e.preventDefault(); acActiveIdx=Math.max(acActiveIdx-1,0); items.forEach((el,i)=>el.classList.toggle('active',i===acActiveIdx)); items[acActiveIdx]?.scrollIntoView({block:'nearest'}); }
-  else if (e.key==='Enter'&&acActiveIdx>=0){ e.preventDefault(); const item=items[acActiveIdx]; selectOfficer(item.dataset.name,item.dataset.email); }
-  else if (e.key==='Escape') acHide('officerDrop');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault(); acActiveIdx = Math.min(acActiveIdx + 1, items.length - 1);
+    items.forEach((el, i) => el.classList.toggle('active', i === acActiveIdx)); items[acActiveIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault(); acActiveIdx = Math.max(acActiveIdx - 1, 0);
+    items.forEach((el, i) => el.classList.toggle('active', i === acActiveIdx)); items[acActiveIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter' && acActiveIdx >= 0) {
+    e.preventDefault(); const o = OFFICER_RESULTS[acActiveIdx]; if (o) selectOfficer(o.name, o.email);
+  } else if (e.key === 'Escape') acHide('officerDrop');
 }
-
 function officerSearch(input) {
-  const q = input.value.trim().toLowerCase();
+  const raw = input.value.trim();
+  const q = raw.toLowerCase();
   const drop = document.getElementById('officerDrop');
+  // แก้ข้อความหลังเลือกแล้ว → ยกเลิกการเลือกเดิม (ไม่ส่งชื่อที่ไม่ตรงกับที่เห็น)
+  const chosen = document.getElementById('officerName');
+  if (chosen && chosen.value && raw !== chosen.value) {
+    chosen.value = ''; document.getElementById('officerEmail').value = '';
+    document.getElementById('officerSelectedHint').style.display = 'none';
+  }
   acActiveIdx = -1;
-  const results = q.length===0 ? OFFICER_DB.slice(0,8) : OFFICER_DB.filter(o=>o.name.toLowerCase().includes(q)).slice(0,10);
-  if (!results.length) { drop.classList.remove('show'); return; }
-  drop.innerHTML = results.map(o =>
-    `<div class="autocomplete-item" data-name="${o.name}" data-email="${o.email}" onmousedown="selectOfficer('${o.name.replace(/'/g,"\\'")}','${o.email}')">
-      <span class="item-icon">👮</span>
-      <div style="display:flex;flex-direction:column;gap:2px;">
-        <span style="font-weight:600;">${highlightMatch(o.name, input.value.trim())}</span>
-        <span style="font-size:11px;color:var(--text-muted);">${o.email}</span>
-      </div>
-    </div>`).join('');
+  const list = officerListNow();
+  OFFICER_RESULTS = q.length === 0 ? list.slice(0, 10)
+    : list.filter(o => o.name.toLowerCase().includes(q) || String(o.email).toLowerCase().includes(q)).slice(0, 12);
+  if (!OFFICER_RESULTS.length) {
+    drop.innerHTML = list.length ? '<div class="autocomplete-count">' + escHtml(VTXT.noMatch) + '</div>' : '';
+    drop.classList.toggle('show', !!list.length);
+    return;
+  }
+  drop.innerHTML = OFFICER_RESULTS.map((o, i) =>
+    '<div class="autocomplete-item" data-i="' + i + '"><span class="item-icon">👮</span>' +
+    '<div style="display:flex;flex-direction:column;gap:2px;"><span style="font-weight:600;">' + hlSafe(o.name, raw) + '</span>' +
+    '<span style="font-size:11px;color:var(--text-muted);">' + hlSafe(o.email, raw) + '</span></div></div>').join('');
+  drop.querySelectorAll('[data-i]').forEach(el => el.addEventListener('mousedown', ev => {
+    ev.preventDefault(); const o = OFFICER_RESULTS[+el.getAttribute('data-i')]; if (o) selectOfficer(o.name, o.email);
+  }));
   drop.classList.add('show');
 }
-
 function selectOfficer(name, email) {
+  // ต้องเป็นชื่อในรายชื่อของสถานที่ที่เลือกอยู่ตอนนี้เท่านั้น
+  const ok = officerListNow().some(o => o.name === name && String(o.email).toLowerCase() === String(email).toLowerCase());
+  if (!ok) return;
   document.getElementById('officerNameInput').value = name;
   document.getElementById('officerName').value = name;
   document.getElementById('officerEmail').value = email;
   document.getElementById('officerDrop').classList.remove('show');
-  document.getElementById('officerSelectedHint').style.display='block';
+  document.getElementById('officerSelectedHint').style.display = 'block';
   document.getElementById('officerSelectedName').textContent = name + ' (' + email + ')';
+  const e = document.getElementById('officerNameError'); if (e) e.classList.remove('show');
+  document.getElementById('officerNameInput').classList.remove('error');
 }
+// ตรวจส่วนที่ 6 ตามอาคาร (เรียกจาก validate)
+function officerVenueProblem() {
+  const st = officerStateForVenue();
+  if (st === 'none') return VTXT.errNeedVenue;
+  if (st === 'loading') return VTXT.errLoading;
+  if (st === 'error') return VTXT.errLoadFailed;
+  return '';
+}
+renderOfficerSection();
+loadVenueDirectory();
+
 
 // ===== AUTOCOMPLETE: MU Faculties =====
 const MU_ORGS = [
